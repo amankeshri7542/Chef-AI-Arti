@@ -7,6 +7,10 @@ const isPublicRoute = createRouteMatcher([
   "/sign-up(.*)",   // Clerk routes new Google users here — must be public even without a page
   "/sso-callback(.*)",
   "/api/webhooks/razorpay",
+  "/manifest.json",
+  "/icon-(.*)\\.png",
+  "/sw.js",
+  "/workbox-(.*)\\.js",
 ]);
 
 // In Next.js 16, proxy.ts replaces middleware.ts.
