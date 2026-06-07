@@ -1,7 +1,15 @@
 import type { NextConfig } from "next";
+// @ts-expect-error next-pwa has no types for ESM import
+import withPWA from "next-pwa";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // next-pwa 5.x uses webpack; silence Turbopack vs webpack mismatch warning
+  turbopack: {},
 };
 
-export default nextConfig;
+export default withPWA({
+  dest: "public",
+  disable: process.env.NODE_ENV === "development",
+  register: true,
+  skipWaiting: true,
+})(nextConfig);
