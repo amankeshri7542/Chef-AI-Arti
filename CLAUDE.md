@@ -100,9 +100,19 @@ SESSION 9 ✅ — Paid user chat bypass, real PWA icons (canvas, 5.3KB/15.5KB), 
 - Fridge scan CASE 2 wired: triggerCase2 branch now offers "Haan, Arti se banwao!" → /api/recipes/generate → /recipe/pending/[id]
 - IMPORTANT id rule reaffirmed: recipes_pending.requested_by + shown_to_user_ids use users.id (UUID), NOT clerk_user_id
 - KNOWN LIMITATION: generate dedup returns ANY pending from last 24h regardless of ingredient similarity (per spec's crude dedup)
-- DEFERRED: Phase 3 Web Push (VAPID, push_subscriptions table, subscribe/send routes, daily-nudge cron, profile toggle) — NOT started, context budget
-- tsc clean, build clean, deployed to https://arti.amankeshri.com (dpl_3yFYCgo3Rttpd4pvewW9KsGYCLVG)
-- Git commits: 08ff924 (quick actions), 0e0d13e (bacha hua + CASE 2)
+- PHASE 3 WEB PUSH ✅ (completed same session):
+  - push_subscriptions table created via Supabase migration (id, user_id UUID UNIQUE FK→users.id, endpoint, p256dh, auth, created_at)
+  - VAPID keys generated, in .env.local + Vercel prod env (NEXT_PUBLIC_VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_EMAIL). CRON_SECRET also in both.
+  - src/lib/push.ts: sendPushToUser(userId UUID, payload) — web-push, prunes dead subs on 404/410
+  - /api/push/subscribe POST: auth → upsert push_subscriptions by user_id
+  - /api/push/send POST: internal, guarded by Authorization: Bearer CRON_SECRET
+  - /api/cron/daily-nudge GET: CRON_SECRET-guarded, nudges 7-day-active users (distinct cooking_history.user_id). vercel.json cron "30 2 * * *" (8am IST)
+  - PushNotificationButton in ProfileClient (below PWAInstallButton): permission + pushManager.subscribe + POST subscribe
+  - proxy.ts: /api/cron/(.*) + /api/push/send made public (self-guard via CRON_SECRET)
+  - ⚠️ IMPORTANT next-pwa FINDING: next-pwa 5.6 webpack plugin does NOT run under Next 16 `next build` — public/sw.js is NOT being regenerated (frozen since an early build). This means session-18's next.config runtimeCaching search-fix ALSO never reached the SW. WORKAROUND: push handlers live in static public/push-sw.js, pulled in by a manual `importScripts("/push-sw.js");` prepended to the committed public/sw.js. next.config importScripts option is set too but is inert until next-pwa regenerates. FUTURE: migrate to @ducanh2912/next-pwa or Serwist for real SW regen on Next 16.
+  - Verified in prod: cron 403, push/send 403, push/subscribe 401, push-sw.js 200, sw.js has importScripts line
+- tsc clean, build clean. Deploys: dpl_3yFYCgo3Rttpd4pvewW9KsGYCLVG (P1+P2), dpl_Gnn6xwHyAV12iHUwgPJxetUqH22r (P3)
+- Git commits: 08ff924 (quick actions), 0e0d13e (bacha hua + CASE 2), 28d3e7c (docs), 47c3c44 (web push)
 
 ## SESSION 18 ✅ — Mobile search fix (GET + SW), community photos
 - Root cause: SW only intercepts GET; mobile PWA was running old precached search page JS (pre-session-17)
@@ -173,7 +183,7 @@ SESSION 9 ✅ — Paid user chat bypass, real PWA icons (canvas, 5.3KB/15.5KB), 
   - Home QuickActions strip (Session 19 ✅)
   - Bacha Hua leftover mode (Session 19 ✅)
   - New recipe generation CASE 2 (Session 19 ✅)
-  - Web Push notifications (Session 20 — DEFERRED, not started)
+  - Web Push notifications (Session 19 ✅)
 
 ## Phase 2 DB Changes Needed
 (not yet applied — Session 16 will run these)
