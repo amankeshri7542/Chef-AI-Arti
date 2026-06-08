@@ -140,6 +140,10 @@ SESSION 9 ✅ — Paid user chat bypass, real PWA icons (canvas, 5.3KB/15.5KB), 
 - `seed-recipes.ts` — seeds 50 curated recipes
 - `seed-knowledge.ts` (or similar) — seeds 116 knowledge_docs
 
+## What's NOT Built Yet (Phase 2 / pending)
+- S3 bucket needs public read ACL for thumbnail URLs to be visible (Aman must set bucket policy — see note below)
+- Chat rate limit display in ChatWindow reads from API response `remaining` field but initial count shown is from RATE_LIMITS constant (correct — seeds on load)
+
 ## What's NOT Built Yet (Phase 2)
 - PWA icons are 1×1 placeholders — replace with real branded icons before launch
 - Dark/light theme toggle (deferred to UI polish phase)
@@ -155,6 +159,17 @@ SESSION 9 ✅ — Paid user chat bypass, real PWA icons (canvas, 5.3KB/15.5KB), 
 - `incrementRateLimit` is not a separate export from redis.ts — `checkRateLimit` atomically increments via INCR + EXPIREAT internally; search route uses checkRateLimit only
 - Tailwind v4: no tailwind.config.js — config lives in globals.css @theme inline
 - CDN caches 404 for unauthenticated programmatic requests to protected routes (Clerk design: isPageRequest() returns false for curl/CDN prefetch → notFound()). Real browser users get correct redirect to /sign-in. Not a bug, just CDN behavior.
+
+## SESSION 11 ✅ — Tiered rate limits, ingredient map, thumbnail upload, PWA install
+- redis.ts: RATE_LIMITS tiered (free: chat 3/scan 2/recipes 10, paid: chat 20/scan 10/recipes 100). checkRateLimit + getRateLimitRemaining accept subscriptionStatus param (default 'free' for backward compat).
+- All API routes (chat/message, fridge/scan, fridge/validate, recipes/search) now fetch subscription_status and pass to rate limit. 429 messages are dynamic per tier.
+- ChatWindow + FloatingChatButton: subscriptionStatus threaded from RecipeDetailClient through to ChatWindow. Banner shows correct limit for free vs paid.
+- ingredient-map.ts: 60+ English→Hinglish translation map. buildHinglishQuery produces bilingual terms ("potato aloo"). Fridge page uses it before RAG search.
+- /api/recipes/[id]/thumbnail POST: S3 upload + Supabase thumbnail_url update. Accepts multipart/form-data.
+- RecipeDetailClient: photo upload prompt after "Bana liya!", browser-image-compression, success/error states, useRef for file input.
+- PWAInstallButton component: beforeinstallprompt listener, returns null if not installable. Added to ProfileClient.
+- next.config.ts: remotePatterns for *.s3.*.amazonaws.com thumbnails.
+- Git commit: 4641401. Deployed to Vercel. All routes 401 on direct URL (auth working).
 
 ## SESSION 10 ✅ — Production diagnosis + bug fixes + custom domain
 - Diagnosed production 404s: NOT a code bug. Root cause: CDN stale cache from old deployment + Clerk's notFound() for non-browser unauthenticated requests. App confirmed WORKING for real authenticated users (200 on /home, /profile, /fridge, all APIs).

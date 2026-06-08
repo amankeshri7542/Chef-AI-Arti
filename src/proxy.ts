@@ -1,39 +1,58 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { NextResponse } from 'next/server';
 
-const isPublicRoute = createRouteMatcher([
-  "/sign-in(.*)",
-  "/sign-up(.*)",   // Clerk routes new Google users here — must be public even without a page
-  "/sso-callback(.*)",
-  "/api/webhooks/razorpay",
-  "/manifest.json",
-  "/icon-(.*)\\.png",
-  "/sw.js",
-  "/workbox-(.*)\\.js",
+const isPublicPage = createRouteMatcher([
+  '/',
+  '/home',
+  '/recipe/(.*)',
+  '/search',
+  '/sign-in(.*)',
+  '/sign-up(.*)',
+  '/sso-callback(.*)',
 ]);
 
-// In Next.js 16, proxy.ts replaces middleware.ts.
-// clerkMiddleware returns a handler compatible with both default and named `proxy` exports.
-export default clerkMiddleware(async (auth, request: NextRequest) => {
+const isPublicApi = createRouteMatcher([
+  '/api/recipes/search',
+  '/api/recipes/(.*)',
+  '/api/webhooks/(.*)',
+  '/manifest.json',
+  '/icon-(.*)',
+  '/sw.js',
+  '/workbox-(.*)',
+]);
+
+export default clerkMiddleware(async (auth, req) => {
   const { userId } = await auth();
 
-  // Authenticated user hitting / → redirect to /home
-  if (userId && request.nextUrl.pathname === "/") {
-    return NextResponse.redirect(new URL("/home", request.url));
+  // Public pages and APIs — allow through
+  if (isPublicPage(req) || isPublicApi(req)) {
+    return NextResponse.next();
   }
 
-  // Protect all non-public routes
-  if (!isPublicRoute(request)) {
-    await auth.protect();
+  // Protected API routes — return 401 JSON (not redirect)
+  if (req.nextUrl.pathname.startsWith('/api/')) {
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'Login karein pehle' },
+        { status: 401 },
+      );
+    }
+    return NextResponse.next();
   }
+
+  // Protected pages — redirect to sign-in
+  if (!userId) {
+    const signInUrl = new URL('/sign-in', req.url);
+    signInUrl.searchParams.set('redirect_url', req.url);
+    return NextResponse.redirect(signInUrl);
+  }
+
+  return NextResponse.next();
 });
 
 export const config = {
   matcher: [
-    // Skip Next.js internals and static assets
-    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
-    "/(api|trpc)(.*)",
-    "/__clerk/(.*)",
+    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
+    '/(api|trpc)(.*)',
   ],
 };

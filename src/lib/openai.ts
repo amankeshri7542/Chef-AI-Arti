@@ -39,8 +39,13 @@ export async function validateImage(
     });
     const content = res.choices[0].message.content ?? '';
     return JSON.parse(content.trim()) as { valid: boolean; reason: string };
-  } catch {
-    return { valid: false, reason: 'parse_error' };
+  } catch (err) {
+    console.error('[openai] validateImage error:', {
+      model: VISION_MODEL,
+      error: err instanceof Error ? err.message : String(err),
+      hasApiKey: !!process.env.OPENAI_API_KEY,
+    })
+    return { valid: false, reason: 'parse_error' }
   }
 }
 
@@ -69,8 +74,13 @@ export async function extractIngredients(
     });
     const content = res.choices[0].message.content ?? '[]';
     return JSON.parse(content.trim()) as Array<{ name: string; confidence: number }>;
-  } catch {
-    return [];
+  } catch (err) {
+    console.error('[openai] extractIngredients error:', {
+      model: VISION_MODEL,
+      error: err instanceof Error ? err.message : String(err),
+      hasApiKey: !!process.env.OPENAI_API_KEY,
+    })
+    return []
   }
 }
 

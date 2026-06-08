@@ -5,7 +5,7 @@ import type { DietType } from '@/types/index';
 
 interface OnboardingBody {
   diet_type: DietType;
-  restrictions: string[];
+  preferred_region: string;
   family_size: number;
 }
 
@@ -16,7 +16,7 @@ export async function POST(request: Request) {
   }
 
   const body: OnboardingBody = await request.json();
-  const { diet_type, restrictions, family_size } = body;
+  const { diet_type, preferred_region, family_size } = body;
 
   if (!diet_type || !['veg', 'non-veg', 'eggetarian'].includes(diet_type)) {
     return NextResponse.json({ error: 'Invalid diet_type' }, { status: 400 });
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
       {
         clerk_user_id: userId,
         diet_type,
-        restrictions: restrictions ?? [],
+        preferred_region: preferred_region ?? 'other',
         family_size,
         onboarding_done: true,
       },

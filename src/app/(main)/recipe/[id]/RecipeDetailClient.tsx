@@ -10,12 +10,19 @@ import VibeBadges from '@/components/VibeBadges/VibeBadges';
 import WhatsAppShare from '@/components/WhatsAppShare/WhatsAppShare';
 import FloatingChatButton from '@/components/FloatingChatButton/FloatingChatButton';
 import UpgradeModal from '@/components/UpgradeModal/UpgradeModal';
+import LoginPromptModal from '@/components/LoginPromptModal/LoginPromptModal';
+
+interface UserProps {
+  family_size: number;
+  subscription_status: SubscriptionStatus;
+  preferred_unit: UnitPreference;
+  is_vrat_mode: boolean;
+}
 
 interface RecipeDetailClientProps {
   recipe: Recipe;
-  familySize: number;
-  unitPreference: UnitPreference;
-  subscriptionStatus: SubscriptionStatus;
+  user: UserProps | null;
+  isAuthenticated: boolean;
 }
 
 function ttsText(recipe: Recipe, scaledIngredients: Ingredient[], portionSize: number): string {
@@ -31,24 +38,40 @@ function ttsText(recipe: Recipe, scaledIngredients: Ingredient[], portionSize: n
 
 export default function RecipeDetailClient({
   recipe,
-  familySize,
-  unitPreference,
-  subscriptionStatus,
+  user,
+  isAuthenticated,
 }: RecipeDetailClientProps) {
   const router = useRouter();
+
+  // Derive values from user (with sensible defaults for unauthenticated / missing user)
+  const familySize = user?.family_size ?? 4;
+  const unitPreference: UnitPreference = user?.preferred_unit ?? 'desi';
+  const subscriptionStatus: SubscriptionStatus = user?.subscription_status ?? 'free';
+  const isPaid = subscriptionStatus === 'paid';
+
   const [portionSize, setPortionSize] = useState(familySize);
   const [cookedLoading, setCookedLoading] = useState(false);
   const [cooked, setCooked] = useState(false);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [loginPromptOpen, setLoginPromptOpen] = useState(false);
+  const [loginPromptFeature, setLoginPromptFeature] = useState('');
   const [showPhotoPrompt, setShowPhotoPrompt] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [thumbnailUploaded, setThumbnailUploaded] = useState(false);
   const photoInputRef = useRef<HTMLInputElement>(null);
 
   const scaledIngredients = scaleIngredients(recipe.ingredients, recipe.base_family_size, portionSize);
-  const isPaid = subscriptionStatus === 'paid';
+
+  function showLoginPrompt(feature: string) {
+    setLoginPromptFeature(feature);
+    setLoginPromptOpen(true);
+  }
 
   async function handleCooked() {
+    if (!isAuthenticated) {
+      showLoginPrompt('Bana liya mark karne');
+      return;
+    }
     if (cooked || cookedLoading) return;
     setCookedLoading(true);
     await fetch(`/api/recipes/${recipe.id}/cooked`, { method: 'POST' });
@@ -197,7 +220,7 @@ export default function RecipeDetailClient({
             recipeName={recipe.name_hinglish}
             recipeId={recipe.id}
             isPaid={isPaid}
-            onUpgradeClick={() => setUpgradeOpen(true)}
+            onUpgradeClick={isAuthenticated ? () => setUpgradeOpen(true) : () => showLoginPrompt('WhatsApp share')}
           />
         </div>
 
@@ -277,10 +300,29 @@ export default function RecipeDetailClient({
       </div>
 
       {/* Floating chat button */}
-      <FloatingChatButton recipeId={recipe.id} recipeName={recipe.name_hinglish} subscriptionStatus={subscriptionStatus} />
+      {isAuthenticated ? (
+        <FloatingChatButton recipeId={recipe.id} recipeName={recipe.name_hinglish} subscriptionStatus={subscriptionStatus} />
+      ) : (
+        <button
+          type="button"
+          onClick={() => showLoginPrompt('Chat')}
+          className="fixed bottom-24 right-4 flex h-14 w-14 items-center justify-center rounded-full shadow-lg"
+          style={{ background: '#E8640C' }}
+          aria-label="Chat kholo"
+        >
+          <span className="text-2xl">💬</span>
+        </button>
+      )}
 
       {/* Upgrade modal */}
       <UpgradeModal isOpen={upgradeOpen} onClose={() => setUpgradeOpen(false)} />
+
+      {/* Login prompt modal */}
+      <LoginPromptModal
+        isOpen={loginPromptOpen}
+        onClose={() => setLoginPromptOpen(false)}
+        feature={loginPromptFeature}
+      />
     </div>
   );
 }
