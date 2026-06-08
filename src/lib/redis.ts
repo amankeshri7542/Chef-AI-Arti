@@ -9,11 +9,19 @@ const redis = Redis.fromEnv();
 // Rate limiting
 // ─────────────────────────────────────
 
-const LIMITS: Record<RateLimitAction, number> = {
-  recipes:  10,
-  chat:      3,
-  scan:      2,
-  'ai-gen':  1,
+export const RATE_LIMITS = {
+  free: {
+    chat: 3,
+    scan: 2,
+    recipes: 10,
+    'ai-gen': 1,
+  },
+  paid: {
+    chat: 20,
+    scan: 10,
+    recipes: 100,
+    'ai-gen': 5,
+  },
 } as const;
 
 function midnightUnixSeconds(): number {
@@ -37,13 +45,14 @@ function rateLimitKey(userId: string, action: RateLimitAction): string {
 export async function checkRateLimit(
   userId: string,
   action: RateLimitAction,
+  subscriptionStatus: 'free' | 'paid' = 'free',
 ): Promise<boolean> {
   const key = rateLimitKey(userId, action);
   const count = await redis.incr(key);
   if (count === 1) {
     await redis.expireat(key, midnightUnixSeconds());
   }
-  return count <= LIMITS[action];
+  return count <= RATE_LIMITS[subscriptionStatus][action];
 }
 
 /**
@@ -53,11 +62,12 @@ export async function checkRateLimit(
 export async function getRateLimitRemaining(
   userId: string,
   action: RateLimitAction,
+  subscriptionStatus: 'free' | 'paid' = 'free',
 ): Promise<number> {
   const key = rateLimitKey(userId, action);
   const count = await redis.get<number>(key);
-  if (count === null) return LIMITS[action];
-  return Math.max(0, LIMITS[action] - count);
+  if (count === null) return RATE_LIMITS[subscriptionStatus][action];
+  return Math.max(0, RATE_LIMITS[subscriptionStatus][action] - count);
 }
 
 // ─────────────────────────────────────

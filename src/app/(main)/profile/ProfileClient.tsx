@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { SignOutButton } from '@clerk/nextjs';
 import UpgradeModal from '@/components/UpgradeModal/UpgradeModal';
+import PWAInstallButton from '@/components/PWAInstallButton/PWAInstallButton';
 import type { SubscriptionStatus, UnitPreference, DietType } from '@/types/index';
 
 interface ProfileClientProps {
@@ -112,6 +113,11 @@ export default function ProfileClient({
           </button>
         </div>
       )}
+
+      {/* PWA install */}
+      <div className="mt-0">
+        <PWAInstallButton />
+      </div>
 
       {/* Settings */}
       <div className="rounded-2xl border border-[#E8DDD0] bg-white px-4 py-4">

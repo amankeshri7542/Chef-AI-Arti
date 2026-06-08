@@ -1,17 +1,27 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { validateImage } from '@/lib/openai';
-import { getRateLimitRemaining } from '@/lib/redis';
+import { getRateLimitRemaining, RATE_LIMITS } from '@/lib/redis';
+import { createServerClient } from '@/lib/supabase';
 
 export async function POST(req: NextRequest) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: 'Unauthorised' }, { status: 401 });
 
+  const supabase = createServerClient();
+  const { data: user } = await supabase
+    .from('users')
+    .select('subscription_status')
+    .eq('clerk_user_id', userId)
+    .single();
+  const subStatus = (user?.subscription_status === 'paid' ? 'paid' : 'free') as 'free' | 'paid';
+
   // Peek without consuming — scan token is only spent on successful extractIngredients
-  const remaining = await getRateLimitRemaining(userId, 'scan');
+  const remaining = await getRateLimitRemaining(userId, 'scan', subStatus);
   if (remaining <= 0) {
+    const limit = RATE_LIMITS[subStatus].scan;
     return NextResponse.json(
-      { error: 'Aaj 2 scans ho gaye! Kal phir aana 📸', hinglish: true },
+      { error: `Aaj ${limit} scans ho gaye! Kal phir aana 📸`, hinglish: true },
       { status: 429 },
     );
   }

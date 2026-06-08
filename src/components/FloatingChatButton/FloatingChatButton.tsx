@@ -6,9 +6,10 @@ import ChatWindow from '@/components/ChatWindow/ChatWindow';
 interface FloatingChatButtonProps {
   recipeId?: string;
   recipeName?: string;
+  subscriptionStatus?: 'free' | 'paid';
 }
 
-export default function FloatingChatButton({ recipeId, recipeName }: FloatingChatButtonProps) {
+export default function FloatingChatButton({ recipeId, recipeName, subscriptionStatus = 'free' }: FloatingChatButtonProps) {
   const [chatOpen, setChatOpen] = useState(false);
 
   return (
@@ -28,6 +29,7 @@ export default function FloatingChatButton({ recipeId, recipeName }: FloatingCha
         onClose={() => setChatOpen(false)}
         recipeId={recipeId}
         recipeName={recipeName}
+        subscriptionStatus={subscriptionStatus}
       />
     </>
   );

@@ -56,6 +56,7 @@ SESSION 5 ✅ — Recipe detail page: RecipeDetailClient, PortionSlider, TTSButt
 SESSION 6 ✅ — Fridge scanner: /api/fridge/validate, /api/fridge/scan, IngredientChips, /fridge page (3-state). PortionSlider fixed: free 2–6, paid 2–15 with upgrade nudge.
 SESSION 7 ✅ — Floating chatbot: ChatWindow, FloatingChatButton wired, /api/chat/message (RAG+Redis+GPT), /api/chat/session (GET/DELETE). RPCs match_recipes + match_knowledge_docs fixed to match lib signatures.
 SESSION 8 ✅ — Bug fix (gpt-5-mini→gpt-4o), Razorpay subscriptions (create/status/webhook), UpgradeModal, profile page, /api/users/preferences, PWA manifest + next-pwa, DEPLOY_CHECKLIST.md.
+SESSION 9 ✅ — Paid user chat bypass, real PWA icons (canvas, 5.3KB/15.5KB), proxy.ts public routes fixed (manifest+icons), GitHub push. Vercel deploy pending manual `vercel login`.
 
 ## What's Built — Every File in src/
 
@@ -139,8 +140,7 @@ SESSION 8 ✅ — Bug fix (gpt-5-mini→gpt-4o), Razorpay subscriptions (create/
 - `seed-recipes.ts` — seeds 50 curated recipes
 - `seed-knowledge.ts` (or similar) — seeds 116 knowledge_docs
 
-## What's NOT Built Yet (Session 9 / Phase 2)
-- RAZORPAY_PLAN_ID + RAZORPAY_WEBHOOK_SECRET still REPLACE_ME — must fill before payment testing
+## What's NOT Built Yet (Phase 2)
 - PWA icons are 1×1 placeholders — replace with real branded icons before launch
 - Dark/light theme toggle (deferred to UI polish phase)
 - Search page (/search) — placeholder only
@@ -154,16 +154,25 @@ SESSION 8 ✅ — Bug fix (gpt-5-mini→gpt-4o), Razorpay subscriptions (create/
 - Recipe thumbnail_url all null — placeholder emoji gradient used in RecipeCard
 - `incrementRateLimit` is not a separate export from redis.ts — `checkRateLimit` atomically increments via INCR + EXPIREAT internally; search route uses checkRateLimit only
 - Tailwind v4: no tailwind.config.js — config lives in globals.css @theme inline
+- CDN caches 404 for unauthenticated programmatic requests to protected routes (Clerk design: isPageRequest() returns false for curl/CDN prefetch → notFound()). Real browser users get correct redirect to /sign-in. Not a bug, just CDN behavior.
 
-## Session 9 / Deployment
-App is feature-complete for Phase 1. Remaining before launch:
-1. Fill RAZORPAY_PLAN_ID (create ₹150/mo plan in Razorpay Dashboard)
-2. Fill RAZORPAY_WEBHOOK_SECRET (from Razorpay Dashboard → Webhooks)
-3. Replace PWA icons (public/icon-192.png + icon-512.png) with real branded art
-4. Deploy to Vercel — see DEPLOY_CHECKLIST.md for full steps
-5. Set all env vars in Vercel dashboard
-6. Set Razorpay webhook URL to https://[vercel-url]/api/webhooks/razorpay
-7. Test payment end-to-end with test card 4111 1111 1111 1111
+## SESSION 10 ✅ — Production diagnosis + bug fixes + custom domain
+- Diagnosed production 404s: NOT a code bug. Root cause: CDN stale cache from old deployment + Clerk's notFound() for non-browser unauthenticated requests. App confirmed WORKING for real authenticated users (200 on /home, /profile, /fridge, all APIs).
+- Fixed RAZORPAY_WEBHOOK_SECRET: generated secret, added to Vercel, redeployed. Webhook endpoint verified (returns 401 on bad sig, not 500).
+- Added custom domain arti.amankeshri.com to Vercel project. DNS auto-resolved via existing wildcard ALIAS on Vercel nameservers.
+- Set NEXT_PUBLIC_APP_URL=https://arti.amankeshri.com in Vercel env.
+- 3 fresh production deploys done. Both chief-ai-arti.vercel.app and arti.amankeshri.com are live.
+
+## Manual Steps Still Needed (Aman must do in dashboards)
+1. RAZORPAY WEBHOOK — see below for exact secret value and instructions
+2. CLERK — add arti.amankeshri.com as allowed origin in Clerk dashboard
+3. PWA icons — replace public/icon-192.png + icon-512.png with real branded art
+4. Test payment end-to-end with Razorpay test card 4111 1111 1111 1111
+
+## RAZORPAY_WEBHOOK_SECRET (set in Vercel)
+Secret value: 204e557a212b02abd323e5deb2d376a37373d73bd377277cb081ff671548decf
+Webhook URL: https://arti.amankeshri.com/api/webhooks/razorpay
+Events: subscription.activated, subscription.charged, subscription.cancelled, subscription.expired
 
 ## Hard constraints
 - No Claude API anywhere

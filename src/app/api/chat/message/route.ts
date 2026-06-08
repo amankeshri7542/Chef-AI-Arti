@@ -10,6 +10,7 @@ import {
   getChatSession,
   setChatSession,
   compressAndUpdateSession,
+  RATE_LIMITS,
 } from '@/lib/redis';
 import { searchKnowledge, hasSafetyFlag } from '@/lib/knowledge';
 import type { ChatSession, ChatMessage } from '@/types/index';
@@ -46,19 +47,23 @@ export async function POST(req: NextRequest) {
 
   if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
-  // 3. Rate limit — paid users get unlimited chat
-  if (user.subscription_status !== 'paid') {
-    const allowed = await checkRateLimit(userId, 'chat');
-    if (!allowed) {
-      return NextResponse.json(
-        {
-          error: 'Aaj ke 3 sawaal ho gaye! ₹150/mein unlimited poochho 😊',
-          limitReached: true,
-          remaining: 0,
-        },
-        { status: 429 },
-      );
-    }
+  // 3. Rate limit — tiered by subscription status
+  const subStatus = (user.subscription_status === 'paid' ? 'paid' : 'free') as 'free' | 'paid';
+  const allowed = await checkRateLimit(userId, 'chat', subStatus);
+  if (!allowed) {
+    const limit = RATE_LIMITS[subStatus].chat;
+    return NextResponse.json(
+      {
+        error: `Aaj ke ${limit} sawaal ho gaye! ${
+          subStatus === 'free'
+            ? '₹150/mein 20 sawaal roz poochho 😊'
+            : 'Kal phir aana!'
+        }`,
+        limitReached: true,
+        remaining: 0,
+      },
+      { status: 429 },
+    );
   }
 
   // 4. Load or create session
@@ -181,10 +186,8 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  // 11. Remaining count (paid users get 999 — treated as unlimited in UI)
-  const remaining = user.subscription_status === 'paid'
-    ? 999
-    : await getRateLimitRemaining(userId, 'chat');
+  // 11. Remaining count
+  const remaining = await getRateLimitRemaining(userId, 'chat', subStatus);
 
   // 12. Return
   return NextResponse.json({ reply, remaining, sessionExists: true });

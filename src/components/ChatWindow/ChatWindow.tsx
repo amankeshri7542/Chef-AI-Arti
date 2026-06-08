@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import UpgradeModal from '@/components/UpgradeModal/UpgradeModal';
+import { RATE_LIMITS } from '@/lib/redis';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -13,13 +14,14 @@ interface ChatWindowProps {
   onClose: () => void;
   recipeId?: string;
   recipeName?: string;
+  subscriptionStatus?: 'free' | 'paid';
 }
 
-export default function ChatWindow({ isOpen, onClose, recipeId, recipeName }: ChatWindowProps) {
+export default function ChatWindow({ isOpen, onClose, recipeId, recipeName, subscriptionStatus = 'free' }: ChatWindowProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [remaining, setRemaining] = useState(3);
+  const [remaining, setRemaining] = useState<number>(RATE_LIMITS[subscriptionStatus].chat);
   const [error, setError] = useState<string | null>(null);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -137,10 +139,12 @@ export default function ChatWindow({ isOpen, onClose, recipeId, recipeName }: Ch
           <div className="flex items-center justify-between border-b border-[#F5A55B] bg-[#FFF0E6] px-4 py-2">
             <p className="text-[10px] text-[#BF4E06]">
               {remaining === 1
-                ? 'Aaj ka 1 sawaal bacha hai'
-                : 'Aaj ke sawaal ho gaye! ₹150/mein unlimited 😊'}
+                ? 'Sirf 1 sawaal bacha aaj ke liye'
+                : subscriptionStatus === 'free'
+                  ? `Aaj ke ${RATE_LIMITS.free.chat} sawaal ho gaye! ₹150/mein 20 sawaal/din 😊`
+                  : `Aaj ke ${RATE_LIMITS.paid.chat} sawaal ho gaye! Kal phir aana 😊`}
             </p>
-            {remaining === 0 && (
+            {remaining === 0 && subscriptionStatus === 'free' && (
               <button
                 type="button"
                 onClick={() => setUpgradeOpen(true)}

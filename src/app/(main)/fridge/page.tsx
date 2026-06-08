@@ -6,6 +6,7 @@ import imageCompression from 'browser-image-compression';
 import type { IngredientChip, Recipe } from '@/types/index';
 import IngredientChips from '@/components/IngredientChips/IngredientChips';
 import RecipeCard from '@/components/RecipeCard/RecipeCard';
+import { buildHinglishQuery } from '@/lib/ingredient-map';
 
 type PageState = 'capture' | 'review' | 'results';
 
@@ -100,7 +101,7 @@ export default function FridgePage() {
 
   async function handleConfirm() {
     setLoading(true);
-    const query = chips.map((c) => c.name).join(', ');
+    const query = buildHinglishQuery(chips.map((c) => c.name));
     const res = await fetch('/api/recipes/search', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

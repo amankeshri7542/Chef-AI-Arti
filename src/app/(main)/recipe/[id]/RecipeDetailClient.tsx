@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Recipe, Ingredient, UnitPreference, SubscriptionStatus, VibeBadgeKey } from '@/types/index';
 import { scaleIngredients } from '@/lib/portion';
@@ -40,6 +40,10 @@ export default function RecipeDetailClient({
   const [cookedLoading, setCookedLoading] = useState(false);
   const [cooked, setCooked] = useState(false);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [showPhotoPrompt, setShowPhotoPrompt] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [thumbnailUploaded, setThumbnailUploaded] = useState(false);
+  const photoInputRef = useRef<HTMLInputElement>(null);
 
   const scaledIngredients = scaleIngredients(recipe.ingredients, recipe.base_family_size, portionSize);
   const isPaid = subscriptionStatus === 'paid';
@@ -50,6 +54,36 @@ export default function RecipeDetailClient({
     await fetch(`/api/recipes/${recipe.id}/cooked`, { method: 'POST' });
     setCookedLoading(false);
     setCooked(true);
+    setShowPhotoPrompt(true);
+  }
+
+  async function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingPhoto(true);
+    try {
+      // Use browser-image-compression if available; fallback to raw file
+      let compressed: File | Blob = file;
+      try {
+        const imageCompression = (await import('browser-image-compression')).default;
+        compressed = await imageCompression(file, { maxWidthOrHeight: 800, useWebWorker: true });
+      } catch {
+        // skip compression if library not available
+      }
+      const fd = new FormData();
+      fd.append('image', compressed, file.name);
+      const res = await fetch(`/api/recipes/${recipe.id}/thumbnail`, { method: 'POST', body: fd });
+      if (res.ok) {
+        setThumbnailUploaded(true);
+        setShowPhotoPrompt(false);
+      } else {
+        alert('Upload nahi hua. Dobara try karein.');
+      }
+    } catch {
+      alert('Upload nahi hua. Dobara try karein.');
+    } finally {
+      setUploadingPhoto(false);
+    }
   }
 
   const totalMinutes = recipe.prep_time_minutes + recipe.cook_time_minutes;
@@ -201,10 +235,49 @@ export default function RecipeDetailClient({
         >
           {cookedLoading ? 'Saving...' : cooked ? '✅ Bana liya! Shukriya!' : '✅ Bana liya!'}
         </button>
+
+        {/* Photo upload prompt after cooking */}
+        {showPhotoPrompt && !thumbnailUploaded && (
+          <div className="mt-3 rounded-xl border border-[#F5A55B] bg-[#FFF7F0] p-4">
+            <p className="text-sm font-semibold text-[#1A1A1A]">
+              Wah! 🎉 Kya aapka dish acha bana?
+            </p>
+            <p className="mt-1 text-xs text-[#8B7355]">
+              Apne pakaye khane ki photo upload karein! Aapki photo recipe card pe dikhegi ❤️
+            </p>
+            <div className="mt-3 flex gap-2">
+              <button
+                onClick={() => photoInputRef.current?.click()}
+                disabled={uploadingPhoto}
+                className="flex-1 rounded-lg bg-[#E8640C] py-2 text-sm font-medium text-white disabled:opacity-60"
+              >
+                {uploadingPhoto ? 'Upload ho rahi hai...' : '📸 Photo upload karo'}
+              </button>
+              <button
+                onClick={() => setShowPhotoPrompt(false)}
+                className="px-3 text-xs text-[#8B7355]"
+              >
+                Abhi nahi
+              </button>
+            </div>
+            <input
+              ref={photoInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handlePhotoUpload}
+            />
+          </div>
+        )}
+        {thumbnailUploaded && (
+          <p className="mt-2 text-center text-xs text-[#2D6A4F]">
+            Shukriya! Aapki photo save ho gayi 🙏
+          </p>
+        )}
       </div>
 
       {/* Floating chat button */}
-      <FloatingChatButton recipeId={recipe.id} recipeName={recipe.name_hinglish} />
+      <FloatingChatButton recipeId={recipe.id} recipeName={recipe.name_hinglish} subscriptionStatus={subscriptionStatus} />
 
       {/* Upgrade modal */}
       <UpgradeModal isOpen={upgradeOpen} onClose={() => setUpgradeOpen(false)} />
