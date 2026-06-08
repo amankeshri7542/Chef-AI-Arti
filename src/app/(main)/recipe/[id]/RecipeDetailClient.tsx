@@ -11,6 +11,7 @@ import WhatsAppShare from '@/components/WhatsAppShare/WhatsAppShare';
 import FloatingChatButton from '@/components/FloatingChatButton/FloatingChatButton';
 import UpgradeModal from '@/components/UpgradeModal/UpgradeModal';
 import LoginPromptModal from '@/components/LoginPromptModal/LoginPromptModal';
+import NutritionDisplay from '@/components/NutritionDisplay/NutritionDisplay';
 
 interface UserProps {
   family_size: number;
@@ -225,6 +226,15 @@ export default function RecipeDetailClient({
             ))}
           </div>
         </section>
+
+        {/* Nutrition */}
+        {recipe.nutrition && (
+          <NutritionDisplay
+            nutrition={recipe.nutrition}
+            currentServings={portionSize}
+            baseServings={recipe.base_family_size}
+          />
+        )}
 
         {/* Goes well with */}
         {recipe.goes_well_with.length > 0 && (

@@ -220,6 +220,20 @@ export interface Recipe {
   embedding: number[] | null;
   /** Provenance — 'curated' seed, 'ai' generated, 'user' submitted. Default 'curated'. */
   source: RecipeSource;
+  /** GPT-estimated macros per serving (base_family_size servings). Scale at display time. */
+  nutrition?: {
+    per_serving: {
+      calories: number;
+      protein_g: number;
+      carbs_g: number;
+      fat_g: number;
+      fiber_g: number;
+    };
+    base_servings: number;
+    estimated_by: string;
+    confidence: 'low' | 'medium' | 'high';
+    heaviness: 'halka' | 'medium' | 'bhaari';
+  } | null;
   created_at: string;
   updated_at: string;
 }
