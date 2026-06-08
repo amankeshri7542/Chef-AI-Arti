@@ -24,6 +24,8 @@ export default withPWA({
   disable: process.env.NODE_ENV === "development",
   register: true,
   skipWaiting: true,
+  // Pull custom Web Push handlers into the generated SW (static file, not overwritten).
+  importScripts: ["/push-sw.js"],
   runtimeCaching: [
     {
       // Search API — NEVER cache (always fresh results, prevents stale SW bug)

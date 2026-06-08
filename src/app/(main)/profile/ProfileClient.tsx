@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { SignOutButton } from '@clerk/nextjs';
 import UpgradeModal from '@/components/UpgradeModal/UpgradeModal';
 import PWAInstallButton from '@/components/PWAInstallButton/PWAInstallButton';
+import PushNotificationButton from '@/components/PushNotificationButton/PushNotificationButton';
 import BackButton from '@/components/BackButton/BackButton';
 import type { SubscriptionStatus, UnitPreference, DietType } from '@/types/index';
 
@@ -125,6 +126,9 @@ export default function ProfileClient({
       <div className="mt-0">
         <PWAInstallButton />
       </div>
+
+      {/* Push notifications */}
+      <PushNotificationButton />
 
       {/* Settings */}
       <div className="rounded-2xl border border-[#E8DDD0] bg-white px-4 py-4">

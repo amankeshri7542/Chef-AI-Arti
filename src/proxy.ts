@@ -15,6 +15,8 @@ const isPublicApi = createRouteMatcher([
   '/api/recipes/search',
   '/api/recipes/(.*)',
   '/api/webhooks/(.*)',
+  '/api/cron/(.*)',
+  '/api/push/send',
   '/manifest.json',
   '/icon-(.*)',
   '/sw.js',
