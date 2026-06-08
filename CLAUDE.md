@@ -88,6 +88,18 @@ SESSION 9 ✅ — Paid user chat bypass, real PWA icons (canvas, 5.3KB/15.5KB), 
 - .gitignore: added .playwright-mcp/
 - Git commit: df6047b + bb10eff
 
+## SESSION 16 ✅ — Nutrition macros: DB column, GPT-4o estimation, UI display
+- DB: `nutrition JSONB` column added to recipes (Supabase SQL Editor)
+- src/types/index.ts: Recipe.nutrition field added (optional, full typed shape)
+- scripts/estimate-nutrition.ts: GPT-4o batch estimator (--dry-run, --force, 300ms throttle)
+- scripts/verify-nutrition.ts: quick DB verification helper
+- src/components/NutritionDisplay/NutritionDisplay.tsx: scaled macro bars (P/C/F/Fi),
+  heaviness label per person, "X logon ke liye total" label, low-confidence note
+- RecipeDetailClient: NutritionDisplay wired after ingredients, before steps
+- 50 recipes estimated, 0 failures. Ranges: Lauki Sabzi 100 kcal (halka) → Malai Kofta 550 kcal (bhaari)
+- Surprising: Khichdi 350 kcal (bhaari) — expected lighter; Malai Kofta 550 kcal — expected
+- Git commit: 1f5376c
+
 ## SESSION 15 ✅ — Back navigation system, search redesign, Food Library
 - src/hooks/useBackNavigation.ts: reusable hook — router.back() or router.push(fallback)
 - src/components/BackButton/BackButton.tsx: reusable back button (arrow/x variant, custom onClick support)
@@ -111,7 +123,7 @@ SESSION 9 ✅ — Paid user chat bypass, real PWA icons (canvas, 5.3KB/15.5KB), 
   Phase 2 features planned:
   - Back navigation system (Session 15 ✅)
   - Search page redesign — Food Library (Session 15 ✅)
-  - Nutrition/macros — GPT estimate, per 100g JSONB (Session 16)
+  - Nutrition macros — GPT-4o estimate, JSONB, scaled UI (Session 16 ✅)
   - Recipe rating system (Session 17)
   - Community cooked photos (Session 18)
   - Bacha Hua leftover mode (Session 19)
