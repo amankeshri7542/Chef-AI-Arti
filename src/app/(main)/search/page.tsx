@@ -26,11 +26,17 @@ type ActiveSource =
   | { type: 'collection'; id: string; label: string; emoji: string };
 
 async function fetchByFilter(filter: Record<string, unknown>): Promise<Recipe[]> {
-  const res = await fetch('/api/recipes/search', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(filter),
-  });
+  // Use GET so the service worker doesn't silently drop the request
+  const params = new URLSearchParams();
+  if (filter.query)          params.set('q',        String(filter.query));
+  if (filter.orderBy)        params.set('orderBy',   String(filter.orderBy));
+  if (filter.category)       params.set('category',  String(filter.category));
+  if (filter.tag)            params.set('tag',        String(filter.tag));
+  if (filter.is_vrat_friendly) params.set('vrat',   'true');
+  if (filter.vibe)           params.set('vibe',       String(filter.vibe));
+  if (filter.limit)          params.set('limit',      String(filter.limit));
+
+  const res = await fetch(`/api/recipes/search?${params.toString()}`);
   if (!res.ok) return [];
   const data = await res.json();
   return data.recipes ?? [];
@@ -91,7 +97,7 @@ export default function SearchPage() {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       runSearch(query);
-    }, 400);
+    }, 600);
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
@@ -156,9 +162,17 @@ export default function SearchPage() {
             🔍
           </span>
           <input
-            type="text"
+            type="search"
+            inputMode="search"
+            enterKeyHint="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                if (debounceRef.current) clearTimeout(debounceRef.current);
+                runSearch(query);
+              }
+            }}
             placeholder="Aloo gobhi, moong dal..."
             className="w-full rounded-full px-4 pl-9 py-2.5 text-sm text-[#1A1A1A] outline-none"
             style={{

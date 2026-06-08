@@ -88,6 +88,20 @@ SESSION 9 ✅ — Paid user chat bypass, real PWA icons (canvas, 5.3KB/15.5KB), 
 - .gitignore: added .playwright-mcp/
 - Git commit: df6047b + bb10eff
 
+## SESSION 18 ✅ — Mobile search fix (GET + SW), community photos
+- Root cause: SW only intercepts GET; mobile PWA was running old precached search page JS (pre-session-17)
+- FIX A: Search API now has GET handler (params: q, category, tag, vrat, orderBy, vibe, limit); POST kept
+- FIX B: next.config.ts explicit runtimeCaching — NetworkOnly for /api/recipes/search
+- FIX C: search input type="search", inputMode="search", enterKeyHint="search", Enter key fires immediately, debounce 600ms
+- FIX D: SWUpdater component in layout.tsx forces SW update check on every app open
+- fetchByFilter in search/page.tsx converted from POST to GET with URLSearchParams
+- recipe_photos table created (Supabase) — id, recipe_id, user_id, s3_url, is_public, created_at
+- /api/recipes/[id]/photos GET: returns 20 most recent public photos
+- /api/recipes/[id]/photos POST: auth + cooking_history gate + S3 upload to community/ prefix + auto-sets thumbnail if missing
+- CommunityPhotos component: horizontal scroll, lightbox (no library), upload button (only if hasCooked)
+- RecipeDetailClient: CommunityPhotos wired after vibes, before portion slider
+- Git commit: see below
+
 ## SESSION 17 ✅ — Search fix (buildHinglishQuery), recipe ratings (1-5 stars)
 - Search bug fixed: search/page.tsx now splits searchTerm, runs buildHinglishQuery before embedding
 - ingredient-map.ts: +35 entries (lentil, bread, curry, paratha, biryani, kheer, etc.)
@@ -137,6 +151,7 @@ SESSION 9 ✅ — Paid user chat bypass, real PWA icons (canvas, 5.3KB/15.5KB), 
   - Search page redesign — Food Library (Session 15 ✅)
   - Nutrition macros — GPT-4o estimate, JSONB, scaled UI (Session 16 ✅)
   - Search fix + recipe ratings 1-5 stars (Session 17 ✅)
+  - Mobile search fix (GET+SW+input) + community photos (Session 18 ✅)
   - Recipe rating system (Session 17)
   - Community cooked photos (Session 18)
   - Bacha Hua leftover mode (Session 19)

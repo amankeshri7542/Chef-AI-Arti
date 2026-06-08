@@ -2,6 +2,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
 import { Poppins, Noto_Sans_Devanagari } from "next/font/google";
 import "./globals.css";
+import SWUpdater from "@/components/SWUpdater/SWUpdater";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -38,6 +39,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col bg-[#FFFDF9] text-[#1A1A1A]">
         <ClerkProvider>
+          <SWUpdater />
           {children}
         </ClerkProvider>
       </body>

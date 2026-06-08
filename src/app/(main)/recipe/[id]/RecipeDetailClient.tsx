@@ -13,6 +13,7 @@ import UpgradeModal from '@/components/UpgradeModal/UpgradeModal';
 import LoginPromptModal from '@/components/LoginPromptModal/LoginPromptModal';
 import NutritionDisplay from '@/components/NutritionDisplay/NutritionDisplay';
 import { StarRatingInteractive, StarRatingDisplay } from '@/components/StarRating/StarRating';
+import CommunityPhotos from '@/components/CommunityPhotos/CommunityPhotos';
 
 interface UserProps {
   family_size: number;
@@ -248,6 +249,13 @@ export default function RecipeDetailClient({
         {recipe.vibes.length > 0 && (
           <VibeBadges vibes={recipe.vibes as VibeBadgeKey[]} />
         )}
+
+        {/* Community photos */}
+        <CommunityPhotos
+          recipeId={recipe.id}
+          isAuthenticated={isAuthenticated}
+          hasCooked={cooked}
+        />
 
         {/* Portion slider */}
         <PortionSlider

@@ -1,5 +1,5 @@
 import { auth } from '@clerk/nextjs/server';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
 import { searchRecipes } from '@/lib/rag';
 import { checkRateLimit, getRateLimitRemaining, RATE_LIMITS } from '@/lib/redis';
@@ -15,9 +15,10 @@ const GUEST_USER_CONTEXT = {
   disliked_ingredients: [] as string[],
 };
 
-interface SearchBody {
+// ─── Shared handler logic ─────────────────────────────────────────────────────
+
+interface SearchParams {
   query?: string;
-  // Collection / browse filters (no query required)
   orderBy?: 'cooked_count' | 'like_count';
   category?: string;
   tag?: string;
@@ -26,19 +27,16 @@ interface SearchBody {
   limit?: number;
 }
 
-export async function POST(request: Request) {
-  const { userId } = await auth();
+async function handleSearch(params: SearchParams, userId: string | null) {
+  const { query, orderBy, category, tag, is_vrat_friendly, vibe, limit } = params;
 
-  const body: SearchBody = await request.json();
-
-  const hasQuery = !!body.query?.trim();
-  const hasFilters = !!(body.orderBy || body.category || body.tag || body.is_vrat_friendly || body.vibe);
+  const hasQuery = !!query?.trim();
+  const hasFilters = !!(orderBy || category || tag || is_vrat_friendly || vibe);
 
   if (!hasQuery && !hasFilters) {
     return NextResponse.json({ error: 'Query ya filter chahiye' }, { status: 400 });
   }
 
-  // For authenticated users: get user context + rate limit
   let userContext = GUEST_USER_CONTEXT;
   let remaining: number | undefined;
 
@@ -54,13 +52,15 @@ export async function POST(request: Request) {
 
     if (user) {
       userContext = user as typeof GUEST_USER_CONTEXT;
-      const subStatus = ((user as { subscription_status?: string }).subscription_status === 'paid' ? 'paid' : 'free') as 'free' | 'paid';
+      const subStatus = (
+        (user as { subscription_status?: string }).subscription_status === 'paid' ? 'paid' : 'free'
+      ) as 'free' | 'paid';
 
       const allowed = await checkRateLimit(userId, 'recipes', subStatus);
       if (!allowed) {
-        const limit = RATE_LIMITS[subStatus].recipes;
+        const rateLimit = RATE_LIMITS[subStatus].recipes;
         return NextResponse.json(
-          { error: `Aaj ke ${limit} recipes ho gaye! Kal aur dekhna 😊` },
+          { error: `Aaj ke ${rateLimit} recipes ho gaye! Kal aur dekhna 😊` },
           { status: 429 },
         );
       }
@@ -68,7 +68,7 @@ export async function POST(request: Request) {
     }
   }
 
-  // Filter-only path — no embedding, just SQL
+  // Filter-only path — SQL, no embedding
   if (!hasQuery && hasFilters) {
     try {
       const supabase = createServerClient();
@@ -78,14 +78,14 @@ export async function POST(request: Request) {
         .eq('source', 'curated')
         .eq('reported_count', 0);
 
-      if (body.category) q = q.eq('category', body.category);
-      if (body.is_vrat_friendly) q = q.eq('is_vrat_friendly', true);
-      if (body.tag) q = q.contains('tags', [body.tag]);
-      if (body.vibe) q = q.contains('vibes', [body.vibe]);
+      if (category) q = q.eq('category', category);
+      if (is_vrat_friendly) q = q.eq('is_vrat_friendly', true);
+      if (tag) q = q.contains('tags', [tag]);
+      if (vibe) q = q.contains('vibes', [vibe]);
 
-      const orderCol = body.orderBy ?? 'cooked_count';
+      const orderCol = orderBy ?? 'cooked_count';
       q = q.order(orderCol, { ascending: false });
-      q = q.limit(body.limit ?? 20);
+      q = q.limit(limit ?? 20);
 
       const { data, error } = await q;
       if (error) throw error;
@@ -106,7 +106,7 @@ export async function POST(request: Request) {
   // RAG search path
   try {
     const result = await searchRecipes(
-      body.query!,
+      query!,
       userContext as Pick<
         User,
         | 'diet_type'
@@ -125,4 +125,33 @@ export async function POST(request: Request) {
     console.error('[search] RAG error:', msg);
     return NextResponse.json({ error: msg }, { status: 500 });
   }
+}
+
+// ─── GET — primary handler (SW-safe, cacheable by client) ────────────────────
+
+export async function GET(request: NextRequest) {
+  const { userId } = await auth();
+  const sp = request.nextUrl.searchParams;
+
+  const params: SearchParams = {
+    query: sp.get('q') ?? undefined,
+    orderBy: (sp.get('orderBy') as SearchParams['orderBy']) ?? undefined,
+    category: sp.get('category') ?? undefined,
+    tag: sp.get('tag') ?? undefined,
+    is_vrat_friendly: sp.get('vrat') === 'true' ? true : undefined,
+    vibe: sp.get('vibe') ?? undefined,
+    limit: sp.get('limit') ? parseInt(sp.get('limit')!, 10) : undefined,
+  };
+
+  return handleSearch(params, userId);
+}
+
+// ─── POST — kept for backward compat (fridge scan, collection browse) ────────
+
+interface SearchBody extends SearchParams {}
+
+export async function POST(request: Request) {
+  const { userId } = await auth();
+  const body: SearchBody = await request.json();
+  return handleSearch(body, userId);
 }
