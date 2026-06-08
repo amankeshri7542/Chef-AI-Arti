@@ -48,6 +48,16 @@ Sign-in page: single "Google se login karo" button. No OTP flow.
 - North Indian household vocabulary (katori, chammach, tadka, bhuno, sukha/tariwala).
 
 ## Build Status
+SESSION 22-UI ✅ — Warm Rasoi redesign (onboarding + upgrade flow + home) + paid chat rate-limit fix
+  - PAID CHAT FIX: root cause was NOT the server (route + RATE_LIMITS.paid.chat=20 were already correct). The /chat page rendered `<FloatingChatButton />` with no subscriptionStatus → defaulted 'free' → UI capped at 3. Fix: converted /chat to a server component that fetches subscription_status and threads it. Commit 3c66ffb.
+  - FOUNDATION (orchestrator-laid, to avoid parallel-agent collisions): Playfair Display font added in layout.tsx (.font-display / --font-playfair). globals.css :root Warm Rasoi tokens (--saffron #E8640C, --saffron-dk, --saffron-lt #FFF0E6, --cream #FFF8F0, --terracotta #C4621E, --green #2D6A4F, --text, --muted, --border #E8D5C0, --shadow). Shared keyframes: floatUp, fadeInUp, cardEntry, emojiBurst, drainBar + utility classes .animate-fade-in-up / .animate-card-entry.
+  - ONBOARDING: welcome screen (step 0, floating 🥔🍅🧅, auto-advance 2.5s) before Q1; redesigned Q1-Q3 option cards (spring select, saffron-lt fill, checkmark, region color dots); NEW /onboarding/done route (server page.tsx + DoneClient.tsx) — emoji burst + 3 personalized recipe cards. Final onboarding submit now router.push('/onboarding/done') not /home.
+  - DONE QUERY: onboarding stores broad buckets (preferred_region: UP-Bihar/Delhi-NCR/...); recipes use granular region_origin. done/page.tsx has REGION_MAP bucket→region_origin[], filters diet_type + in(region_origins + 'pan-north-indian'), 3-tier fallback (region+diet → diet-only → any curated).
+  - UPGRADE: ChatWindow rate-limit banner rewritten (remaining===0+free → benefit card w/ "chai ka ek cup" line + CTA + "Kal free mein jaari rakhein" skip; ===1 → subtle yellow; >=2 → nothing). UpgradeModal full warm bottom-sheet rewrite — IMPORTANT BEHAVIOR CHANGE: subscription-create now fires on CTA tap (checkoutStarted flag), NOT on modal open. Premium success state: emoji burst + delayed text + "ghar chalein" button + 5s drainBar auto-close. Razorpay create→checkout.js→handler logic unchanged.
+  - HOME: StoryCircles merged into QuickActions single scroll row (5 feature cards + category chips driving existing categoryFilter state). StoryCircles.tsx DELETED (orphaned). Recipe grid stagger entry (.animate-card-entry, +60ms each, cap 8). Time-of-day greeting (computed in useEffect to avoid hydration mismatch).
+  - VERIFIED: tsc clean, `next build --webpack` clean, PWA sw.js regenerated (NetworkOnly present). Deployed prod dpl_37a1s3kZwVWkRqm5n4ox9fMpinRs. /home 200 + 0 console errors in browser. NOT browser-tested (need auth/paid account): onboarding welcome/done, chat banner, upgrade modal, payment success.
+  - Commits: 3c66ffb (chat fix), dd4215c (UI redesign). Pushed main. CONSTRAINT NOTE: agents did UI-only, no API/DB/lib changes.
+
 SESSION 1 ✅ — Scaffold, types, schema.sql, seed data (50 recipes + 116 docs)
 SESSION 2 ✅ — lib/ folder: supabase, openai, redis, rag, knowledge, portion
 SESSION 3 ✅ — Auth: Clerk Google-only login, proxy.ts middleware, onboarding (3 questions), user DB sync
