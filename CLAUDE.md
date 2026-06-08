@@ -88,6 +88,14 @@ SESSION 9 ✅ — Paid user chat bypass, real PWA icons (canvas, 5.3KB/15.5KB), 
 - .gitignore: added .playwright-mcp/
 - Git commit: df6047b + bb10eff
 
+## SESSION 22 ✅ — SW regeneration fix (next-pwa→@ducanh2912 + webpack build), promotion source fix, audit
+- ROOT CAUSE of stale SW: Next 16 `next build` defaults to **Turbopack**, which ignores next-pwa's webpack plugin. public/sw.js was frozen for several sessions → session-18 search-cache fix never actually shipped.
+- FIX: uninstalled next-pwa 5.6, installed @ducanh2912/next-pwa 10 (maintained for Next 16). next.config.ts rewritten: runtimeCaching/skipWaiting/importScripts now under `workboxOptions`, added reloadOnOnline + cacheOnFrontEndNav.
+- Build now uses `next build --webpack` (package.json script + vercel.json `buildCommand`) so the PWA webpack plugin runs. Verified: `(pwa) Service worker` logs, sw.js regenerated, search NetworkOnly + importScripts(/push-sw.js) both ship. Confirmed in PROD: deployed /sw.js is freshly generated (NetworkOnly=1, push-sw import present), /swe-worker-*.js 200.
+- ITEM-1 FIX: /api/recipes/pending/[id]/cook promotion now inserts source='curated' (was 'ai', which schema.sql:122 forbids and which hid promoted recipes from /surprise + emptyStateFallback that filter source='curated').
+- AUDIT findings still open: push_subscriptions RLS OFF (consistent w/ app's service-role-only design, not a live vuln); PWA icons still 1×1 placeholders; S3 thumbnail public-read ACL; paid chat still 3/day; CASE2 dedup ingredient-blind. Stale CLAUDE.md lines (search "placeholder", "recipes_pending no API route") are now BUILT — ignore those.
+- Commits: 67daa32 (SW fix + source fix). Pushed to GitHub (main @ 67daa32). Deployed prod.
+
 ## SESSION 19 ✅ — Home QuickActions, Bacha Hua leftover mode, CASE 2 recipe generation
 - QuickActions: 80×90px horizontal-scroll strip on home (between StoryCircles and grid). 5 gradient cards: Fridge Scan→/fridge, Bacha Hua→/bacha-hua, Chef Arti→/chat, Surprise!→surprise API then /recipe/[id], Dhundhon→/search
 - /chat placeholder page ((main) group) — renders FloatingChatButton with a Hinglish prompt to open chat
@@ -109,7 +117,7 @@ SESSION 9 ✅ — Paid user chat bypass, real PWA icons (canvas, 5.3KB/15.5KB), 
   - /api/cron/daily-nudge GET: CRON_SECRET-guarded, nudges 7-day-active users (distinct cooking_history.user_id). vercel.json cron "30 2 * * *" (8am IST)
   - PushNotificationButton in ProfileClient (below PWAInstallButton): permission + pushManager.subscribe + POST subscribe
   - proxy.ts: /api/cron/(.*) + /api/push/send made public (self-guard via CRON_SECRET)
-  - ⚠️ IMPORTANT next-pwa FINDING: next-pwa 5.6 webpack plugin does NOT run under Next 16 `next build` — public/sw.js is NOT being regenerated (frozen since an early build). This means session-18's next.config runtimeCaching search-fix ALSO never reached the SW. WORKAROUND: push handlers live in static public/push-sw.js, pulled in by a manual `importScripts("/push-sw.js");` prepended to the committed public/sw.js. next.config importScripts option is set too but is inert until next-pwa regenerates. FUTURE: migrate to @ducanh2912/next-pwa or Serwist for real SW regen on Next 16.
+  - push handlers live in static public/push-sw.js, pulled into the generated SW via workboxOptions.importScripts.
   - Verified in prod: cron 403, push/send 403, push/subscribe 401, push-sw.js 200, sw.js has importScripts line
 - tsc clean, build clean. Deploys: dpl_3yFYCgo3Rttpd4pvewW9KsGYCLVG (P1+P2), dpl_Gnn6xwHyAV12iHUwgPJxetUqH22r (P3)
 - Git commits: 08ff924 (quick actions), 0e0d13e (bacha hua + CASE 2), 28d3e7c (docs), 47c3c44 (web push)
