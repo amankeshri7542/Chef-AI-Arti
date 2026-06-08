@@ -1,11 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Recipe } from '@/types/index';
 import VratToggle from '@/components/VratToggle/VratToggle';
 import RecipeCardGrid from '@/components/RecipeCard/RecipeCardGrid';
-import StoryCircles from '@/components/StoryCircles/StoryCircles';
 import QuickActions from '@/components/QuickActions/QuickActions';
 
 interface HomeClientProps {
@@ -18,12 +17,37 @@ interface HomeClientProps {
 
 const WEEKDAYS_HI = ['Ravivar','Somvar','Mangalvar','Budhvar','Guruvar','Shukravar','Shanivar'];
 
+const CATEGORY_CHIPS = [
+  { label: '🥗 Sabzi', filter: 'sabzi' },
+  { label: '🫘 Dal', filter: 'dal' },
+  { label: '🍚 Chawal', filter: 'chawal' },
+  { label: '🍳 Nashta', filter: 'nashta' },
+  { label: '🕉️ Vrat', filter: 'vrat' },
+];
+
+function greeting(name: string | null): string {
+  const h = new Date().getHours();
+  const n = name ? name.split(' ')[0] : '';
+  const tail = n ? `, ${n}` : '';
+  if (h >= 6 && h < 11) return `Subah ka namaskar${tail}! ☀️`;
+  if (h >= 11 && h < 16) return `Dopahar mein kya bana rahi hain${tail}? 🍽️`;
+  if (h >= 16 && h < 19) return `Chai ke saath kuch snack?${n ? ` ${n}` : ''} 🍵`;
+  if (h >= 19 && h < 22) return `Dinner ka time ho gaya${tail}! 🌙`;
+  return `Raat ka khaana soch rahi hain?${n ? ` ${n}` : ''} 🌛`;
+}
+
 export default function HomeClient({ initialRecipes, userName, subscriptionStatus, initialIsVrat, isAuthenticated }: HomeClientProps) {
   const router = useRouter();
   const [isVrat, setIsVrat] = useState(initialIsVrat);
   const [vatLoading, setVatLoading] = useState(false);
   const [recipes] = useState<Recipe[]>(initialRecipes);
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
+
+  // Time-based greeting — compute after mount to avoid hydration mismatch
+  const [greet, setGreet] = useState<string>(`Namaskar${userName ? `, ${userName.split(' ')[0]}` : ''}! 🙏`);
+  useEffect(() => {
+    setGreet(greeting(userName));
+  }, [userName]);
 
   const dayHi = WEEKDAYS_HI[new Date().getDay()];
 
@@ -48,9 +72,9 @@ export default function HomeClient({ initialRecipes, userName, subscriptionStatu
       <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#E8DDD0] bg-white px-4 py-3">
         <div>
           <p className="text-[14px] font-semibold text-[#1A1A1A]">
-            Namaskar{userName ? `, ${userName.split(' ')[0]}` : ''}! 🙏
+            {greet}
           </p>
-          <p className="text-[10px] text-[#8B7355]">{dayHi} ka khaana</p>
+          <p className="text-[13px] text-[#8B7355]">{dayHi} ka khaana</p>
         </div>
         {isAuthenticated && (
           <VratToggle isVrat={isVrat} onToggle={onVratToggle} loading={vatLoading} />
@@ -66,11 +90,29 @@ export default function HomeClient({ initialRecipes, userName, subscriptionStatu
         <span className="text-[13px] text-[#8B7355]">🔍 Kuch bhi dhundho...</span>
       </button>
 
-      {/* Story circles */}
-      <StoryCircles onFilter={setCategoryFilter} />
-
-      {/* Quick actions */}
-      <QuickActions />
+      {/* Quick actions + category chips — single horizontal-scroll row */}
+      <div className="flex items-stretch gap-3 overflow-x-auto px-3 py-2 scrollbar-hide">
+        <QuickActions inline />
+        {CATEGORY_CHIPS.map((chip) => {
+          const isActive = categoryFilter === chip.filter;
+          return (
+            <button
+              key={chip.filter}
+              type="button"
+              onClick={() => setCategoryFilter(isActive ? null : chip.filter)}
+              className="flex flex-shrink-0 items-center self-center rounded-[20px] px-4 text-[13px] font-medium"
+              style={{
+                minHeight: 52,
+                background: isActive ? '#E8640C' : '#FFFFFF',
+                border: isActive ? '1px solid #E8640C' : '1px solid var(--border)',
+                color: isActive ? '#FFFFFF' : 'var(--muted)',
+              }}
+            >
+              {chip.label}
+            </button>
+          );
+        })}
+      </div>
 
       {/* 2-col grid */}
       <div className="grid grid-cols-2 gap-0.5 px-0.5 pb-24">
@@ -81,8 +123,16 @@ export default function HomeClient({ initialRecipes, userName, subscriptionStatu
         ) : (
           displayedRecipes.map((r, index) => {
             const isFeatured = index % 5 === 4;
+            const delay = index <= 7 ? index * 60 : 0;
             return (
-              <div key={r.id} className={isFeatured ? 'col-span-2' : ''} style={isFeatured ? { aspectRatio: '2/1' } : {}}>
+              <div
+                key={r.id}
+                className={`animate-card-entry ${isFeatured ? 'col-span-2' : ''}`}
+                style={{
+                  animationDelay: `${delay}ms`,
+                  ...(isFeatured ? { aspectRatio: '2/1' } : {}),
+                }}
+              >
                 <RecipeCardGrid recipe={r} onClick={() => router.push('/recipe/' + r.id)} />
               </div>
             );
@@ -90,9 +140,9 @@ export default function HomeClient({ initialRecipes, userName, subscriptionStatu
         )}
         {displayedRecipes.length >= 10 && subscriptionStatus === 'free' && (
           <div className="col-span-2 mx-2 mt-2 rounded-xl border-2 border-[#E8640C] bg-[#FFF0E6] px-4 py-3 text-center">
-            <p className="text-sm font-semibold text-[#1A1A1A]">Aur recipes dekhne ke liye Premium lo! 🍳</p>
-            <p className="mt-0.5 text-xs text-[#8B7355]">₹150/mahine — unlimited recipes + chat</p>
-            <button className="mt-2 h-9 w-full rounded-lg bg-[#E8640C] text-sm font-medium text-white">Abhi lo →</button>
+            <p className="text-[14px] font-semibold text-[#1A1A1A]">Aur recipes dekhne ke liye Premium lo! 🍳</p>
+            <p className="mt-0.5 text-[13px] text-[#8B7355]">₹150/mahine — unlimited recipes + chat</p>
+            <button className="mt-2 h-[52px] w-full rounded-lg bg-[#E8640C] text-[14px] font-medium text-white">Abhi lo →</button>
           </div>
         )}
       </div>

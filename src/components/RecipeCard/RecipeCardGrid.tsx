@@ -49,13 +49,13 @@ export default function RecipeCardGrid({ recipe, onClick }: Props) {
         className="absolute bottom-0 left-0 right-0 px-2 py-2"
         style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.75), transparent)' }}
       >
-        <p className="line-clamp-2 text-left text-[12px] font-semibold leading-tight text-white">
+        <p className="line-clamp-2 text-left text-[13px] font-semibold leading-tight text-white">
           {recipe.name_hinglish}
         </p>
         <div className="mt-0.5 flex items-center gap-2">
-          <p className="text-[10px] text-white/70">⏱ {totalMin} min</p>
+          <p className="text-[13px] text-white/70">⏱ {totalMin} min</p>
           {recipe.rating_count >= 3 && (
-            <span className="text-[10px] text-yellow-300">
+            <span className="text-[13px] text-yellow-300">
               ⭐ {recipe.avg_rating.toFixed(1)}
             </span>
           )}

@@ -9,6 +9,21 @@
   --color-muted: #8B7355;
   --font-sans: var(--font-poppins);
   --font-devanagari: var(--font-devanagari);
+  --font-display: var(--font-playfair);
+}
+
+/* ───── Warm Rasoi design tokens ───── */
+:root {
+  --saffron: #E8640C;
+  --saffron-dk: #BF4E06;
+  --saffron-lt: #FFF0E6;
+  --cream: #FFF8F0;
+  --terracotta: #C4621E;
+  --green: #2D6A4F;
+  --text: #2C1810;
+  --muted: #8B6B4A;
+  --border: #E8D5C0;
+  --shadow: rgba(180, 80, 20, 0.12);
 }
 
 body {
@@ -16,4 +31,46 @@ body {
   color: #1A1A1A;
   font-family: var(--font-poppins, system-ui, sans-serif);
   -webkit-tap-highlight-color: transparent;
+}
+
+/* Display headings — Playfair Display */
+.font-display {
+  font-family: var(--font-playfair, Georgia, serif);
+}
+
+/* ───── Shared Warm Rasoi animations (CSS only) ───── */
+@keyframes floatUp {
+  0%   { transform: translateY(0px) rotate(-5deg); opacity: 0; }
+  30%  { opacity: 1; }
+  100% { transform: translateY(-24px) rotate(5deg); opacity: 0.8; }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes cardEntry {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes emojiBurst {
+  0%   { transform: scale(0) translate(0, 0); opacity: 0; }
+  40%  { opacity: 1; }
+  100% { transform: scale(1.1) translate(var(--burst-x, 0), var(--burst-y, 0)); opacity: 0; }
+}
+
+@keyframes drainBar {
+  from { width: 100%; }
+  to   { width: 0%; }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.animate-card-entry {
+  opacity: 0;
+  animation: cardEntry 0.4s ease-out forwards;
 }

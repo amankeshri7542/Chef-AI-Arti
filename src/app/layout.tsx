@@ -1,6 +1,6 @@
 import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
-import { Poppins, Noto_Sans_Devanagari } from "next/font/google";
+import { Poppins, Noto_Sans_Devanagari, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import SWUpdater from "@/components/SWUpdater/SWUpdater";
 
@@ -8,6 +8,13 @@ const poppins = Poppins({
   variable: "--font-poppins",
   subsets: ["latin"],
   weight: ["400", "500", "600"],
+  display: "swap",
+});
+
+const playfair = Playfair_Display({
+  variable: "--font-playfair",
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
   display: "swap",
 });
 
@@ -32,7 +39,7 @@ export default function RootLayout({
   return (
     <html
       lang="hi"
-      className={`${poppins.variable} ${devanagari.variable} h-full antialiased`}
+      className={`${poppins.variable} ${devanagari.variable} ${playfair.variable} h-full antialiased`}
     >
       <head>
         <meta name="theme-color" content="#E8640C" />

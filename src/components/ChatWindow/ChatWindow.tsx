@@ -24,6 +24,7 @@ export default function ChatWindow({ isOpen, onClose, recipeId, recipeName, subs
   const [remaining, setRemaining] = useState<number>(RATE_LIMITS[subscriptionStatus].chat);
   const [error, setError] = useState<string | null>(null);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [bannerDismissed, setBannerDismissed] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -134,25 +135,58 @@ export default function ChatWindow({ isOpen, onClose, recipeId, recipeName, subs
           </button>
         </div>
 
-        {/* C. Rate limit banner */}
-        {remaining <= 1 && (
-          <div className="flex items-center justify-between border-b border-[#F5A55B] bg-[#FFF0E6] px-4 py-2">
-            <p className="text-[10px] text-[#BF4E06]">
-              {remaining === 1
-                ? 'Sirf 1 sawaal bacha aaj ke liye'
-                : subscriptionStatus === 'free'
-                  ? `Aaj ke ${RATE_LIMITS.free.chat} sawaal ho gaye! ₹150/mein 20 sawaal/din 😊`
-                  : `Aaj ke ${RATE_LIMITS.paid.chat} sawaal ho gaye! Kal phir aana 😊`}
+        {/* C. Rate limit banner — warm benefit-focused upsell */}
+        {remaining === 0 && subscriptionStatus === 'free' && !bannerDismissed && (
+          <div
+            className="m-2 rounded-[14px] px-4 py-[14px]"
+            style={{
+              background: 'linear-gradient(135deg, #FFF0E6, #FFF8F0)',
+              border: '1.5px solid var(--saffron-lt)',
+              boxShadow: '0 4px 16px rgba(180,80,20,0.12)',
+            }}
+          >
+            <p className="text-[13px] font-medium" style={{ color: 'var(--terracotta)' }}>
+              ✨ Chef Arti aur help kar sakti hai!
             </p>
-            {remaining === 0 && subscriptionStatus === 'free' && (
-              <button
-                type="button"
-                onClick={() => setUpgradeOpen(true)}
-                className="rounded-full bg-[#E8640C] px-3 py-1 text-[10px] font-bold text-white"
-              >
-                Abhi lo →
-              </button>
-            )}
+
+            <div className="mt-2 flex flex-col gap-1.5">
+              <p className="text-[13px]" style={{ color: 'var(--muted)' }}>💬 Roz 20 sawaal — kabhi limit nahi</p>
+              <p className="text-[13px]" style={{ color: 'var(--muted)' }}>📷 Fridge scan 10 baar/din</p>
+              <p className="text-[13px]" style={{ color: 'var(--muted)' }}>🍱 Bacha Hua mode bhi milega</p>
+            </div>
+
+            <p className="mt-2 text-[13px]">
+              <span className="font-bold" style={{ color: 'var(--saffron)' }}>Sirf ₹150/mahine </span>
+              <span className="italic" style={{ color: 'var(--muted)' }}>= less than chai ka ek cup roz ☕</span>
+            </p>
+
+            <button
+              type="button"
+              onClick={() => setUpgradeOpen(true)}
+              className="mt-3 flex w-full items-center justify-center rounded-[12px] text-[13px] font-semibold text-white"
+              style={{
+                height: 52,
+                background: 'linear-gradient(135deg, #E8640C, #C4621E)',
+                boxShadow: '0 4px 16px rgba(180,80,20,0.25)',
+              }}
+            >
+              Abhi upgrade karein →
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setBannerDismissed(true)}
+              className="mt-2 block w-full text-center text-[13px]"
+              style={{ color: 'var(--muted)' }}
+            >
+              Kal free mein jaari rakhein
+            </button>
+          </div>
+        )}
+
+        {remaining === 1 && (
+          <div className="m-2 rounded-[12px] border border-[#FDE68A] bg-[#FFFBEB] px-4 py-2">
+            <p className="text-[13px] text-[#92600A]">1 sawaal aur bacha hai aaj ke liye 💬</p>
           </div>
         )}
 
@@ -163,7 +197,7 @@ export default function ChatWindow({ isOpen, onClose, recipeId, recipeName, subs
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FFF0E6] text-xl">
                 🍳
               </div>
-              <p className="text-[12px] text-[#8B7355]">
+              <p className="text-[13px] text-[#8B7355]">
                 Namaskar! Khaana pakane mein koi sawaal?
               </p>
             </div>
@@ -212,7 +246,7 @@ export default function ChatWindow({ isOpen, onClose, recipeId, recipeName, subs
 
           {/* Error */}
           {error && !loading && (
-            <p className="text-center text-[11px] text-[#BF4E06]">{error}</p>
+            <p className="text-center text-[13px] text-[#BF4E06]">{error}</p>
           )}
 
           <div ref={messagesEndRef} />
