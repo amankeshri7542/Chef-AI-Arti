@@ -110,7 +110,10 @@ export async function POST(
         cook_time_minutes: gen.cook_time_minutes ?? 0,
         vibes: gen.vibes ?? [],
         tags: gen.tags ?? [],
-        source: 'ai', // spec explicitly requires source='ai' for promoted CASE-2 recipes
+        // Promoted recipes become real library entries. Schema forbids source='ai'
+        // (TS RecipeSource = 'curated' | 'user'); 'curated' also makes them visible
+        // to /surprise and the empty-state fallback, which filter source='curated'.
+        source: 'curated',
         thumbnail_source: 'none',
         category: 'sabzi', // safe default — generated recipes lack category
         diet_type: 'veg', // default
