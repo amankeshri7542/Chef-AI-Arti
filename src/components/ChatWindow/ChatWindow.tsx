@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import UpgradeModal from '@/components/UpgradeModal/UpgradeModal';
-import { RATE_LIMITS } from '@/lib/redis';
+import { RATE_LIMITS } from '@/lib/rate-limits';
 
 interface Message {
   role: 'user' | 'assistant';

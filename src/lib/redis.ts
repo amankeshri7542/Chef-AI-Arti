@@ -2,27 +2,11 @@ import { Redis } from '@upstash/redis';
 import type { ChatSession, RateLimitAction } from '@/types/index';
 import { chatCompletion, SUMMARY_MODEL } from '@/lib/openai';
 import type OpenAI from 'openai';
+import { RATE_LIMITS } from '@/lib/rate-limits';
+
+export { RATE_LIMITS };
 
 const redis = Redis.fromEnv();
-
-// ─────────────────────────────────────
-// Rate limiting
-// ─────────────────────────────────────
-
-export const RATE_LIMITS = {
-  free: {
-    chat: 3,
-    scan: 2,
-    recipes: 10,
-    'ai-gen': 1,
-  },
-  paid: {
-    chat: 20,
-    scan: 10,
-    recipes: 100,
-    'ai-gen': 5,
-  },
-} as const;
 
 function midnightUnixSeconds(): number {
   const now = new Date();
