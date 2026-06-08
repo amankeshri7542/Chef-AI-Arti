@@ -131,7 +131,7 @@ export default function RecipeDetailClient({
       <div className="flex flex-col gap-4 px-4 py-4">
         {/* Hero thumbnail */}
         <div
-          className="flex h-48 w-full items-center justify-center rounded-2xl text-6xl"
+          className="relative flex h-48 w-full items-center justify-center rounded-2xl text-6xl overflow-hidden"
           style={{
             background: 'linear-gradient(135deg, #FDDBC2, #FBC08A)',
           }}
@@ -146,6 +146,28 @@ export default function RecipeDetailClient({
           ) : (
             getCategoryEmoji(recipe.category)
           )}
+
+          {/* Overlay back button */}
+          <button
+            type="button"
+            onClick={() => router.back()}
+            aria-label="Wapas jao"
+            className="absolute left-3 top-3 flex h-10 w-10 items-center justify-center rounded-full text-white text-lg transition-opacity active:opacity-70"
+            style={{ background: 'rgba(255,255,255,0.22)', backdropFilter: 'blur(6px)', minHeight: 44, minWidth: 44 }}
+          >
+            ←
+          </button>
+
+          {/* Overlay save/heart placeholder */}
+          <button
+            type="button"
+            onClick={() => console.log('save tapped')}
+            aria-label="Save recipe"
+            className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full text-white text-lg transition-opacity active:opacity-70"
+            style={{ background: 'rgba(255,255,255,0.22)', backdropFilter: 'blur(6px)', minHeight: 44, minWidth: 44 }}
+          >
+            🤍
+          </button>
         </div>
 
         {/* Name + meta */}

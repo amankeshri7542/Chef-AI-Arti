@@ -2,8 +2,10 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import RecipeCardGrid from '@/components/RecipeCard/RecipeCardGrid';
-import RecipeCardSkeleton from '@/components/Skeletons/RecipeCardSkeleton';
+import RecipeCardCompact from '@/components/RecipeCard/RecipeCardCompact';
+import CollectionCard from '@/components/CollectionCard/CollectionCard';
+import BackButton from '@/components/BackButton/BackButton';
+import { RECIPE_COLLECTIONS } from '@/lib/collections';
 import { Recipe } from '@/types/index';
 
 const CATEGORY_CHIPS = [
@@ -16,30 +18,52 @@ const CATEGORY_CHIPS = [
   { label: '🕉️ Vrat', query: 'vrat' },
 ];
 
+type ActiveSource =
+  | { type: 'none' }
+  | { type: 'search'; term: string }
+  | { type: 'chip'; label: string; query: string }
+  | { type: 'collection'; id: string; label: string; emoji: string };
+
+async function fetchByFilter(filter: Record<string, unknown>): Promise<Recipe[]> {
+  const res = await fetch('/api/recipes/search', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(filter),
+  });
+  if (!res.ok) return [];
+  const data = await res.json();
+  return data.recipes ?? [];
+}
+
 export default function SearchPage() {
   const router = useRouter();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(false);
-  const [searched, setSearched] = useState(false);
+  const [activeSource, setActiveSource] = useState<ActiveSource>({ type: 'none' });
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Default: load top recipes on mount
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    fetchByFilter({ orderBy: 'cooked_count', limit: 20 }).then((recipes) => {
+      if (!cancelled) {
+        setResults(recipes);
+        setLoading(false);
+        setActiveSource({ type: 'none' });
+      }
+    });
+    return () => { cancelled = true; };
+  }, []);
 
   const runSearch = useCallback(async (searchTerm: string) => {
     if (!searchTerm.trim()) return;
     setLoading(true);
-    setSearched(true);
+    setActiveSource({ type: 'search', term: searchTerm });
     try {
-      const res = await fetch('/api/recipes/search', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: searchTerm }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setResults(data.recipes ?? []);
-      } else {
-        setResults([]);
-      }
+      const data = await fetchByFilter({ query: searchTerm });
+      setResults(data);
     } catch {
       setResults([]);
     } finally {
@@ -49,8 +73,15 @@ export default function SearchPage() {
 
   useEffect(() => {
     if (!query.trim()) {
-      setSearched(false);
-      setResults([]);
+      // Reset to top recipes when cleared
+      if (activeSource.type === 'search') {
+        setLoading(true);
+        setActiveSource({ type: 'none' });
+        fetchByFilter({ orderBy: 'cooked_count', limit: 20 }).then((recipes) => {
+          setResults(recipes);
+          setLoading(false);
+        });
+      }
       return;
     }
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -60,36 +91,63 @@ export default function SearchPage() {
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, runSearch]);
 
-  const handleChipClick = (chipQuery: string) => {
-    setQuery(chipQuery);
-    runSearch(chipQuery);
-    setSearched(true);
+  const handleChipClick = (chip: { label: string; query: string }) => {
+    setQuery('');
+    setLoading(true);
+    setActiveSource({ type: 'chip', label: chip.label, query: chip.query });
+    fetchByFilter({ query: chip.query }).then((recipes) => {
+      setResults(recipes);
+      setLoading(false);
+    });
+  };
+
+  const handleCollectionClick = (collection: (typeof RECIPE_COLLECTIONS)[number]) => {
+    setQuery('');
+    setLoading(true);
+    setActiveSource({ type: 'collection', id: collection.id, label: collection.label, emoji: collection.emoji });
+    fetchByFilter({ ...collection.filter }).then((recipes) => {
+      setResults(recipes);
+      setLoading(false);
+    });
   };
 
   const handleClear = () => {
     setQuery('');
-    setResults([]);
-    setSearched(false);
   };
+
+  const activeCollectionId = activeSource.type === 'collection' ? activeSource.id : null;
+
+  const resultsHeading: string | null = (() => {
+    if (activeSource.type === 'search') return `"${activeSource.term}" ke results`;
+    if (activeSource.type === 'chip') return `${activeSource.label} recipes`;
+    if (activeSource.type === 'collection') return `${activeSource.emoji} ${activeSource.label}`;
+    return null;
+  })();
 
   return (
     <div className="flex flex-col min-h-full bg-[#FFFAF6]">
       {/* Sticky header */}
       <div
-        className="sticky top-0 z-10 bg-white px-4 pt-4 pb-2"
+        className="sticky top-0 z-10 bg-white px-4 pt-3 pb-2"
         style={{ borderBottom: '1px solid #E8DDD0' }}
       >
-        <p className="font-bold text-[#1A1A1A]" style={{ fontSize: 16 }}>
-          🔍 Recipe Dhundho
-        </p>
-        <p className="text-[#8B7355] mt-0.5" style={{ fontSize: 11 }}>
-          Kuch bhi likho — aloo, dal, biryani...
-        </p>
+        <div className="flex items-center gap-2 mb-2">
+          <BackButton fallback="/home" className="bg-[#FFF0E6] text-[#5C3D1E]" />
+          <div>
+            <p className="font-bold text-[#1A1A1A]" style={{ fontSize: 16 }}>
+              🔍 Recipe Dhundho
+            </p>
+            <p className="text-[#8B7355]" style={{ fontSize: 11 }}>
+              Kuch bhi likho — aloo, dal, biryani...
+            </p>
+          </div>
+        </div>
 
         {/* Search input */}
-        <div className="relative mt-3 mb-1">
+        <div className="relative mb-1">
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8B7355] text-sm select-none">
             🔍
           </span>
@@ -116,66 +174,84 @@ export default function SearchPage() {
             </button>
           )}
         </div>
+
+        {/* Category chips */}
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none mt-2">
+          {CATEGORY_CHIPS.map((chip) => {
+            const isActive = activeSource.type === 'chip' && activeSource.query === chip.query;
+            return (
+              <button
+                key={chip.query}
+                type="button"
+                onClick={() => handleChipClick(chip)}
+                className="flex-shrink-0 px-3 py-1 rounded-full text-sm font-medium transition-colors"
+                style={{
+                  background: isActive ? '#E8640C' : '#FFF0E6',
+                  border: '1px solid #E8DDD0',
+                  color: isActive ? '#fff' : '#5C3D1E',
+                  fontSize: 12,
+                  minHeight: 32,
+                }}
+              >
+                {chip.label}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Body */}
       <div className="flex-1 px-4 py-3">
-        {/* Initial state — category chips */}
-        {!searched && !loading && (
-          <div>
-            <p className="text-[#8B7355] mb-3" style={{ fontSize: 12 }}>
-              Category se dhundho:
+        {/* Food Library */}
+        {activeSource.type !== 'search' && (
+          <div className="mb-4">
+            <p className="font-semibold text-[#1A1A1A] mb-3" style={{ fontSize: 13 }}>
+              📚 Food Library
             </p>
-            <div className="flex flex-wrap gap-2">
-              {CATEGORY_CHIPS.map((chip) => (
-                <button
-                  key={chip.query}
-                  type="button"
-                  onClick={() => handleChipClick(chip.query)}
-                  className="px-3 py-1.5 rounded-full text-sm font-medium transition-colors"
-                  style={{
-                    background: '#FFF0E6',
-                    border: '1px solid #E8DDD0',
-                    color: '#5C3D1E',
-                    fontSize: 13,
-                    minHeight: 36,
-                  }}
-                >
-                  {chip.label}
-                </button>
+            <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-none">
+              {RECIPE_COLLECTIONS.map((col) => (
+                <CollectionCard
+                  key={col.id}
+                  collection={col}
+                  active={activeCollectionId === col.id}
+                  onClick={() => handleCollectionClick(col)}
+                />
               ))}
             </div>
           </div>
         )}
 
-        {/* Loading state */}
+        {/* Results heading */}
+        {resultsHeading && !loading && (
+          <p className="text-[#8B7355] mb-3" style={{ fontSize: 12 }}>
+            {resultsHeading}
+            {results.length > 0 && ` — ${results.length} recipes`}
+          </p>
+        )}
+
+        {/* Loading */}
         {loading && (
-          <div className="flex flex-col gap-3">
-            <RecipeCardSkeleton />
-            <RecipeCardSkeleton />
-            <RecipeCardSkeleton />
+          <div className="flex flex-col items-center justify-center py-12 gap-3">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#E8640C] border-t-transparent" />
+            <p className="text-[#8B7355]" style={{ fontSize: 12 }}>Dhundh rahi hoon...</p>
           </div>
         )}
 
-        {/* Results */}
-        {!loading && searched && results.length > 0 && (
-          <div className="grid grid-cols-2 gap-0.5">
-            {results.map((recipe, index) => {
-              const isFeatured = index % 5 === 4;
-              return (
-                <div key={recipe.id} className={isFeatured ? 'col-span-2' : ''} style={isFeatured ? { aspectRatio: '2/1' } : {}}>
-                  <RecipeCardGrid
-                    recipe={recipe}
-                    onClick={() => router.push(`/recipe/${recipe.id}`)}
-                  />
-                </div>
-              );
-            })}
+        {/* Recipe grid */}
+        {!loading && results.length > 0 && (
+          <div className="grid grid-cols-2 gap-2">
+            {results.map((recipe) => (
+              <RecipeCardCompact
+                key={recipe.id}
+                recipe={recipe}
+                onClick={() => router.push(`/recipe/${recipe.id}`)}
+              />
+            ))}
           </div>
         )}
 
         {/* Empty state */}
-        {!loading && searched && results.length === 0 && (
+        {!loading && results.length === 0 && activeSource.type !== 'none' && (
           <div className="flex flex-col items-center justify-center py-16 text-center gap-3">
             <p className="text-3xl">😕</p>
             <p className="font-semibold text-[#1A1A1A]" style={{ fontSize: 15 }}>

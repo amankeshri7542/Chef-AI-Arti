@@ -1,12 +1,20 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSignIn } from '@clerk/nextjs/legacy';
+import { useRouter } from 'next/navigation';
 
 export default function SignInPage() {
   const { isLoaded, signIn } = useSignIn();
+  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showClose, setShowClose] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setShowClose(!!params.get('redirect_url'));
+  }, []);
 
   async function googleLogin() {
     if (!isLoaded || !signIn) return;
@@ -33,6 +41,20 @@ export default function SignInPage() {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-[#FFFDF9] px-6">
+      {showClose && (
+        <button
+          type="button"
+          onClick={() => {
+            if (window.history.length > 1) router.back();
+            else router.push('/home');
+          }}
+          aria-label="Band karo"
+          className="absolute right-4 top-4 flex h-12 w-12 items-center justify-center rounded-full text-[18px] text-[#8B7355] transition-opacity active:opacity-70"
+          style={{ background: '#FFF0E6' }}
+        >
+          ✕
+        </button>
+      )}
       <div className="w-full max-w-sm text-center">
         <p className="text-5xl">🍳</p>
         <h1 className="mt-3 text-2xl font-semibold text-[#1A1A1A]">Chief-AI-Arti</h1>

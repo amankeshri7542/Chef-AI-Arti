@@ -7,6 +7,7 @@ import type { IngredientChip, Recipe } from '@/types/index';
 import IngredientChips from '@/components/IngredientChips/IngredientChips';
 import RecipeCard from '@/components/RecipeCard/RecipeCard';
 import { buildHinglishQuery } from '@/lib/ingredient-map';
+import BackButton from '@/components/BackButton/BackButton';
 
 type PageState = 'capture' | 'review' | 'results';
 
@@ -141,7 +142,7 @@ export default function FridgePage() {
   // ─── STATE 1: Capture ────────────────────────────────────────
   if (state === 'capture') {
     return (
-      <div className="flex min-h-screen flex-col bg-[#FFFDF9] px-4 py-6">
+      <div className="flex min-h-screen flex-col bg-[#FFFDF9] px-4 py-4">
         <input
           ref={cameraInputRef}
           type="file"
@@ -158,18 +159,21 @@ export default function FridgePage() {
           onChange={onFileChange}
         />
 
-        <div className="flex flex-col gap-2">
-          <h1 className="text-[16px] font-bold text-[#1A1A1A]">📷 Fridge Scan</h1>
-          <p className="text-[12px] text-[#8B7355]">
-            Fridge ki photo lo, hum dhundh lenge kya banao!
-          </p>
-          {remaining > 0 ? (
-            <p className="text-[10px] text-[#8B7355]">{remaining}/2 scans aaj baaki</p>
-          ) : (
-            <p className="text-[10px] font-medium text-[#E8640C]">
-              Aaj ke scans ho gaye! Kal phir aana
+        <div className="flex items-center gap-2 mb-3">
+          <BackButton fallback="/home" className="bg-[#FFF0E6] text-[#5C3D1E]" />
+          <div>
+            <h1 className="text-[16px] font-bold text-[#1A1A1A]">📷 Fridge Scan</h1>
+            <p className="text-[12px] text-[#8B7355]">
+              Fridge ki photo lo, hum dhundh lenge kya banao!
             </p>
-          )}
+            {remaining > 0 ? (
+              <p className="text-[10px] text-[#8B7355]">{remaining}/2 scans aaj baaki</p>
+            ) : (
+              <p className="text-[10px] font-medium text-[#E8640C]">
+                Aaj ke scans ho gaye! Kal phir aana
+              </p>
+            )}
+          </div>
         </div>
 
         <button
@@ -222,12 +226,15 @@ export default function FridgePage() {
   // ─── STATE 2: Review ─────────────────────────────────────────
   if (state === 'review') {
     return (
-      <div className="flex min-h-screen flex-col bg-[#FFFDF9] px-4 py-6">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-[16px] font-bold text-[#1A1A1A]">Kya kya mila? 🔍</h1>
-          <p className="text-[12px] text-[#8B7355]">
-            Galat ho toh hatao, jo chhoot gaya wo add karo
-          </p>
+      <div className="flex min-h-screen flex-col bg-[#FFFDF9] px-4 py-4">
+        <div className="flex items-center gap-2 mb-3">
+          <BackButton fallback="/home" onClick={() => setState('capture')} className="bg-[#FFF0E6] text-[#5C3D1E]" />
+          <div>
+            <h1 className="text-[16px] font-bold text-[#1A1A1A]">Kya kya mila? 🔍</h1>
+            <p className="text-[12px] text-[#8B7355]">
+              Galat ho toh hatao, jo chhoot gaya wo add karo
+            </p>
+          </div>
         </div>
 
         <div className="mt-5">
@@ -251,8 +258,11 @@ export default function FridgePage() {
 
   // ─── STATE 3: Results ────────────────────────────────────────
   return (
-    <div className="flex min-h-screen flex-col bg-[#FFFDF9] px-4 py-6 pb-32">
-      <h1 className="text-[16px] font-bold text-[#1A1A1A]">Yeh bana sakte ho! 🍳</h1>
+    <div className="flex min-h-screen flex-col bg-[#FFFDF9] px-4 py-4 pb-32">
+      <div className="flex items-center gap-2 mb-3">
+        <BackButton fallback="/home" onClick={() => setState('review')} className="bg-[#FFF0E6] text-[#5C3D1E]" />
+        <h1 className="text-[16px] font-bold text-[#1A1A1A]">Yeh bana sakte ho! 🍳</h1>
+      </div>
 
       {triggerCase2 ? (
         <div className="mt-6 flex flex-col items-center gap-4 text-center">

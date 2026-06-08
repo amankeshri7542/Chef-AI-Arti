@@ -88,6 +88,43 @@ SESSION 9 ✅ — Paid user chat bypass, real PWA icons (canvas, 5.3KB/15.5KB), 
 - .gitignore: added .playwright-mcp/
 - Git commit: df6047b + bb10eff
 
+## SESSION 15 ✅ — Back navigation system, search redesign, Food Library
+- src/hooks/useBackNavigation.ts: reusable hook — router.back() or router.push(fallback)
+- src/components/BackButton/BackButton.tsx: reusable back button (arrow/x variant, custom onClick support)
+- RecipeDetailClient: overlay back + save buttons on hero image (absolute positioned, blurred bg)
+- fridge/page.tsx: back button in all 3 states (capture→/home, review→capture, results→review)
+- profile/ProfileClient.tsx: back button + "Mera Profile" heading at top
+- sign-in page: X close button shown when redirect_url search param is present
+- onboarding page: already had ← Wapas on Q2 and Q3 — no change needed
+- src/lib/collections.ts: 6 curated collections (Top Recipes, Jaldi Bane, Vrat Special, Nashta, Halka Khana, Meetha)
+- src/components/CollectionCard/CollectionCard.tsx: 80×80px card, colored emoji bg, active ring
+- src/components/RecipeCard/RecipeCardCompact.tsx: 3:2 ratio compact card for search results
+- search/page.tsx: full redesign — back button, Food Library horizontal scroll, 2-col compact grid, default top-20 load
+- api/recipes/search/route.ts: filter-only path added (no query + filters → SQL only, no embedding)
+- Git commit: see below
+
+## Phase 2 Status
+
+  PHASE 1: Complete ✅ (Sessions 1-14)
+  PHASE 2: In progress (Session 15+)
+
+  Phase 2 features planned:
+  - Back navigation system (Session 15 ✅)
+  - Search page redesign — Food Library (Session 15 ✅)
+  - Nutrition/macros — GPT estimate, per 100g JSONB (Session 16)
+  - Recipe rating system (Session 17)
+  - Community cooked photos (Session 18)
+  - Bacha Hua leftover mode (Session 19)
+  - New recipe generation CASE 2 (Session 20)
+
+## Phase 2 DB Changes Needed
+(not yet applied — Session 16 will run these)
+
+  ALTER TABLE recipes ADD COLUMN nutrition JSONB;
+  ALTER TABLE recipes ADD COLUMN avg_rating DECIMAL(3,2) DEFAULT 0;
+  ALTER TABLE recipes ADD COLUMN rating_count INTEGER DEFAULT 0;
+  CREATE TABLE recipe_ratings (...) -- see full schema in session 17
+
 ## What's Built — Every File in src/
 
 ### src/lib/
@@ -98,6 +135,7 @@ SESSION 9 ✅ — Paid user chat bypass, real PWA icons (canvas, 5.3KB/15.5KB), 
 - `portion.ts` — scaleIngredients (pure math, non-linear scaling), shouldShowScalingWarning
 - `rag.ts` — searchRecipes (full RAG pipeline: embed → RPC → re-rank → top 3)
 - `knowledge.ts` — searchKnowledge (embed → RPC → top 3), hasSafetyFlag
+- `collections.ts` — RECIPE_COLLECTIONS (6 curated browse collections with filters)
 
 ### src/types/
 - `index.ts` — all types: Recipe, User, Ingredient, RecipeStep, KnowledgeDoc, RecipePending, etc.

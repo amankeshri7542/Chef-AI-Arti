@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { SignOutButton } from '@clerk/nextjs';
 import UpgradeModal from '@/components/UpgradeModal/UpgradeModal';
 import PWAInstallButton from '@/components/PWAInstallButton/PWAInstallButton';
+import BackButton from '@/components/BackButton/BackButton';
 import type { SubscriptionStatus, UnitPreference, DietType } from '@/types/index';
 
 interface ProfileClientProps {
@@ -64,6 +65,12 @@ export default function ProfileClient({
 
   return (
     <div className="flex flex-col gap-4 px-4 py-4 pb-24">
+      {/* Back nav */}
+      <div className="flex items-center gap-2">
+        <BackButton fallback="/home" className="bg-[#FFF0E6] text-[#5C3D1E]" />
+        <p className="font-bold text-[#1A1A1A]" style={{ fontSize: 16 }}>Mera Profile</p>
+      </div>
+
       {/* Header */}
       <div className="flex items-center gap-3 rounded-2xl border border-[#E8DDD0] bg-white px-4 py-4">
         <div
