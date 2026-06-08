@@ -24,6 +24,43 @@ export default function FridgePage() {
   const [remaining, setRemaining] = useState(2);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [generating, setGenerating] = useState(false);
+  const [genError, setGenError] = useState<string | null>(null);
+
+  async function handleGenerate() {
+    setGenerating(true);
+    setGenError(null);
+    try {
+      const res = await fetch('/api/recipes/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ingredients: chips.map((c) => c.name) }),
+      });
+
+      if (res.status === 429) {
+        setGenError('Aaj ki recipe generation limit ho gayi');
+        setGenerating(false);
+        return;
+      }
+
+      if (!res.ok) {
+        setGenError('Kuch gadbad ho gayi, dobara try karein');
+        setGenerating(false);
+        return;
+      }
+
+      const data: { pendingId?: string } = await res.json();
+      if (data.pendingId) {
+        router.push('/recipe/pending/' + data.pendingId);
+        return;
+      }
+      setGenError('Kuch gadbad ho gayi, dobara try karein');
+      setGenerating(false);
+    } catch {
+      setGenError('Kuch gadbad ho gayi, dobara try karein');
+      setGenerating(false);
+    }
+  }
 
   const handleFile = useCallback(async (file: File) => {
     setError(null);
@@ -266,20 +303,36 @@ export default function FridgePage() {
 
       {triggerCase2 ? (
         <div className="mt-6 flex flex-col items-center gap-4 text-center">
-          <p className="text-[14px] text-[#1A1A1A]">
-            Koi exact recipe nahi mili 🙁
-            <br />
-            <span className="text-[12px] text-[#8B7355]">
-              Ingredients badlo ya kuch aur try karo →
-            </span>
-          </p>
-          <button
-            type="button"
-            onClick={resetToCapture}
-            className="flex h-12 items-center gap-2 rounded-xl border border-[#E8DDD0] bg-white px-6 text-[13px] font-medium text-[#1A1A1A]"
-          >
-            Fir se try karo
-          </button>
+          {generating ? (
+            <div className="flex flex-col items-center gap-3">
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#E8640C] border-t-transparent" />
+              <p className="text-[14px] text-[#1A1A1A]">Arti soch rahi hai... 🤔</p>
+            </div>
+          ) : (
+            <>
+              <p className="text-[15px] font-bold text-[#1A1A1A]">
+                Koi recipe nahi mili — Arti banayegi? ✨
+              </p>
+              <button
+                type="button"
+                onClick={handleGenerate}
+                className="flex h-14 w-full items-center justify-center rounded-2xl text-[15px] font-bold text-white"
+                style={{ background: '#E8640C' }}
+              >
+                Haan, Arti se banwao!
+              </button>
+              {genError && (
+                <p className="text-[13px] text-[#BF4E06]">{genError}</p>
+              )}
+              <button
+                type="button"
+                onClick={resetToCapture}
+                className="flex h-12 items-center gap-2 rounded-xl border border-[#E8DDD0] bg-white px-6 text-[13px] font-medium text-[#1A1A1A]"
+              >
+                Fir se try karo
+              </button>
+            </>
+          )}
         </div>
       ) : (
         <>
