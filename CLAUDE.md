@@ -75,6 +75,19 @@ SESSION 9 ✅ — Paid user chat bypass, real PWA icons (canvas, 5.3KB/15.5KB), 
 - api/users/onboarding/route.ts: preferred_region replaces restrictions field
 - Git commits: e2ed819, 419e24a, 2047d78, b2bbd1f, ed5e6a7 + DB migration recompile_match_recipes
 
+## SESSION 13 ✅ — Root URL fix, Instagram grid, story circles, fridge/openai fixes, DALL-E script
+- page.tsx: / → /home (no login required at root URL)
+- RecipeCardGrid: square full-bleed card with gradient overlay, vrat dot, text at bottom
+- StoryCircles: horizontal scroll category filter (Sab/Sabzi/Dal/Chawal/Nashta/Vrat/Meetha)
+- HomeClient: 2-col grid, every-5th featured (2:1 span), tappable search bar → /search
+- search/page.tsx: 2-col grid results using RecipeCardGrid
+- openai.ts: detail:'low' on vision calls, regex JSON parsing (strips markdown fences)
+- validate/scan routes: console.log for debugging image size and extraction results
+- scripts/generate-thumbnails.ts: DALL-E 3 batch script — run with `npx tsx scripts/generate-thumbnails.ts` (~$2 for 50 recipes)
+- sign-in page: Clerk 429 rate-limit caught, shows Hinglish error instead of silent crash
+- .gitignore: added .playwright-mcp/
+- Git commit: df6047b + bb10eff
+
 ## What's Built — Every File in src/
 
 ### src/lib/
