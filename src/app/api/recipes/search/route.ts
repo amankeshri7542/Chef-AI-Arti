@@ -56,20 +56,25 @@ export async function POST(request: Request) {
   }
 
   // 4. RAG search (works for both guests and authenticated users)
-  const result = await searchRecipes(
-    body.query,
-    userContext as Pick<
-      User,
-      | 'diet_type'
-      | 'is_vrat_mode'
-      | 'restrictions'
-      | 'family_size'
-      | 'spice_preference'
-      | 'preferred_region'
-      | 'disliked_ingredients'
-    >,
-    userId ?? 'guest',
-  );
-
-  return NextResponse.json({ ...result, ...(remaining !== undefined ? { remaining } : {}) });
+  try {
+    const result = await searchRecipes(
+      body.query,
+      userContext as Pick<
+        User,
+        | 'diet_type'
+        | 'is_vrat_mode'
+        | 'restrictions'
+        | 'family_size'
+        | 'spice_preference'
+        | 'preferred_region'
+        | 'disliked_ingredients'
+      >,
+      userId ?? 'guest',
+    );
+    return NextResponse.json({ ...result, ...(remaining !== undefined ? { remaining } : {}) });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error('[search] RAG error:', msg);
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
 }
