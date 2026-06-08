@@ -58,12 +58,30 @@ SESSION 7 ✅ — Floating chatbot: ChatWindow, FloatingChatButton wired, /api/c
 SESSION 8 ✅ — Bug fix (gpt-5-mini→gpt-4o), Razorpay subscriptions (create/status/webhook), UpgradeModal, profile page, /api/users/preferences, PWA manifest + next-pwa, DEPLOY_CHECKLIST.md.
 SESSION 9 ✅ — Paid user chat bypass, real PWA icons (canvas, 5.3KB/15.5KB), proxy.ts public routes fixed (manifest+icons), GitHub push. Vercel deploy pending manual `vercel login`.
 
+## SESSION 12 ✅ — Public browse, real search, skeletons, fridge error logging, onboarding region, OpenAI bundle fix
+- proxy.ts: /home, /recipe/*, /search, /api/recipes/* now public — no login to browse
+- home/page.tsx: null-safe user, no redirect for unauthenticated guests
+- recipe/[id]/page.tsx: public access; null user handled with defaults
+- RecipeDetailClient: new props {recipe, user, isAuthenticated}; unauth actions → LoginPromptModal
+- LoginPromptModal: bottom-sheet for unauth feature prompts (Bana liya!, chat, WhatsApp)
+- search/page.tsx: real search with debounce, category chips, RecipeCard results, empty state
+- api/recipes/search/route.ts: public guest access with veg/medium defaults, no rate-limit for guests
+- RATE_LIMITS extracted to rate-limits.ts (client-safe) — fixes OpenAI library bundled to browser via ChatWindow→redis.ts→openai.ts chain
+- match_recipes RPC: recompiled with explicit ::text casts (varchar→text) to fix "structure mismatch" error
+- Skeletons: RecipeCardSkeleton, PageSkeleton, loading.tsx for home/search/recipe/[id]
+- openai.ts validateImage/extractIngredients: console.error logging instead of silent catch
+- fridge/validate/route.ts: logs image size (chars) for debugging
+- Onboarding Q3: Region selection (UP-Bihar/Delhi-NCR/Punjab-Haryana/Rajasthan-MP/other) replaces restrictions
+- api/users/onboarding/route.ts: preferred_region replaces restrictions field
+- Git commits: e2ed819, 419e24a, 2047d78, b2bbd1f, ed5e6a7 + DB migration recompile_match_recipes
+
 ## What's Built — Every File in src/
 
 ### src/lib/
 - `supabase.ts` — createServerClient() (service role, server-only), createBrowserClient() (anon)
 - `openai.ts` — VISION_MODEL, CHAT_MODEL, SUMMARY_MODEL, EMBEDDING_MODEL constants; getEmbedding, validateImage, extractIngredients, chatCompletion
-- `redis.ts` — checkRateLimit, getRateLimitRemaining; chat session with 3hr TTL; compressAndUpdateSession
+- `redis.ts` — checkRateLimit, getRateLimitRemaining; chat session with 3hr TTL; compressAndUpdateSession. Re-exports RATE_LIMITS from rate-limits.ts.
+- `rate-limits.ts` — RATE_LIMITS constant only (no server deps — safe to import in client components)
 - `portion.ts` — scaleIngredients (pure math, non-linear scaling), shouldShowScalingWarning
 - `rag.ts` — searchRecipes (full RAG pipeline: embed → RPC → re-rank → top 3)
 - `knowledge.ts` — searchKnowledge (embed → RPC → top 3), hasSafetyFlag
@@ -75,7 +93,7 @@ SESSION 9 ✅ — Paid user chat bypass, real PWA icons (canvas, 5.3KB/15.5KB), 
 - `layout.tsx` — root layout: Poppins + Noto Sans Devanagari, ClerkProvider, theme-color meta
 - `globals.css` — Tailwind v4 @theme inline with project color tokens
 - `page.tsx` — server redirect → /sign-in
-- `proxy.ts` — Next.js 16 middleware (clerkMiddleware), public routes: /sign-in, /sso-callback, /api/webhooks/razorpay
+- `proxy.ts` — Next.js 16 middleware (clerkMiddleware). Public: /, /home, /recipe/*, /search, /sign-in, /api/recipes/*, /api/webhooks/*. Protected pages redirect to /sign-in; protected APIs return 401 JSON.
 - `sso-callback/page.tsx` — AuthenticateWithRedirectCallback
 
 ### src/app/(auth)/
