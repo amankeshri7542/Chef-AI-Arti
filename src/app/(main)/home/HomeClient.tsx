@@ -6,6 +6,7 @@ import { Recipe } from '@/types/index';
 import VratToggle from '@/components/VratToggle/VratToggle';
 import RecipeCardGrid from '@/components/RecipeCard/RecipeCardGrid';
 import StoryCircles from '@/components/StoryCircles/StoryCircles';
+import QuickActions from '@/components/QuickActions/QuickActions';
 
 interface HomeClientProps {
   initialRecipes: Recipe[];
@@ -67,6 +68,9 @@ export default function HomeClient({ initialRecipes, userName, subscriptionStatu
 
       {/* Story circles */}
       <StoryCircles onFilter={setCategoryFilter} />
+
+      {/* Quick actions */}
+      <QuickActions />
 
       {/* 2-col grid */}
       <div className="grid grid-cols-2 gap-0.5 px-0.5 pb-24">
