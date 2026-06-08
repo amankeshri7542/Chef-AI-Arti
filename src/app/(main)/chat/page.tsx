@@ -1,9 +1,22 @@
-'use client';
-
+import { auth } from '@clerk/nextjs/server';
+import { createServerClient } from '@/lib/supabase';
 import BackButton from '@/components/BackButton/BackButton';
 import FloatingChatButton from '@/components/FloatingChatButton/FloatingChatButton';
 
-export default function ChatPage() {
+export default async function ChatPage() {
+  const { userId } = await auth();
+
+  let subscriptionStatus: 'free' | 'paid' = 'free';
+  if (userId) {
+    const supabase = createServerClient();
+    const { data } = await supabase
+      .from('users')
+      .select('subscription_status')
+      .eq('clerk_user_id', userId)
+      .single<{ subscription_status: string }>();
+    subscriptionStatus = data?.subscription_status === 'paid' ? 'paid' : 'free';
+  }
+
   return (
     <div className="min-h-screen bg-[#FFFDF9]">
       <div className="flex items-center gap-2 border-b border-[#E8DDD0] bg-white px-4 py-3">
@@ -21,7 +34,7 @@ export default function ChatPage() {
         </p>
       </div>
 
-      <FloatingChatButton />
+      <FloatingChatButton subscriptionStatus={subscriptionStatus} />
     </div>
   );
 }
