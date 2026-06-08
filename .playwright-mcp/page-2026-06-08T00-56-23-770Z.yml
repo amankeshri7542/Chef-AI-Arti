@@ -1,0 +1,10 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - paragraph [ref=e4]: 🍳
+    - heading "Chief-AI-Arti" [level=1] [ref=e5]
+    - paragraph [ref=e6]: Aaj kya banao?
+    - button "Google se login karo" [ref=e7]:
+      - img [ref=e8]
+      - text: Google se login karo
+    - paragraph [ref=e14]: Login karke aap hamare Terms se agree karte hain
+  - alert [ref=e15]

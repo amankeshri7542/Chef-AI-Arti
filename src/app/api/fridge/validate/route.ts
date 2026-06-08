@@ -29,6 +29,7 @@ export async function POST(req: NextRequest) {
   const { imageBase64 }: { imageBase64: string } = await req.json();
   console.log('[fridge/validate] image size (chars):', imageBase64?.length ?? 0)
   const result = await validateImage(imageBase64);
+  console.log('[fridge/validate] result:', result.valid, result.reason);
 
   if (!result.valid) {
     const reason = result.reason.toLowerCase();

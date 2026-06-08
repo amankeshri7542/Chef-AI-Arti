@@ -1,0 +1,150 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - main [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]:
+          - button "Wapas jao" [ref=e6]: ←
+          - heading "Chicken Biryani" [level=1] [ref=e7]
+        - generic [ref=e8]:
+          - generic [ref=e9]: 🍚
+          - generic [ref=e10]:
+            - heading "Chicken Biryani" [level=2] [ref=e11]
+            - paragraph [ref=e12]: चिकन बिरयानी
+            - paragraph [ref=e13]: Layered biryani jo har bite mein magic lekar aati hai — Sunday special.
+          - generic [ref=e14]:
+            - generic [ref=e15]: ⏱ 85 min cooking
+            - generic [ref=e16]: 🔪 55 min prep
+            - generic [ref=e17]: 🌶 hot
+            - generic [ref=e18]: ⚖️ bhaari
+          - generic [ref=e19]:
+            - generic [ref=e20]: tyohar-special
+            - generic [ref=e21]: taakat-wali
+            - generic [ref=e22]: guest-special
+          - generic [ref=e23]:
+            - generic [ref=e24]:
+              - paragraph [ref=e25]: Kitne logo ke liye? 👨‍👩‍👧‍👦
+              - generic [ref=e26]: "4"
+            - generic [ref=e27]:
+              - button "Kam karo" [ref=e28]: −
+              - slider [ref=e29] [cursor=pointer]: "4"
+              - button "Badhao" [ref=e30]: +
+          - generic [ref=e31]:
+            - heading "Samagri 🛒" [level=3] [ref=e32]
+            - generic [ref=e33]:
+              - generic [ref=e34]:
+                - paragraph [ref=e36]: Chicken
+                - paragraph [ref=e37]: 3 katori
+              - generic [ref=e38]:
+                - paragraph [ref=e40]: Basmati chawal
+                - paragraph [ref=e41]: 2 katori
+              - generic [ref=e42]:
+                - generic [ref=e43]:
+                  - paragraph [ref=e44]: Pyaaz
+                  - paragraph [ref=e45]: sliced
+                - paragraph [ref=e46]: 3 medium
+              - generic [ref=e47]:
+                - paragraph [ref=e49]: Dahi
+                - paragraph [ref=e50]: 1 katori
+              - generic [ref=e51]:
+                - paragraph [ref=e53]: Adrak-lehsun paste
+                - paragraph [ref=e54]: 2 chammach
+              - generic [ref=e55]:
+                - paragraph [ref=e57]: Biryani masala
+                - paragraph [ref=e58]: 2 chammach
+              - generic [ref=e59]:
+                - paragraph [ref=e61]: Lal mirch powder
+                - paragraph [ref=e62]: 1 chammach
+              - generic [ref=e63]:
+                - paragraph [ref=e65]: Haldi
+                - paragraph [ref=e66]: half chammach
+              - generic [ref=e67]:
+                - paragraph [ref=e69]: Pudina
+                - paragraph [ref=e70]: half katori
+              - generic [ref=e71]:
+                - paragraph [ref=e73]: Saffron in milk
+                - paragraph [ref=e74]: 2 chammach
+              - generic [ref=e75]:
+                - paragraph [ref=e77]: Tel/Ghee
+                - paragraph [ref=e78]: 4 chammach
+              - generic [ref=e79]:
+                - paragraph [ref=e81]: Paani
+                - paragraph [ref=e82]: 5 katori
+              - generic [ref=e83]:
+                - paragraph [ref=e85]: Namak
+                - paragraph [ref=e86]: 1 chammach
+          - paragraph [ref=e87]: "🍽 Ke saath: raita, achaar, salaad"
+          - generic [ref=e88]:
+            - button "🔊 Suno" [ref=e89]
+            - button "🔒 WhatsApp (Premium)" [ref=e90]
+          - generic [ref=e91]:
+            - heading "Banane ka tarika 👩‍🍳" [level=3] [ref=e92]
+            - generic [ref=e93]:
+              - generic [ref=e94]:
+                - generic [ref=e95]: "1"
+                - generic [ref=e96]:
+                  - paragraph [ref=e97]: Chawal ko 2-3 baar achhe se dho lein aur 20 min soak karein.
+                  - paragraph [ref=e98]: ⏱ ~22 min
+              - generic [ref=e99]:
+                - generic [ref=e100]: "2"
+                - generic [ref=e101]:
+                  - paragraph [ref=e102]: Chicken ko dahi, adrak-lehsun aur masale mein 30 min marinate karein.
+                  - paragraph [ref=e103]: ⏱ ~30 min
+              - generic [ref=e104]:
+                - generic [ref=e105]: "3"
+                - generic [ref=e106]:
+                  - paragraph [ref=e107]: Pyaaz ko tel mein crispy brown karein (birista).
+                  - paragraph [ref=e108]: ⏱ ~8 min
+              - generic [ref=e109]:
+                - generic [ref=e110]: "4"
+                - generic [ref=e111]:
+                  - paragraph [ref=e112]: Chawal ko 70% boil karein aur strain karein.
+                  - paragraph [ref=e113]: ⏱ ~8 min
+              - generic [ref=e114]:
+                - generic [ref=e115]: "5"
+                - generic [ref=e116]:
+                  - paragraph [ref=e117]: Marinated chicken ko 15 min pakayein.
+                  - paragraph [ref=e118]: ⏱ ~15 min
+              - generic [ref=e119]:
+                - generic [ref=e120]: "6"
+                - generic [ref=e121]:
+                  - paragraph [ref=e122]: Chicken par chawal, birista, pudina, saffron layer karein.
+                  - paragraph [ref=e123]: ⏱ ~3 min
+              - generic [ref=e124]:
+                - generic [ref=e125]: "7"
+                - generic [ref=e126]:
+                  - paragraph [ref=e127]: Dum par dheemi aanch par 20 minute pakayein.
+                  - paragraph [ref=e128]: ⏱ ~20 min
+              - generic [ref=e129]:
+                - generic [ref=e130]: "8"
+                - generic [ref=e131]:
+                  - paragraph [ref=e132]: Halke se mix karke raita ke saath serve karein.
+                  - paragraph [ref=e133]: ⏱ ~1 min
+          - button "✅ Bana liya!" [ref=e134]
+        - button "Chat kholo" [active] [ref=e135]:
+          - generic [ref=e136]: 💬
+        - generic [ref=e165]:
+          - generic [ref=e166]: 🍳
+          - paragraph [ref=e167]: Login karein!
+          - paragraph [ref=e168]:
+            - text: Chat ke liye login zaroori hai
+            - text: Google se ek click mein login ho jaao
+          - button "Google se login karo →" [ref=e169]
+          - button "Abhi nahi" [ref=e170]
+    - navigation [ref=e137]:
+      - link "🏠 Ghar" [ref=e138] [cursor=pointer]:
+        - /url: /home
+        - generic [ref=e139]: 🏠
+        - generic [ref=e140]: Ghar
+      - link "🔍 Dhundho" [ref=e141] [cursor=pointer]:
+        - /url: /search
+        - generic [ref=e142]: 🔍
+        - generic [ref=e143]: Dhundho
+      - link "📷 Fridge" [ref=e144] [cursor=pointer]:
+        - /url: /fridge
+        - generic [ref=e145]: 📷
+        - generic [ref=e146]: Fridge
+      - link "👤 Profile" [ref=e147] [cursor=pointer]:
+        - /url: /profile
+        - generic [ref=e148]: 👤
+        - generic [ref=e149]: Profile
+  - alert [ref=e150]

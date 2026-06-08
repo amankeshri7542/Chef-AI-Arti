@@ -1,17 +1,33 @@
 'use client';
 
+import { useState } from 'react';
 import { useSignIn } from '@clerk/nextjs/legacy';
 
 export default function SignInPage() {
   const { isLoaded, signIn } = useSignIn();
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   async function googleLogin() {
     if (!isLoaded || !signIn) return;
-    await signIn.authenticateWithRedirect({
-      strategy: 'oauth_google',
-      redirectUrl: '/sso-callback',
-      redirectUrlComplete: '/api/users/sync-redirect',
-    });
+    setError(null);
+    setLoading(true);
+    try {
+      await signIn.authenticateWithRedirect({
+        strategy: 'oauth_google',
+        redirectUrl: '/sso-callback',
+        redirectUrlComplete: '/api/users/sync-redirect',
+      });
+    } catch (err: unknown) {
+      setLoading(false);
+      const message = err instanceof Error ? err.message : String(err);
+      // Clerk throws with status 429 for rate-limited login attempts
+      if (message.includes('429') || message.toLowerCase().includes('rate') || message.toLowerCase().includes('too many')) {
+        setError('Bahut zyada login attempts ho gayi. Thodi der mein dobara try karein 🙏');
+      } else {
+        setError('Login ho nahi saka. Dobara try karein.');
+      }
+    }
   }
 
   return (
@@ -23,11 +39,22 @@ export default function SignInPage() {
 
         <button
           onClick={googleLogin}
-          className="mt-10 flex h-12 w-full items-center justify-center gap-3 rounded-xl bg-[#E8640C] text-base font-medium text-white transition-opacity active:opacity-80"
+          disabled={loading}
+          className="mt-10 flex h-12 w-full items-center justify-center gap-3 rounded-xl bg-[#E8640C] text-base font-medium text-white transition-opacity active:opacity-80 disabled:opacity-60"
         >
-          <GoogleIcon />
+          {loading ? (
+            <span className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+          ) : (
+            <GoogleIcon />
+          )}
           Google se login karo
         </button>
+
+        {error && (
+          <div className="mt-4 rounded-xl border border-[#FBC08A] bg-[#FFF0E6] px-4 py-3 text-left">
+            <p className="text-sm text-[#BF4E06]">{error}</p>
+          </div>
+        )}
 
         <p className="mt-4 text-xs text-[#C4B8A8]">
           Login karke aap hamare Terms se agree karte hain

@@ -26,7 +26,7 @@ export async function validateImage(
           content: [
             {
               type: 'image_url',
-              image_url: { url: `data:image/jpeg;base64,${imageBase64}` },
+              image_url: { url: `data:image/jpeg;base64,${imageBase64}`, detail: 'low' },
             },
             {
               type: 'text',
@@ -44,8 +44,9 @@ export async function validateImage(
       model: VISION_MODEL,
       error: err instanceof Error ? err.message : String(err),
       hasApiKey: !!process.env.OPENAI_API_KEY,
-    })
-    return { valid: false, reason: 'parse_error' }
+      imageSize: imageBase64?.length,
+    });
+    return { valid: false, reason: 'openai_error' };
   }
 }
 
@@ -61,7 +62,7 @@ export async function extractIngredients(
           content: [
             {
               type: 'image_url',
-              image_url: { url: `data:image/jpeg;base64,${imageBase64}` },
+              image_url: { url: `data:image/jpeg;base64,${imageBase64}`, detail: 'low' },
             },
             {
               type: 'text',
@@ -73,14 +74,16 @@ export async function extractIngredients(
       max_tokens: 500,
     });
     const content = res.choices[0].message.content ?? '[]';
-    return JSON.parse(content.trim()) as Array<{ name: string; confidence: number }>;
+    const jsonMatch = content.match(/\[[\s\S]*\]/);
+    const arr = jsonMatch ? JSON.parse(jsonMatch[0]) : [];
+    return arr as Array<{ name: string; confidence: number }>;
   } catch (err) {
     console.error('[openai] extractIngredients error:', {
       model: VISION_MODEL,
       error: err instanceof Error ? err.message : String(err),
       hasApiKey: !!process.env.OPENAI_API_KEY,
-    })
-    return []
+    });
+    return [];
   }
 }
 

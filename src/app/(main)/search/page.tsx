@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import RecipeCard from '@/components/RecipeCard/RecipeCard';
+import RecipeCardGrid from '@/components/RecipeCard/RecipeCardGrid';
 import RecipeCardSkeleton from '@/components/Skeletons/RecipeCardSkeleton';
 import { Recipe } from '@/types/index';
 
@@ -159,14 +159,18 @@ export default function SearchPage() {
 
         {/* Results */}
         {!loading && searched && results.length > 0 && (
-          <div className="flex flex-col gap-3">
-            {results.map((recipe) => (
-              <RecipeCard
-                key={recipe.id}
-                recipe={recipe}
-                onClick={() => router.push(`/recipe/${recipe.id}`)}
-              />
-            ))}
+          <div className="grid grid-cols-2 gap-0.5">
+            {results.map((recipe, index) => {
+              const isFeatured = index % 5 === 4;
+              return (
+                <div key={recipe.id} className={isFeatured ? 'col-span-2' : ''} style={isFeatured ? { aspectRatio: '2/1' } : {}}>
+                  <RecipeCardGrid
+                    recipe={recipe}
+                    onClick={() => router.push(`/recipe/${recipe.id}`)}
+                  />
+                </div>
+              );
+            })}
           </div>
         )}
 

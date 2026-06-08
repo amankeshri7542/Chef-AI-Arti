@@ -1,0 +1,34 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - main [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]:
+          - paragraph [ref=e6]: 🔍 Recipe Dhundho
+          - paragraph [ref=e7]: Kuch bhi likho — aloo, dal, biryani...
+          - generic [ref=e8]:
+            - generic [ref=e9]: 🔍
+            - textbox "Aloo gobhi, moong dal..." [active] [ref=e10]: aloo
+            - button "Clear search" [ref=e36]: ✕
+        - generic [ref=e37]:
+          - paragraph [ref=e38]: 😕
+          - paragraph [ref=e39]: Koi recipe nahi mili
+          - paragraph [ref=e40]: Kuch aur try karein ya fridge scan karein
+          - button "📷 Fridge Scan" [ref=e41]
+    - navigation [ref=e22]:
+      - link "🏠 Ghar" [ref=e23] [cursor=pointer]:
+        - /url: /home
+        - generic [ref=e24]: 🏠
+        - generic [ref=e25]: Ghar
+      - link "🔍 Dhundho" [ref=e26] [cursor=pointer]:
+        - /url: /search
+        - generic [ref=e27]: 🔍
+        - generic [ref=e28]: Dhundho
+      - link "📷 Fridge" [ref=e29] [cursor=pointer]:
+        - /url: /fridge
+        - generic [ref=e30]: 📷
+        - generic [ref=e31]: Fridge
+      - link "👤 Profile" [ref=e32] [cursor=pointer]:
+        - /url: /profile
+        - generic [ref=e33]: 👤
+        - generic [ref=e34]: Profile
+  - alert [ref=e35]

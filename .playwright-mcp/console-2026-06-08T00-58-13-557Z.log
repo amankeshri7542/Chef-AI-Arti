@@ -1,0 +1,11 @@
+[    1697ms] [WARNING] Clerk: Clerk has been loaded with development keys. Development instances have strict usage limits and should not be used when deploying your application to production. Learn more: https://clerk.com/docs/deployments/overview @ https://fast-collie-68.clerk.accounts.dev/npm/@clerk/clerk-js@6/dist/clerk.browser.js:11
+[   30730ms] iP: Missing credentials. Please pass an `apiKey`, `workloadIdentity`, `adminAPIKey`, or set the `OPENAI_API_KEY` or `OPENAI_ADMIN_KEY` environment variable.
+    at new oW (https://arti.amankeshri.com/_next/static/chunks/0a8-1.82zno9l.js:9:70063)
+    at module evaluation (https://arti.amankeshri.com/_next/static/chunks/0a8-1.82zno9l.js:9:88673)
+    at W (https://arti.amankeshri.com/_next/static/chunks/turbopack-12k4atb0.h5mi.js:1:7679)
+    at B (https://arti.amankeshri.com/_next/static/chunks/turbopack-12k4atb0.h5mi.js:1:7220)
+    at u.r (https://arti.amankeshri.com/_next/static/chunks/turbopack-12k4atb0.h5mi.js:1:3242)
+    at f (https://arti.amankeshri.com/_next/static/chunks/05cb37z0kpq1b.js:1:731)
+    at F (https://arti.amankeshri.com/_next/static/chunks/05cb37z0kpq1b.js:1:4183)
+    at D (https://arti.amankeshri.com/_next/static/chunks/05cb37z0kpq1b.js:1:3213)
+    at https://arti.amankeshri.com/_next/static/chunks/05cb37z0kpq1b.js:1:16431

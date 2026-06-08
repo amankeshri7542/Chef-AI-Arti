@@ -29,6 +29,7 @@ export async function POST(req: NextRequest) {
 
   const { imageBase64 }: { imageBase64: string } = await req.json();
   const raw = await extractIngredients(imageBase64);
+  console.log('[fridge/scan] extracted:', raw.length, 'ingredients');
 
   const chips: IngredientChip[] = raw.map((item) => ({
     name: item.name,
