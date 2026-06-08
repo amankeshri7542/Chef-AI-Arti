@@ -21,9 +21,10 @@ export default function SignInPage() {
     } catch (err: unknown) {
       setLoading(false);
       const message = err instanceof Error ? err.message : String(err);
-      // Clerk throws with status 429 for rate-limited login attempts
       if (message.includes('429') || message.toLowerCase().includes('rate') || message.toLowerCase().includes('too many')) {
         setError('Bahut zyada login attempts ho gayi. Thodi der mein dobara try karein 🙏');
+      } else if (message.includes('422') || message.toLowerCase().includes('unprocessable') || message.toLowerCase().includes('oauth')) {
+        setError('Google login abhi set up ho raha hai. Thodi der mein dobara try karein 🙏');
       } else {
         setError('Login ho nahi saka. Dobara try karein.');
       }
