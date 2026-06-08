@@ -149,6 +149,8 @@ type RpcRecipeRow = {
   saved_count: number;
   reported_count: number;
   reuse_count: number;
+  avg_rating: number;
+  rating_count: number;
   embedding_text: string | null;
   source: RecipeSource;
   created_at: string;
@@ -159,6 +161,8 @@ type RpcRecipeRow = {
 function rowToRecipe(row: RpcRecipeRow): Recipe {
   return {
     ...row,
+    avg_rating: row.avg_rating ?? 0,
+    rating_count: row.rating_count ?? 0,
     embedding: null, // vector not fetched from RPC — not needed on client
   };
 }

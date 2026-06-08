@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Recipe, Ingredient, UnitPreference, SubscriptionStatus, VibeBadgeKey } from '@/types/index';
 import { scaleIngredients } from '@/lib/portion';
@@ -12,6 +12,7 @@ import FloatingChatButton from '@/components/FloatingChatButton/FloatingChatButt
 import UpgradeModal from '@/components/UpgradeModal/UpgradeModal';
 import LoginPromptModal from '@/components/LoginPromptModal/LoginPromptModal';
 import NutritionDisplay from '@/components/NutritionDisplay/NutritionDisplay';
+import { StarRatingInteractive, StarRatingDisplay } from '@/components/StarRating/StarRating';
 
 interface UserProps {
   family_size: number;
@@ -60,6 +61,49 @@ export default function RecipeDetailClient({
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [thumbnailUploaded, setThumbnailUploaded] = useState(false);
   const photoInputRef = useRef<HTMLInputElement>(null);
+
+  const [userRating, setUserRating] = useState(0);
+  const [ratingSubmitted, setRatingSubmitted] = useState(false);
+  const [ratingLoading, setRatingLoading] = useState(false);
+  const [avgRating, setAvgRating] = useState(recipe.avg_rating ?? 0);
+  const [ratingCount, setRatingCount] = useState(recipe.rating_count ?? 0);
+
+  // Fetch user's existing rating on mount
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    fetch(`/api/recipes/${recipe.id}/rating`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.user_rating) {
+          setUserRating(data.user_rating);
+          setRatingSubmitted(true);
+        }
+      })
+      .catch(() => {});
+  }, [recipe.id, isAuthenticated]);
+
+  async function handleRating(rating: number) {
+    if (ratingLoading) return;
+    setRatingLoading(true);
+    try {
+      const res = await fetch(`/api/recipes/${recipe.id}/rate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rating }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setUserRating(rating);
+        setRatingSubmitted(true);
+        setAvgRating(data.avg_rating);
+        setRatingCount(data.rating_count);
+      }
+    } catch {
+      // silent fail
+    } finally {
+      setRatingLoading(false);
+    }
+  }
 
   const scaledIngredients = scaleIngredients(recipe.ingredients, recipe.base_family_size, portionSize);
 
@@ -178,6 +222,11 @@ export default function RecipeDetailClient({
             <p className="mt-0.5 text-[13px] text-[#8B7355]" style={{ fontFamily: 'var(--font-devanagari)' }}>
               {recipe.name_hindi}
             </p>
+          )}
+          {ratingCount >= 3 && (
+            <div className="mt-1">
+              <StarRatingDisplay avg_rating={avgRating} rating_count={ratingCount} size="md" />
+            </div>
           )}
           {recipe.description && (
             <p className="mt-2 text-[13px] text-[#8B7355]">{recipe.description}</p>
@@ -328,6 +377,40 @@ export default function RecipeDetailClient({
           <p className="mt-2 text-center text-xs text-[#2D6A4F]">
             Shukriya! Aapki photo save ho gayi 🙏
           </p>
+        )}
+
+        {/* Rating section — only after user has cooked */}
+        {isAuthenticated && cooked && (
+          <div className="mt-3 rounded-xl border border-[#E8DDD0] bg-white px-4 py-3">
+            {!ratingSubmitted ? (
+              <>
+                <p className="text-[12px] font-medium text-[#E8640C] mb-2">
+                  Kaise bana? Rating do! ⭐
+                </p>
+                <StarRatingInteractive
+                  value={userRating}
+                  onChange={handleRating}
+                  size="md"
+                  disabled={ratingLoading}
+                />
+              </>
+            ) : (
+              <>
+                <p className="text-[11px] text-[#2D6A4F] mb-2">
+                  Shukriya! Aapki rating save ho gayi 🙏
+                </p>
+                <div className="flex items-center gap-3">
+                  <StarRatingInteractive
+                    value={userRating}
+                    onChange={handleRating}
+                    size="sm"
+                    disabled={ratingLoading}
+                  />
+                  <span className="text-[10px] text-[#8B7355]">Rating badal sakte ho</span>
+                </div>
+              </>
+            )}
+          </div>
         )}
       </div>
 

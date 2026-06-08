@@ -212,6 +212,8 @@ export interface Recipe {
   saved_count: number;
   reported_count: number;
   reuse_count: number;
+  avg_rating: number;
+  rating_count: number;
   /**
    * Stored embedding input string — exact text used to generate `embedding`.
    * Regenerate `embedding` by re-embedding this column (model upgrades, schema changes).

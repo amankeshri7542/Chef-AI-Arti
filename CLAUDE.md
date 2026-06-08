@@ -88,6 +88,18 @@ SESSION 9 ✅ — Paid user chat bypass, real PWA icons (canvas, 5.3KB/15.5KB), 
 - .gitignore: added .playwright-mcp/
 - Git commit: df6047b + bb10eff
 
+## SESSION 17 ✅ — Search fix (buildHinglishQuery), recipe ratings (1-5 stars)
+- Search bug fixed: search/page.tsx now splits searchTerm, runs buildHinglishQuery before embedding
+- ingredient-map.ts: +35 entries (lentil, bread, curry, paratha, biryani, kheer, etc.)
+- src/types/index.ts: avg_rating + rating_count added to Recipe interface
+- src/lib/rag.ts: RpcRecipeRow updated with avg_rating/rating_count; rowToRecipe defaults to 0
+- /api/recipes/[id]/rate POST: auth + cooking_history check + upsert + sync avg/count to recipes
+- /api/recipes/[id]/rating GET: returns user's existing rating (pre-fills stars on revisit)
+- StarRating component: interactive (tap to rate) + display (show avg, muted) variants
+- RecipeCardGrid + RecipeCardCompact: show "⭐ 4.2" when rating_count >= 3
+- RecipeDetailClient: avg rating below title, rating prompt after "Bana liya!", pre-fill on revisit
+- Git commit: see below
+
 ## SESSION 16 ✅ — Nutrition macros: DB column, GPT-4o estimation, UI display
 - DB: `nutrition JSONB` column added to recipes (Supabase SQL Editor)
 - src/types/index.ts: Recipe.nutrition field added (optional, full typed shape)
@@ -124,6 +136,7 @@ SESSION 9 ✅ — Paid user chat bypass, real PWA icons (canvas, 5.3KB/15.5KB), 
   - Back navigation system (Session 15 ✅)
   - Search page redesign — Food Library (Session 15 ✅)
   - Nutrition macros — GPT-4o estimate, JSONB, scaled UI (Session 16 ✅)
+  - Search fix + recipe ratings 1-5 stars (Session 17 ✅)
   - Recipe rating system (Session 17)
   - Community cooked photos (Session 18)
   - Bacha Hua leftover mode (Session 19)

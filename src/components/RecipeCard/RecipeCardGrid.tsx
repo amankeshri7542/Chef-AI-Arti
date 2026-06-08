@@ -1,6 +1,7 @@
 'use client';
 import { useRouter } from 'next/navigation';
 import { Recipe } from '@/types/index';
+import { StarRatingDisplay } from '@/components/StarRating/StarRating';
 
 interface Props { recipe: Recipe; onClick?: () => void }
 
@@ -51,7 +52,14 @@ export default function RecipeCardGrid({ recipe, onClick }: Props) {
         <p className="line-clamp-2 text-left text-[12px] font-semibold leading-tight text-white">
           {recipe.name_hinglish}
         </p>
-        <p className="mt-0.5 text-[10px] text-white/70">⏱ {totalMin} min</p>
+        <div className="mt-0.5 flex items-center gap-2">
+          <p className="text-[10px] text-white/70">⏱ {totalMin} min</p>
+          {recipe.rating_count >= 3 && (
+            <span className="text-[10px] text-yellow-300">
+              ⭐ {recipe.avg_rating.toFixed(1)}
+            </span>
+          )}
+        </div>
       </div>
     </button>
   );

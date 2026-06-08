@@ -6,6 +6,7 @@ import RecipeCardCompact from '@/components/RecipeCard/RecipeCardCompact';
 import CollectionCard from '@/components/CollectionCard/CollectionCard';
 import BackButton from '@/components/BackButton/BackButton';
 import { RECIPE_COLLECTIONS } from '@/lib/collections';
+import { buildHinglishQuery } from '@/lib/ingredient-map';
 import { Recipe } from '@/types/index';
 
 const CATEGORY_CHIPS = [
@@ -62,7 +63,10 @@ export default function SearchPage() {
     setLoading(true);
     setActiveSource({ type: 'search', term: searchTerm });
     try {
-      const data = await fetchByFilter({ query: searchTerm });
+      // Translate English terms to Hinglish equivalents for better embedding match
+      const words = searchTerm.split(/[,\s]+/).filter(Boolean);
+      const translatedQuery = buildHinglishQuery(words);
+      const data = await fetchByFilter({ query: translatedQuery });
       setResults(data);
     } catch {
       setResults([]);

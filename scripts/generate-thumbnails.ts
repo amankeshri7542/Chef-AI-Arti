@@ -27,30 +27,50 @@ async function generateAndUpload(recipeId: string, nameHinglish: string): Promis
   const prompt = `Traditional Indian home-cooked ${nameHinglish}, served in a steel katori on a wooden kitchen table, overhead shot, warm natural light, photorealistic, food photography`;
 
   console.log(`  Generating image for: ${nameHinglish}`);
-  const imgRes = await openai.images.generate({
-    model: 'dall-e-3',
-    prompt,
-    n: 1,
-    size: '1024x1024',
-    quality: 'standard',
-    response_format: 'b64_json',
-  });
-
-  const b64 = imgRes.data?.[0]?.b64_json;
-  if (!b64) throw new Error('DALL-E returned no image data');
-  const buf = Buffer.from(b64, 'base64');
-  const key = `thumbnails/${recipeId}.jpg`;
+  // gpt-image-1: always returns b64_json in SDK v6
+  // dall-e-3: always returns URL in SDK v6 (response_format removed)
+  let buf: Buffer;
+  try {
+    const imgRes = await openai.images.generate({
+      model: 'gpt-image-1',
+      prompt,
+      n: 1,
+      size: '1024x1024',
+      quality: 'medium',
+    } as Parameters<typeof openai.images.generate>[0]);
+    const b64 = imgRes.data?.[0]?.b64_json;
+    if (!b64) throw new Error('gpt-image-1: no b64_json in response');
+    buf = Buffer.from(b64, 'base64');
+    console.log(`    Used gpt-image-1`);
+  } catch (e1) {
+    console.log(`    gpt-image-1 failed (${e1 instanceof Error ? e1.message : e1}), trying dall-e-3...`);
+    const imgRes = await openai.images.generate({
+      model: 'dall-e-3',
+      prompt,
+      n: 1,
+      size: '1024x1024',
+      quality: 'standard',
+    } as Parameters<typeof openai.images.generate>[0]);
+    const url = imgRes.data?.[0]?.url;
+    if (!url) throw new Error('dall-e-3: no URL in response');
+    const r = await fetch(url);
+    if (!r.ok) throw new Error(`download failed: ${r.status}`);
+    buf = Buffer.from(await r.arrayBuffer());
+    console.log(`    Used dall-e-3`);
+  }
+  const key = `thumbnails/${recipeId}.png`;
 
   await s3.send(new PutObjectCommand({
     Bucket: BUCKET,
     Key: key,
     Body: buf,
-    ContentType: 'image/jpeg',
+    ContentType: 'image/png',
     // @ts-ignore — ACL type requires ObjectCannedACL enum but 'public-read' is valid
     ACL: 'public-read',
   }));
 
-  const url = `https://${BUCKET}.s3.${process.env.AWS_REGION ?? 'ap-south-1'}.amazonaws.com/${key}`;
+  const region = process.env.AWS_REGION ?? 'ap-south-1';
+  const url = `https://${BUCKET}.s3.${region}.amazonaws.com/${key}`;
   console.log(`  Uploaded: ${url}`);
   return url;
 }

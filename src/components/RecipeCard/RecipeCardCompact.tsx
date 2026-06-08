@@ -81,9 +81,14 @@ export default function RecipeCardCompact({ recipe, onClick }: Props) {
         >
           {recipe.name_hinglish}
         </p>
-        <p className="text-white/70 mt-0.5" style={{ fontSize: 9 }}>
-          {totalMin} min
-        </p>
+        <div className="flex items-center gap-2 mt-0.5">
+          <p className="text-white/70" style={{ fontSize: 9 }}>{totalMin} min</p>
+          {recipe.rating_count >= 3 && (
+            <span className="text-yellow-300" style={{ fontSize: 9 }}>
+              ⭐ {recipe.avg_rating.toFixed(1)}
+            </span>
+          )}
+        </div>
       </div>
     </button>
   );
