@@ -88,6 +88,22 @@ SESSION 9 ✅ — Paid user chat bypass, real PWA icons (canvas, 5.3KB/15.5KB), 
 - .gitignore: added .playwright-mcp/
 - Git commit: df6047b + bb10eff
 
+## SESSION 19 ✅ — Home QuickActions, Bacha Hua leftover mode, CASE 2 recipe generation
+- QuickActions: 80×90px horizontal-scroll strip on home (between StoryCircles and grid). 5 gradient cards: Fridge Scan→/fridge, Bacha Hua→/bacha-hua, Chef Arti→/chat, Surprise!→surprise API then /recipe/[id], Dhundhon→/search
+- /chat placeholder page ((main) group) — renders FloatingChatButton with a Hinglish prompt to open chat
+- src/lib/generate-recipe.ts: shared GPT-4o helper. generateRecipe(ingredients, query?) → GeneratedRecipe {name_hinglish, description, ingredients, steps, cook_time_minutes, vibes, tags}. json_object response_format, strict validation (throws if name/ingredients/steps missing)
+- Bacha Hua (PAID ONLY): /bacha-hua server page (auth→sign-in, fetch subscription_status) + BachaHuaClient. Free users → upgrade wall + UpgradeModal. Paid → 3-state (select chips → loading → results). 10 pre-defined leftover chips + "Kuch aur..." custom input. Multi-select, 1-5 items.
+- /api/bacha-hua/suggest POST: auth→user lookup→403 if free→validate 1-5→buildHinglishQuery→searchRecipes (CASE 1). triggerCase2/empty → generateRecipe → insert recipes_pending → return {recipes} or {generated:{pendingId,recipe}}
+- /api/recipes/generate POST: auth→user→validate→DEDUP check (recipes_pending by requested_by within 24h, returns existing, BEFORE rate limit)→checkRateLimit('ai-gen', free 1/paid 5)→generateRecipe→insert recipes_pending (requester seeded into shown_to_user_ids)→{pendingId, recipe, isGenerated}
+- /recipe/pending/[pendingId] page ((main) group, NOT a separate route group — avoids /recipe path conflict): server auth + owner-gate (user.id must be in shown_to_user_ids else notFound) → PendingRecipeClient (yellow ✨ Naya Recipe banner, ingredients/steps, "Bana liya!" → cook route, promotion progress)
+- /api/recipes/pending/[id]/cook POST: cook-guard via shown_to_user_ids-as-cooked-set (handles requester's seeded-but-uncounted first cook; rejects double-cook). Does NOT touch cooking_history (FK to recipes(id) would violate for pending ids). Promotion at cooked_count>=3 AND reported_count=0 → INSERT recipes (source='ai', category='sabzi' default) → status='promoted'
+- Fridge scan CASE 2 wired: triggerCase2 branch now offers "Haan, Arti se banwao!" → /api/recipes/generate → /recipe/pending/[id]
+- IMPORTANT id rule reaffirmed: recipes_pending.requested_by + shown_to_user_ids use users.id (UUID), NOT clerk_user_id
+- KNOWN LIMITATION: generate dedup returns ANY pending from last 24h regardless of ingredient similarity (per spec's crude dedup)
+- DEFERRED: Phase 3 Web Push (VAPID, push_subscriptions table, subscribe/send routes, daily-nudge cron, profile toggle) — NOT started, context budget
+- tsc clean, build clean, deployed to https://arti.amankeshri.com (dpl_3yFYCgo3Rttpd4pvewW9KsGYCLVG)
+- Git commits: 08ff924 (quick actions), 0e0d13e (bacha hua + CASE 2)
+
 ## SESSION 18 ✅ — Mobile search fix (GET + SW), community photos
 - Root cause: SW only intercepts GET; mobile PWA was running old precached search page JS (pre-session-17)
 - FIX A: Search API now has GET handler (params: q, category, tag, vrat, orderBy, vibe, limit); POST kept
@@ -154,8 +170,10 @@ SESSION 9 ✅ — Paid user chat bypass, real PWA icons (canvas, 5.3KB/15.5KB), 
   - Mobile search fix (GET+SW+input) + community photos (Session 18 ✅)
   - Recipe rating system (Session 17)
   - Community cooked photos (Session 18)
-  - Bacha Hua leftover mode (Session 19)
-  - New recipe generation CASE 2 (Session 20)
+  - Home QuickActions strip (Session 19 ✅)
+  - Bacha Hua leftover mode (Session 19 ✅)
+  - New recipe generation CASE 2 (Session 19 ✅)
+  - Web Push notifications (Session 20 — DEFERRED, not started)
 
 ## Phase 2 DB Changes Needed
 (not yet applied — Session 16 will run these)
