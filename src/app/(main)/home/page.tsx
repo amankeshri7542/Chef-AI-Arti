@@ -1,24 +1,14 @@
 import { auth } from '@clerk/nextjs/server';
-import { redirect } from 'next/navigation';
 import { createServerClient } from '@/lib/supabase';
 import HomeClient from './HomeClient';
 import { User, Recipe } from '@/types/index';
 
 export default async function HomePage() {
   const { userId } = await auth();
-  if (!userId) redirect('/sign-in');
 
   const supabase = createServerClient();
 
-  const { data: user } = await supabase
-    .from('users')
-    .select('*')
-    .eq('clerk_user_id', userId)
-    .single<User>();
-
-  if (!user) redirect('/onboarding');
-  if (!user.onboarding_done) redirect('/onboarding');
-
+  // Always fetch recipes (public)
   const { data: recipes } = await supabase
     .from('recipes')
     .select('*')
@@ -27,13 +17,25 @@ export default async function HomePage() {
     .limit(20)
     .returns<Recipe[]>();
 
+  // Fetch user only if logged in; redirect to onboarding if not set up
+  let user: User | null = null;
+  if (userId) {
+    const { data } = await supabase
+      .from('users')
+      .select('*')
+      .eq('clerk_user_id', userId)
+      .single<User>();
+    user = data;
+  }
+
   return (
     <main>
       <HomeClient
         initialRecipes={(recipes ?? []) as Recipe[]}
-        userName={user.name}
-        subscriptionStatus={user.subscription_status}
-        initialIsVrat={user.is_vrat_mode}
+        userName={user?.name ?? null}
+        subscriptionStatus={user?.subscription_status ?? 'free'}
+        initialIsVrat={user?.is_vrat_mode ?? false}
+        isAuthenticated={!!userId}
       />
     </main>
   );

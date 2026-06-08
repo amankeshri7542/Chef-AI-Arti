@@ -11,6 +11,7 @@ interface HomeClientProps {
   userName: string | null;
   subscriptionStatus: 'free' | 'paid';
   initialIsVrat: boolean;
+  isAuthenticated: boolean;
 }
 
 const WEEKDAYS_HI = [
@@ -28,6 +29,7 @@ export default function HomeClient({
   userName,
   subscriptionStatus,
   initialIsVrat,
+  isAuthenticated,
 }: HomeClientProps) {
   const router = useRouter();
   const [isVrat, setIsVrat] = useState(initialIsVrat);
@@ -64,7 +66,9 @@ export default function HomeClient({
           </p>
           <p className="text-[10px] text-[#8B7355]">{dayHi} ka khaana</p>
         </div>
-        <VratToggle isVrat={isVrat} onToggle={onVratToggle} loading={vatLoading} />
+        {isAuthenticated && (
+          <VratToggle isVrat={isVrat} onToggle={onVratToggle} loading={vatLoading} />
+        )}
       </div>
 
       {/* B. Quick action strip */}
