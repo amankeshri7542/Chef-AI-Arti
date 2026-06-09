@@ -134,7 +134,7 @@ export default function SearchPage() {
     if (activeSource.type === 'search') return `"${activeSource.term}" ke results`;
     if (activeSource.type === 'chip') return `${activeSource.label} recipes`;
     if (activeSource.type === 'collection') return `${activeSource.emoji} ${activeSource.label}`;
-    return null;
+    return '📋 Sab Recipes';
   })();
 
   return (
@@ -222,7 +222,7 @@ export default function SearchPage() {
       <div className="flex-1 px-4 py-3">
         {/* Food Library */}
         {activeSource.type !== 'search' && (
-          <div className="mb-4">
+          <div className="mb-6">
             <p className="font-semibold text-[#1A1A1A] mb-3" style={{ fontSize: 13 }}>
               📚 Food Library
             </p>
@@ -257,7 +257,7 @@ export default function SearchPage() {
 
         {/* Recipe grid */}
         {!loading && results.length > 0 && (
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-3.5 pb-24">
             {results.map((recipe) => (
               <RecipeCardCompact
                 key={recipe.id}

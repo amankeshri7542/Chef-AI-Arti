@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Recipe } from '@/types/index';
+import { Recipe, DietType } from '@/types/index';
 import VratToggle from '@/components/VratToggle/VratToggle';
-import RecipeCardGrid from '@/components/RecipeCard/RecipeCardGrid';
 import QuickActions from '@/components/QuickActions/QuickActions';
 
 interface HomeClientProps {
@@ -13,17 +12,25 @@ interface HomeClientProps {
   subscriptionStatus: 'free' | 'paid';
   initialIsVrat: boolean;
   isAuthenticated: boolean;
+  dietType: DietType | null;
+  cookedCount: number;
 }
 
 const WEEKDAYS_HI = ['Ravivar','Somvar','Mangalvar','Budhvar','Guruvar','Shukravar','Shanivar'];
 
-const CATEGORY_CHIPS = [
-  { label: '🥗 Sabzi', filter: 'sabzi' },
-  { label: '🫘 Dal', filter: 'dal' },
-  { label: '🍚 Chawal', filter: 'chawal' },
-  { label: '🍳 Nashta', filter: 'nashta' },
-  { label: '🕉️ Vrat', filter: 'vrat' },
-];
+const CATEGORY_EMOJI: Record<string, string> = {
+  sabzi: '🥬', dal: '🫘', roti: '🫓', chawal: '🍚',
+  nashta: '🍳', meetha: '🍬', default: '🍽️',
+};
+const CATEGORY_BG: Record<string, string> = {
+  sabzi: 'linear-gradient(135deg,#D4F1C4,#A8E063)',
+  dal: 'linear-gradient(135deg,#FFE5B0,#FFCB6B)',
+  roti: 'linear-gradient(135deg,#FFD8A8,#FFAE5E)',
+  chawal: 'linear-gradient(135deg,#E8F4FD,#BFD9F2)',
+  nashta: 'linear-gradient(135deg,#FDDBC2,#FBC08A)',
+  meetha: 'linear-gradient(135deg,#F3D4F8,#E09EEA)',
+  default: 'linear-gradient(135deg,#FDDBC2,#FBC08A)',
+};
 
 function greeting(name: string | null): string {
   const h = new Date().getHours();
@@ -36,12 +43,73 @@ function greeting(name: string | null): string {
   return `Raat ka khaana soch rahi hain?${n ? ` ${n}` : ''} 🌛`;
 }
 
-export default function HomeClient({ initialRecipes, userName, subscriptionStatus, initialIsVrat, isAuthenticated }: HomeClientProps) {
+function FeaturedCard({ recipe, onClick }: { recipe: Recipe; onClick: () => void }) {
+  const emoji = CATEGORY_EMOJI[recipe.category] ?? CATEGORY_EMOJI.default;
+  const bg = CATEGORY_BG[recipe.category] ?? CATEGORY_BG.default;
+  const totalMin = recipe.cook_time_minutes + recipe.prep_time_minutes;
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex flex-shrink-0 flex-col overflow-hidden rounded-2xl text-left transition-transform active:scale-95"
+      style={{ width: 160, height: 180, background: '#FFFFFF', border: '1px solid var(--border)' }}
+    >
+      {/* Image — top 60% */}
+      <div className="relative w-full" style={{ height: 108 }}>
+        {recipe.thumbnail_url ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={recipe.thumbnail_url}
+            alt={recipe.name_hinglish}
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center text-4xl" style={{ background: bg }}>
+            {emoji}
+          </div>
+        )}
+        {recipe.is_vrat_friendly && (
+          <span
+            className="absolute right-2 top-2 rounded-full px-1.5 py-0.5 text-[9px] font-semibold leading-none"
+            style={{ background: 'rgba(255,255,255,0.9)', color: '#2D6A4F' }}
+          >
+            🕉️
+          </span>
+        )}
+      </div>
+
+      {/* Text — bottom 40% */}
+      <div className="flex flex-1 flex-col justify-between px-2.5 py-2">
+        <p
+          className="font-semibold leading-tight text-[#1A1A1A]"
+          style={{ fontSize: 13, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
+        >
+          {recipe.name_hinglish}
+        </p>
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] text-[#8B7355]">⏱ {totalMin} min</span>
+          {recipe.rating_count >= 3 && (
+            <span className="text-[11px] text-[#D97706]">⭐ {recipe.avg_rating.toFixed(1)}</span>
+          )}
+        </div>
+      </div>
+    </button>
+  );
+}
+
+export default function HomeClient({
+  initialRecipes,
+  userName,
+  initialIsVrat,
+  isAuthenticated,
+  dietType,
+  cookedCount,
+}: HomeClientProps) {
   const router = useRouter();
   const [isVrat, setIsVrat] = useState(initialIsVrat);
   const [vatLoading, setVatLoading] = useState(false);
   const [recipes] = useState<Recipe[]>(initialRecipes);
-  const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
 
   // Time-based greeting — compute after mount to avoid hydration mismatch
   const [greet, setGreet] = useState<string>(`Namaskar${userName ? `, ${userName.split(' ')[0]}` : ''}! 🙏`);
@@ -51,12 +119,14 @@ export default function HomeClient({ initialRecipes, userName, subscriptionStatu
 
   const dayHi = WEEKDAYS_HI[new Date().getDay()];
 
-  const displayedRecipes = recipes.filter((r) => {
-    if (isVrat && !r.is_vrat_friendly) return false;
-    if (categoryFilter === 'vrat') return r.is_vrat_friendly;
-    if (categoryFilter && r.category !== categoryFilter) return false;
-    return true;
-  });
+  // Top 4 for "Aaj ke liye": vrat + diet filtered (non-veg/egg users see all).
+  const featured = recipes
+    .filter((r) => {
+      if (isVrat && !r.is_vrat_friendly) return false;
+      if (dietType === 'veg' && r.diet_type !== 'veg') return false;
+      return true;
+    })
+    .slice(0, 4);
 
   async function onVratToggle() {
     setVatLoading(true);
@@ -66,14 +136,14 @@ export default function HomeClient({ initialRecipes, userName, subscriptionStatu
     setVatLoading(false);
   }
 
+  const showExploreTeaser = !isAuthenticated || cookedCount < 5;
+
   return (
     <>
       {/* Sticky header */}
       <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#E8DDD0] bg-white px-4 py-3">
         <div>
-          <p className="text-[14px] font-semibold text-[#1A1A1A]">
-            {greet}
-          </p>
+          <p className="text-[14px] font-semibold text-[#1A1A1A]">{greet}</p>
           <p className="text-[13px] text-[#8B7355]">{dayHi} ka khaana</p>
         </div>
         {isAuthenticated && (
@@ -90,62 +160,51 @@ export default function HomeClient({ initialRecipes, userName, subscriptionStatu
         <span className="text-[13px] text-[#8B7355]">🔍 Kuch bhi dhundho...</span>
       </button>
 
-      {/* Quick actions + category chips — single horizontal-scroll row */}
-      <div className="flex items-stretch gap-3 overflow-x-auto px-3 py-2 scrollbar-hide">
-        <QuickActions inline />
-        {CATEGORY_CHIPS.map((chip) => {
-          const isActive = categoryFilter === chip.filter;
-          return (
-            <button
-              key={chip.filter}
-              type="button"
-              onClick={() => setCategoryFilter(isActive ? null : chip.filter)}
-              className="flex flex-shrink-0 items-center self-center rounded-[20px] px-4 text-[13px] font-medium"
-              style={{
-                minHeight: 52,
-                background: isActive ? '#E8640C' : '#FFFFFF',
-                border: isActive ? '1px solid #E8640C' : '1px solid var(--border)',
-                color: isActive ? '#FFFFFF' : 'var(--muted)',
-              }}
-            >
-              {chip.label}
-            </button>
-          );
-        })}
-      </div>
+      {/* Quick actions */}
+      <QuickActions />
 
-      {/* 2-col grid */}
-      <div className="grid grid-cols-2 gap-0.5 px-0.5 pb-24">
-        {displayedRecipes.length === 0 ? (
-          <div className="col-span-2 py-12 text-center text-sm text-[#8B7355]">
-            Koi recipe nahi mili 😕
-          </div>
+      {/* Aaj ke liye — horizontal scroll of 4 */}
+      <section className="mb-6 mt-2">
+        <p className="px-4 text-[14px] font-bold text-[#C4621E]">🍽️ Aaj ke liye</p>
+        {featured.length === 0 ? (
+          <p className="px-4 py-6 text-center text-sm text-[#8B7355]">Koi recipe nahi mili 😕</p>
         ) : (
-          displayedRecipes.map((r, index) => {
-            const isFeatured = index % 5 === 4;
-            const delay = index <= 7 ? index * 60 : 0;
-            return (
-              <div
-                key={r.id}
-                className={`animate-card-entry ${isFeatured ? 'col-span-2' : ''}`}
-                style={{
-                  animationDelay: `${delay}ms`,
-                  ...(isFeatured ? { aspectRatio: '2/1' } : {}),
-                }}
-              >
-                <RecipeCardGrid recipe={r} onClick={() => router.push('/recipe/' + r.id)} />
-              </div>
-            );
-          })
-        )}
-        {displayedRecipes.length >= 10 && subscriptionStatus === 'free' && (
-          <div className="col-span-2 mx-2 mt-2 rounded-xl border-2 border-[#E8640C] bg-[#FFF0E6] px-4 py-3 text-center">
-            <p className="text-[14px] font-semibold text-[#1A1A1A]">Aur recipes dekhne ke liye Premium lo! 🍳</p>
-            <p className="mt-0.5 text-[13px] text-[#8B7355]">₹150/mahine — unlimited recipes + chat</p>
-            <button className="mt-2 h-[52px] w-full rounded-lg bg-[#E8640C] text-[14px] font-medium text-white">Abhi lo →</button>
+          <div className="mt-3 flex gap-3 overflow-x-auto px-4 pb-1 scrollbar-hide">
+            {featured.map((r) => (
+              <FeaturedCard key={r.id} recipe={r} onClick={() => router.push('/recipe/' + r.id)} />
+            ))}
           </div>
         )}
-      </div>
+      </section>
+
+      {/* Aapki Chef Arti promo */}
+      <button
+        type="button"
+        onClick={() => router.push('/chat')}
+        className="mx-4 mb-6 flex w-[calc(100%-32px)] items-center gap-3 rounded-2xl px-4 py-3.5 text-left"
+        style={{ background: '#FFF0E6' }}
+      >
+        <span className="text-[36px] leading-none">🍳</span>
+        <div>
+          <p className="text-[14px] font-semibold text-[#1A1A1A]">Koi sawaal? Arti se poochho!</p>
+          <p className="text-[13px] text-[#8B7355]">Khaana pakane mein help milegi 💬</p>
+        </div>
+      </button>
+
+      {/* Naye Recipes explore teaser */}
+      {showExploreTeaser && (
+        <button
+          type="button"
+          onClick={() => router.push('/search')}
+          className="mx-4 flex w-[calc(100%-32px)] items-center justify-between rounded-2xl bg-white px-4 py-3 text-left"
+          style={{ border: '1px solid #E8640C' }}
+        >
+          <span className="text-[14px] font-semibold text-[#1A1A1A]">🍲 100+ recipes explore karo</span>
+          <span className="text-[16px] text-[#E8640C]">→</span>
+        </button>
+      )}
+
+      <div className="pb-24" />
     </>
   );
 }

@@ -120,19 +120,10 @@ export async function POST(
     return NextResponse.json({ error: 'Photo save nahi hui' }, { status: 500 });
   }
 
-  // If recipe has no thumbnail yet → set this as the thumbnail
-  const { data: recipe } = await supabase
-    .from('recipes')
-    .select('thumbnail_url')
-    .eq('id', recipeId)
-    .single();
-
-  if (recipe && !recipe.thumbnail_url) {
-    await supabase
-      .from('recipes')
-      .update({ thumbnail_url: s3Url, thumbnail_source: 'user' })
-      .eq('id', recipeId);
-  }
+  // NOTE: Community photos must NEVER auto-become the recipe thumbnail.
+  // A user once uploaded a product (Surf Excel) photo that hijacked the
+  // recipe card image. Thumbnails come only from generate-thumbnails.ts (AI)
+  // or a future explicit "Set as thumbnail" admin action.
 
   return NextResponse.json({ photo: photoRow });
 }

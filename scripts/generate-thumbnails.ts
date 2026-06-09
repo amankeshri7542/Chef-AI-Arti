@@ -65,8 +65,8 @@ async function generateAndUpload(recipeId: string, nameHinglish: string): Promis
     Key: key,
     Body: buf,
     ContentType: 'image/png',
-    // @ts-ignore — ACL type requires ObjectCannedACL enum but 'public-read' is valid
-    ACL: 'public-read',
+    // ACL removed — bucket uses BucketOwnerEnforced (ACLs disabled).
+    // Public read is granted via the bucket policy instead.
   }));
 
   const region = process.env.AWS_REGION ?? 'ap-south-1';

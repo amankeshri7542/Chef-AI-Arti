@@ -35,14 +35,19 @@ export default async function OnboardingDonePage() {
     'pan-north-indian',
   ];
 
+  // Diet filter: veg users see veg only; non-veg/eggetarian users eat veg too,
+  // so show them a mix instead of forcing a tiny non-veg-only set.
+  const dietMatch =
+    diet === 'veg' ? ['veg'] : diet ? ['non-veg', 'eggetarian', 'veg'] : null;
+
   // Personalized: diet match + region (or pan-north-indian), most cooked first.
   let recipes: Recipe[] = [];
-  if (diet) {
+  if (dietMatch) {
     let q = supabase
       .from('recipes')
       .select('*')
       .eq('source', 'curated')
-      .eq('diet_type', diet);
+      .in('diet_type', dietMatch);
 
     if (regionOrigins && regionOrigins.length > 0) {
       q = q.in('region_origin', wantRegions);
@@ -58,7 +63,7 @@ export default async function OnboardingDonePage() {
   // Fallback: top curated recipes (diet-only or fully generic) if nothing matched.
   if (recipes.length < 3) {
     let fb = supabase.from('recipes').select('*').eq('source', 'curated');
-    if (diet) fb = fb.eq('diet_type', diet);
+    if (dietMatch) fb = fb.in('diet_type', dietMatch);
     const { data } = await fb
       .order('cooked_count', { ascending: false })
       .limit(3)

@@ -19,6 +19,7 @@ export default async function HomePage() {
 
   // Fetch user only if logged in; redirect to onboarding if not set up
   let user: User | null = null;
+  let cookedCount = 0;
   if (userId) {
     const { data } = await supabase
       .from('users')
@@ -26,6 +27,14 @@ export default async function HomePage() {
       .eq('clerk_user_id', userId)
       .single<User>();
     user = data;
+
+    if (user) {
+      const { count } = await supabase
+        .from('cooking_history')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+      cookedCount = count ?? 0;
+    }
   }
 
   return (
@@ -36,6 +45,8 @@ export default async function HomePage() {
         subscriptionStatus={user?.subscription_status ?? 'free'}
         initialIsVrat={user?.is_vrat_mode ?? false}
         isAuthenticated={!!userId}
+        dietType={user?.diet_type ?? null}
+        cookedCount={cookedCount}
       />
     </main>
   );
