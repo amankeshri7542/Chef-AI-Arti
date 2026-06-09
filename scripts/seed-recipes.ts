@@ -277,18 +277,37 @@ async function seedKnowledge(
 // Main
 // ─────────────────────────────────────
 
+function getFlagValue(flag: string): string | null {
+  const i = process.argv.indexOf(flag);
+  if (i !== -1 && process.argv[i + 1]) return process.argv[i + 1];
+  return null;
+}
+
 async function main(): Promise<void> {
   const dryRun = process.argv.includes('--dry-run');
+  const knowledgeOnly = process.argv.includes('--knowledge-only');
+  const recipesOnly = process.argv.includes('--recipes-only');
 
-  const recipesPath = path.join(__dirname, 'seed', 'recipes.json');
+  // --file overrides the recipes seed path (used for batch2, etc.)
+  const fileOverride = getFlagValue('--file');
+  const recipesPath = fileOverride
+    ? path.resolve(process.cwd(), fileOverride)
+    : path.join(__dirname, 'seed', 'recipes.json');
   const knowledgePath = path.join(__dirname, 'seed', 'knowledge.json');
 
-  const recipes = JSON.parse(
-    fs.readFileSync(recipesPath, 'utf-8'),
-  ) as RecipeSeed[];
-  const knowledge = JSON.parse(
-    fs.readFileSync(knowledgePath, 'utf-8'),
-  ) as KnowledgeSeed[];
+  const recipes =
+    knowledgeOnly
+      ? []
+      : (JSON.parse(fs.readFileSync(recipesPath, 'utf-8')) as RecipeSeed[]);
+  const knowledge =
+    recipesOnly || fileOverride
+      ? []
+      : (JSON.parse(fs.readFileSync(knowledgePath, 'utf-8')) as KnowledgeSeed[]);
+
+  console.log(
+    `Seeding — recipes: ${recipes.length} (from ${path.relative(process.cwd(), recipesPath)})` +
+      `, knowledge: ${knowledge.length}${dryRun ? ' [dry-run]' : ''}`,
+  );
 
   let supabase: SupabaseClient | null = null;
   let openai: OpenAI | null = null;

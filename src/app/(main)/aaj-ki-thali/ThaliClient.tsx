@@ -19,10 +19,32 @@ const MEAL_SLOTS = [
   { key: 'raat' as const, label: '🌙 Raat', time: 'Dinner' },
 ];
 
-export default function ThaliClient() {
+function todayKey(userId: string): string {
+  const d = new Date();
+  const date = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  return `aaj_ki_thali_${userId}_${date}`;
+}
+
+export default function ThaliClient({ userId }: { userId: string }) {
   const router = useRouter();
   const [thali, setThali] = useState<ThaliData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [planned, setPlanned] = useState(false);
+
+  useEffect(() => {
+    if (localStorage.getItem(todayKey(userId))) setPlanned(true);
+  }, [userId]);
+
+  function confirmThali() {
+    const ids = [thali?.nashta?.id, thali?.dopahar?.id, thali?.raat?.id].filter(Boolean);
+    localStorage.setItem(todayKey(userId), JSON.stringify(ids));
+    setPlanned(true);
+  }
+
+  function resetThali() {
+    localStorage.removeItem(todayKey(userId));
+    setPlanned(false);
+  }
 
   async function fetchThali() {
     setLoading(true);
@@ -93,6 +115,33 @@ export default function ThaliClient() {
 
             {/* Action buttons */}
             <div className="flex flex-col gap-3 mt-2">
+              {planned ? (
+                <div className="rounded-xl border border-[#BFE3CF] bg-[#EAF7F0] px-4 py-4 text-center">
+                  <p className="text-[14px] font-bold text-[#2D6A4F]">
+                    ✓ Aaj ki thali set hai!
+                  </p>
+                  <p className="mt-1 text-[12px] text-[#5C8A72]">
+                    Aaj ka khaana plan ho gaya. Mazze se banao 💛
+                  </p>
+                  <button
+                    type="button"
+                    onClick={resetThali}
+                    className="mt-3 rounded-full px-4 py-2 text-[12px] font-semibold text-[#2D6A4F] underline"
+                    style={{ minHeight: 40 }}
+                  >
+                    Badalna hai? Reset karo
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={confirmThali}
+                  className="flex h-12 items-center justify-center gap-2 rounded-xl text-[14px] font-semibold text-white"
+                  style={{ background: '#2D6A4F' }}
+                >
+                  Yeh theek hai ✓
+                </button>
+              )}
               <button
                 type="button"
                 onClick={fetchThali}

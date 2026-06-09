@@ -31,6 +31,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Message required' }, { status: 400 });
   }
 
+  // Chat opened from home has no recipe context. Treat empty/'general' as no recipe.
+  const hasRecipeContext = Boolean(recipeName && recipeName !== 'general');
+
   // 2. Get user context from Supabase (needed for rate-limit bypass + chat context)
   const supabase = createServerClient();
   const { data: user } = await supabase
@@ -69,7 +72,7 @@ export async function POST(req: NextRequest) {
   // 4. Load or create session
   let session: ChatSession = (await getChatSession(userId)) ?? {
     compressed_memory: {
-      current_recipe: recipeName ?? 'general',
+      current_recipe: hasRecipeContext ? recipeName! : null,
       family_size: user.family_size,
       cooking_progress: '',
       notes: '',
@@ -124,7 +127,7 @@ export async function POST(req: NextRequest) {
     .replace('{family_size}', user.family_size.toString())
     .replace('{is_vrat_mode}', user.is_vrat_mode.toString())
     .replace('{spice_pref}', user.spice_preference ?? 'medium')
-    .replace('{current_recipe}', session.compressed_memory.current_recipe ?? 'general')
+    .replace('{current_recipe}', session.compressed_memory.current_recipe ?? 'Koi specific recipe nahi — general baat-cheet')
     .replace('{cooking_progress}', session.compressed_memory.cooking_progress ?? '')
     .replace('{retrieved_recipe}', retrievedRecipe)
     .replace('{retrieved_knowledge}', retrievedKnowledge);

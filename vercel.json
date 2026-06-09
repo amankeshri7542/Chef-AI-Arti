@@ -1,5 +1,6 @@
 {
   "buildCommand": "next build --webpack",
+  "regions": ["bom1"],
   "crons": [
     {
       "path": "/api/cron/daily-nudge",

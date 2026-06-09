@@ -6,5 +6,5 @@ export default async function AajKiThaliPage() {
   const { userId } = await auth();
   if (!userId) redirect('/sign-in?redirect_url=/aaj-ki-thali');
 
-  return <ThaliClient />;
+  return <ThaliClient userId={userId} />;
 }
