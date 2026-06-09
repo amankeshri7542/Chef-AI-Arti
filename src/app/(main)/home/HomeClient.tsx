@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { Recipe, DietType } from '@/types/index';
 import VratToggle from '@/components/VratToggle/VratToggle';
 import QuickActions from '@/components/QuickActions/QuickActions';
+import FloatingChatButton from '@/components/FloatingChatButton/FloatingChatButton';
+import PullToRefresh from '@/components/PullToRefresh/PullToRefresh';
 
 interface HomeClientProps {
   initialRecipes: Recipe[];
@@ -101,6 +103,7 @@ function FeaturedCard({ recipe, onClick }: { recipe: Recipe; onClick: () => void
 export default function HomeClient({
   initialRecipes,
   userName,
+  subscriptionStatus,
   initialIsVrat,
   isAuthenticated,
   dietType,
@@ -139,7 +142,7 @@ export default function HomeClient({
   const showExploreTeaser = !isAuthenticated || cookedCount < 5;
 
   return (
-    <>
+    <PullToRefresh onRefresh={() => router.refresh()}>
       {/* Sticky header */}
       <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#E8DDD0] bg-white px-4 py-3">
         <div>
@@ -205,6 +208,11 @@ export default function HomeClient({
       )}
 
       <div className="pb-24" />
-    </>
+
+      {/* Floating AI chat — auth-only, general context */}
+      {isAuthenticated && (
+        <FloatingChatButton subscriptionStatus={subscriptionStatus} />
+      )}
+    </PullToRefresh>
   );
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { toast } from '@/lib/toast';
 
 interface Photo {
   id: string;
@@ -53,13 +54,14 @@ export default function CommunityPhotos({ recipeId, isAuthenticated, hasCooked }
         const { photo } = await res.json();
         setPhotos((prev) => [photo, ...prev]);
         setUploadDone(true);
+        toast.success('Photo add ho gayi! 📸');
         setTimeout(() => setUploadDone(false), 3000);
       } else {
         const d = await res.json();
-        alert(d.error ?? 'Upload nahi hua. Dobara try karein.');
+        toast.error(d.error ?? 'Upload nahi hua. Dobara try karein.');
       }
     } catch {
-      alert('Upload nahi hua. Dobara try karein.');
+      toast.error('Upload nahi hua. Dobara try karein.');
     } finally {
       setUploading(false);
     }

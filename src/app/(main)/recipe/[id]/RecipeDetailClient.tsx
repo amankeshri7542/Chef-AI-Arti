@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Recipe, Ingredient, UnitPreference, SubscriptionStatus, VibeBadgeKey } from '@/types/index';
 import { scaleIngredients } from '@/lib/portion';
-import PortionSlider from '@/components/PortionSlider/PortionSlider';
+import PortionSelector from '@/components/PortionSelector/PortionSelector';
 import TTSButton from '@/components/TTSButton/TTSButton';
 import VibeBadges from '@/components/VibeBadges/VibeBadges';
 import WhatsAppShare from '@/components/WhatsAppShare/WhatsAppShare';
@@ -14,6 +14,9 @@ import LoginPromptModal from '@/components/LoginPromptModal/LoginPromptModal';
 import NutritionDisplay from '@/components/NutritionDisplay/NutritionDisplay';
 import { StarRatingInteractive, StarRatingDisplay } from '@/components/StarRating/StarRating';
 import CommunityPhotos from '@/components/CommunityPhotos/CommunityPhotos';
+import CookingMode from '@/components/CookingMode/CookingMode';
+import { toast } from '@/lib/toast';
+import { haptic } from '@/lib/haptics';
 
 interface UserProps {
   family_size: number;
@@ -69,6 +72,17 @@ export default function RecipeDetailClient({
   const [avgRating, setAvgRating] = useState(recipe.avg_rating ?? 0);
   const [ratingCount, setRatingCount] = useState(recipe.rating_count ?? 0);
 
+  // Heart/save state
+  const [isSaved, setIsSaved] = useState(false);
+  const [saveLoading, setSaveLoading] = useState(false);
+
+  // Collapsible sections
+  const [nutritionOpen, setNutritionOpen] = useState(false);
+  const [photosOpen, setPhotosOpen] = useState(false);
+
+  // Cooking mode
+  const [showCookingMode, setShowCookingMode] = useState(false);
+
   // Fetch user's existing rating on mount
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -82,6 +96,43 @@ export default function RecipeDetailClient({
       })
       .catch(() => {});
   }, [recipe.id, isAuthenticated]);
+
+  // Fetch save state on mount
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    fetch(`/api/recipes/${recipe.id}/save`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.saved) setIsSaved(true);
+      })
+      .catch(() => {});
+  }, [recipe.id, isAuthenticated]);
+
+  async function handleSaveToggle() {
+    if (!isAuthenticated) {
+      showLoginPrompt('Recipe save karne');
+      return;
+    }
+    if (saveLoading) return;
+    setSaveLoading(true);
+    // Optimistic update
+    const wasSaved = isSaved;
+    setIsSaved(!wasSaved);
+    haptic('tap');
+    if (!wasSaved) toast.success('Recipe save ho gayi ❤️');
+    try {
+      const res = await fetch(`/api/recipes/${recipe.id}/save`, {
+        method: wasSaved ? 'DELETE' : 'POST',
+      });
+      if (!res.ok) {
+        setIsSaved(wasSaved); // Rollback
+      }
+    } catch {
+      setIsSaved(wasSaved); // Rollback
+    } finally {
+      setSaveLoading(false);
+    }
+  }
 
   async function handleRating(rating: number) {
     if (ratingLoading) return;
@@ -123,6 +174,7 @@ export default function RecipeDetailClient({
     await fetch(`/api/recipes/${recipe.id}/cooked`, { method: 'POST' });
     setCookedLoading(false);
     setCooked(true);
+    haptic('success');
     setShowPhotoPrompt(true);
   }
 
@@ -145,11 +197,12 @@ export default function RecipeDetailClient({
       if (res.ok) {
         setThumbnailUploaded(true);
         setShowPhotoPrompt(false);
+        toast.success('Photo save ho gayi! Shukriya 🙏');
       } else {
-        alert('Upload nahi hua. Dobara try karein.');
+        toast.error('Upload nahi hua. Dobara try karein.');
       }
     } catch {
-      alert('Upload nahi hua. Dobara try karein.');
+      toast.error('Upload nahi hua. Dobara try karein.');
     } finally {
       setUploadingPhoto(false);
     }
@@ -157,77 +210,71 @@ export default function RecipeDetailClient({
 
   const totalMinutes = recipe.prep_time_minutes + recipe.cook_time_minutes;
 
+  // Cooking Mode overlay
+  if (showCookingMode) {
+    return (
+      <CookingMode
+        recipe={recipe}
+        portionSize={portionSize}
+        unitPreference={unitPreference}
+        onExit={() => setShowCookingMode(false)}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#FFFDF9] pb-32">
-      {/* Top bar */}
-      <div className="sticky top-0 z-10 flex h-14 items-center gap-3 border-b border-[#E8DDD0] bg-white px-4">
+      {/* Hero thumbnail */}
+      <div
+        className="relative flex h-56 w-full items-center justify-center text-6xl overflow-hidden"
+        style={{
+          background: 'linear-gradient(135deg, #FDDBC2, #FBC08A)',
+        }}
+      >
+        {recipe.thumbnail_url ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={recipe.thumbnail_url}
+            alt={recipe.name_hinglish}
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          getCategoryEmoji(recipe.category)
+        )}
+
+        {/* Overlay back button */}
         <button
           type="button"
           onClick={() => router.back()}
-          className="flex h-10 w-10 items-center justify-center rounded-full border border-[#E8DDD0] text-lg"
           aria-label="Wapas jao"
+          className="absolute left-3 top-3 flex h-10 w-10 items-center justify-center rounded-full text-white text-lg transition-opacity active:opacity-70"
+          style={{ background: 'rgba(255,255,255,0.22)', backdropFilter: 'blur(6px)', minHeight: 44, minWidth: 44 }}
         >
           ←
         </button>
-        <h1 className="line-clamp-1 flex-1 text-[15px] font-semibold text-[#1A1A1A]">
-          {recipe.name_hinglish}
-        </h1>
+
+        {/* Overlay heart button */}
+        <button
+          type="button"
+          onClick={handleSaveToggle}
+          aria-label={isSaved ? 'Unsave recipe' : 'Save recipe'}
+          className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full text-lg transition-all active:scale-90"
+          style={{ background: 'rgba(255,255,255,0.22)', backdropFilter: 'blur(6px)', minHeight: 44, minWidth: 44 }}
+        >
+          <span key={isSaved ? 'saved' : 'unsaved'} className={isSaved ? 'animate-heart-pop' : ''}>
+            {isSaved ? '❤️' : '🤍'}
+          </span>
+        </button>
       </div>
 
       <div className="flex flex-col gap-4 px-4 py-4">
-        {/* Hero thumbnail */}
-        <div
-          className="relative flex h-48 w-full items-center justify-center rounded-2xl text-6xl overflow-hidden"
-          style={{
-            background: 'linear-gradient(135deg, #FDDBC2, #FBC08A)',
-          }}
-        >
-          {recipe.thumbnail_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={recipe.thumbnail_url}
-              alt={recipe.name_hinglish}
-              className="h-full w-full rounded-2xl object-cover"
-            />
-          ) : (
-            getCategoryEmoji(recipe.category)
-          )}
-
-          {/* Overlay back button */}
-          <button
-            type="button"
-            onClick={() => router.back()}
-            aria-label="Wapas jao"
-            className="absolute left-3 top-3 flex h-10 w-10 items-center justify-center rounded-full text-white text-lg transition-opacity active:opacity-70"
-            style={{ background: 'rgba(255,255,255,0.22)', backdropFilter: 'blur(6px)', minHeight: 44, minWidth: 44 }}
-          >
-            ←
-          </button>
-
-          {/* Overlay save/heart placeholder */}
-          <button
-            type="button"
-            onClick={() => console.log('save tapped')}
-            aria-label="Save recipe"
-            className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full text-white text-lg transition-opacity active:opacity-70"
-            style={{ background: 'rgba(255,255,255,0.22)', backdropFilter: 'blur(6px)', minHeight: 44, minWidth: 44 }}
-          >
-            🤍
-          </button>
-        </div>
-
         {/* Name + meta */}
         <div>
-          <h2 className="text-[20px] font-bold text-[#1A1A1A]">{recipe.name_hinglish}</h2>
+          <h1 className="text-[20px] font-bold text-[#1A1A1A]">{recipe.name_hinglish}</h1>
           {recipe.name_hindi && (
             <p className="mt-0.5 text-[13px] text-[#8B7355]" style={{ fontFamily: 'var(--font-devanagari)' }}>
               {recipe.name_hindi}
             </p>
-          )}
-          {ratingCount >= 3 && (
-            <div className="mt-1">
-              <StarRatingDisplay avg_rating={avgRating} rating_count={ratingCount} size="md" />
-            </div>
           )}
           {recipe.description && (
             <p className="mt-2 text-[13px] text-[#8B7355]">{recipe.description}</p>
@@ -250,21 +297,48 @@ export default function RecipeDetailClient({
           <VibeBadges vibes={recipe.vibes as VibeBadgeKey[]} />
         )}
 
-        {/* Community photos */}
-        <CommunityPhotos
-          recipeId={recipe.id}
-          isAuthenticated={isAuthenticated}
-          hasCooked={cooked}
-        />
+        {/* Rating display */}
+        {ratingCount >= 3 && (
+          <div className="mt-0">
+            <StarRatingDisplay avg_rating={avgRating} rating_count={ratingCount} size="md" />
+          </div>
+        )}
 
-        {/* Portion slider */}
-        <PortionSlider
-          baseSize={recipe.base_family_size}
-          currentSize={portionSize}
-          onChange={setPortionSize}
-          subscriptionStatus={subscriptionStatus}
-          onUpgradeClick={() => setUpgradeOpen(true)}
-        />
+        {/* 🍳 Banana shuru karein CTA */}
+        <button
+          type="button"
+          onClick={() => { haptic('tap'); setShowCookingMode(true); }}
+          className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl text-[16px] font-bold text-white transition-all active:scale-[0.98]"
+          style={{
+            background: 'linear-gradient(135deg, #E8640C, #F5A55B)',
+            boxShadow: '0 4px 16px rgba(232,100,12,0.35)',
+          }}
+        >
+          <span className="text-[20px]">🍳</span>
+          Banana shuru karein
+        </button>
+
+        {/* Portion selector */}
+        <div className="flex items-center gap-3">
+          <PortionSelector
+            baseSize={recipe.base_family_size}
+            currentSize={portionSize}
+            onChange={setPortionSize}
+            subscriptionStatus={subscriptionStatus}
+            onUpgradeClick={() => setUpgradeOpen(true)}
+          />
+          <div className="flex gap-2">
+            <TTSButton
+              text={ttsText(recipe, scaledIngredients, portionSize)}
+            />
+            <WhatsAppShare
+              recipeName={recipe.name_hinglish}
+              recipeId={recipe.id}
+              isPaid={isPaid}
+              onUpgradeClick={isAuthenticated ? () => setUpgradeOpen(true) : () => showLoginPrompt('WhatsApp share')}
+            />
+          </div>
+        </div>
 
         {/* Ingredients */}
         <section>
@@ -283,35 +357,6 @@ export default function RecipeDetailClient({
             ))}
           </div>
         </section>
-
-        {/* Nutrition */}
-        {recipe.nutrition && (
-          <NutritionDisplay
-            nutrition={recipe.nutrition}
-            currentServings={portionSize}
-            baseServings={recipe.base_family_size}
-          />
-        )}
-
-        {/* Goes well with */}
-        {recipe.goes_well_with.length > 0 && (
-          <p className="text-[12px] text-[#8B7355]">
-            🍽 Ke saath: {recipe.goes_well_with.join(', ')}
-          </p>
-        )}
-
-        {/* TTS button row */}
-        <div className="flex flex-wrap gap-2">
-          <TTSButton
-            text={ttsText(recipe, scaledIngredients, portionSize)}
-          />
-          <WhatsAppShare
-            recipeName={recipe.name_hinglish}
-            recipeId={recipe.id}
-            isPaid={isPaid}
-            onUpgradeClick={isAuthenticated ? () => setUpgradeOpen(true) : () => showLoginPrompt('WhatsApp share')}
-          />
-        </div>
 
         {/* Steps */}
         <section>
@@ -336,6 +381,74 @@ export default function RecipeDetailClient({
           </div>
         </section>
 
+        {/* Goes well with */}
+        {recipe.goes_well_with.length > 0 && (
+          <p className="text-[12px] text-[#8B7355]">
+            🍽 Ke saath: {recipe.goes_well_with.join(', ')}
+          </p>
+        )}
+
+        {/* Collapsible Nutrition */}
+        {recipe.nutrition && (
+          <div>
+            <button
+              type="button"
+              onClick={() => setNutritionOpen(!nutritionOpen)}
+              className="flex w-full items-center justify-between rounded-xl px-4 py-3 text-[13px] font-semibold text-[#1A1A1A]"
+              style={{ background: '#FFF0E6', border: '1px solid #E8DDD0', minHeight: 48 }}
+            >
+              <span>🥗 Nutrition Details</span>
+              <span
+                className="text-[#8B7355] transition-transform duration-200"
+                style={{ transform: nutritionOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+              >
+                ▾
+              </span>
+            </button>
+            <div
+              className="overflow-hidden transition-all duration-300"
+              style={{ maxHeight: nutritionOpen ? 300 : 0, opacity: nutritionOpen ? 1 : 0 }}
+            >
+              <div className="pt-2">
+                <NutritionDisplay
+                  nutrition={recipe.nutrition}
+                  currentServings={portionSize}
+                  baseServings={recipe.base_family_size}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Collapsible Community Photos */}
+        <div>
+          <button
+            type="button"
+            onClick={() => setPhotosOpen(!photosOpen)}
+            className="flex w-full items-center justify-between rounded-xl px-4 py-3 text-[13px] font-semibold text-[#1A1A1A]"
+            style={{ background: '#FFF0E6', border: '1px solid #E8DDD0', minHeight: 48 }}
+          >
+            <span>📸 Community Photos</span>
+            <span
+              className="text-[#8B7355] transition-transform duration-200"
+              style={{ transform: photosOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+            >
+              ▾
+            </span>
+          </button>
+          <div
+            className="overflow-hidden transition-all duration-300"
+            style={{ maxHeight: photosOpen ? 500 : 0, opacity: photosOpen ? 1 : 0 }}
+          >
+            <div className="pt-2">
+              <CommunityPhotos
+                recipeId={recipe.id}
+                isAuthenticated={isAuthenticated}
+                hasCooked={cooked}
+              />
+            </div>
+          </div>
+        </div>
 
         {/* Bana liya button */}
         <button

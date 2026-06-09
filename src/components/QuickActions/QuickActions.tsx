@@ -47,7 +47,7 @@ export default function QuickActions({ inline = false }: QuickActionsProps) {
     },
     {
       label: 'Bacha Hua',
-      emoji: '🍱',
+      emoji: '🥡',
       gradient: 'linear-gradient(135deg, #2D6A4F, #52B788)',
       onClick: () => router.push('/bacha-hua'),
     },
@@ -68,6 +68,12 @@ export default function QuickActions({ inline = false }: QuickActionsProps) {
       emoji: '🔍',
       gradient: 'linear-gradient(135deg, #0369A1, #38BDF8)',
       onClick: () => router.push('/search'),
+    },
+    {
+      label: 'Aaj ki Thali',
+      emoji: '🍱',
+      gradient: 'linear-gradient(135deg, #7C3AED, #A78BFA)',
+      onClick: () => router.push('/aaj-ki-thali'),
     },
   ];
 

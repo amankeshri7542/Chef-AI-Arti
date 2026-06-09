@@ -2,6 +2,7 @@ import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { createServerClient } from '@/lib/supabase';
+import { validateFoodPhoto } from '@/lib/openai';
 
 const s3 = new S3Client({
   region: process.env.AWS_REGION!,
@@ -92,16 +93,26 @@ export async function POST(
     return NextResponse.json({ error: 'Photo 5MB se chhoti honi chahiye' }, { status: 400 });
   }
 
+  // Validate with GPT-4o-mini that this is actual cooked food (not a product photo, etc.)
+  const arrayBufForValidation = await file.arrayBuffer();
+  const imageBase64 = Buffer.from(arrayBufForValidation).toString('base64');
+  const { valid } = await validateFoodPhoto(imageBase64);
+  if (!valid) {
+    return NextResponse.json(
+      { error: 'Yeh khaane ki photo nahi lagti! Apne pakaye dish ki photo upload karein 📸' },
+      { status: 400 },
+    );
+  }
+
   const bucket = process.env.AWS_S3_BUCKET_NAME!;
   const region = process.env.AWS_REGION!;
   const key = `community/${recipeId}/${internalUserId}-${Date.now()}.jpg`;
 
-  const arrayBuffer = await file.arrayBuffer();
   await s3.send(
     new PutObjectCommand({
       Bucket: bucket,
       Key: key,
-      Body: Buffer.from(arrayBuffer),
+      Body: Buffer.from(arrayBufForValidation),
       ContentType: 'image/jpeg',
     }),
   );

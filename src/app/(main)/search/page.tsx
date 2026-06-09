@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import RecipeCardCompact from '@/components/RecipeCard/RecipeCardCompact';
 import CollectionCard from '@/components/CollectionCard/CollectionCard';
 import BackButton from '@/components/BackButton/BackButton';
+import ArtiLoader from '@/components/ArtiLoader/ArtiLoader';
+import PullToRefresh from '@/components/PullToRefresh/PullToRefresh';
 import { RECIPE_COLLECTIONS } from '@/lib/collections';
 import { buildHinglishQuery } from '@/lib/ingredient-map';
 import { Recipe } from '@/types/index';
@@ -25,17 +27,25 @@ type ActiveSource =
   | { type: 'chip'; label: string; query: string }
   | { type: 'collection'; id: string; label: string; emoji: string };
 
-async function fetchByFilter(filter: Record<string, unknown>): Promise<Recipe[]> {
-  // Use GET so the service worker doesn't silently drop the request
+/** Fast SQL-only browse — no embedding / vector search. */
+async function fetchBrowse(filter: Record<string, unknown>): Promise<Recipe[]> {
   const params = new URLSearchParams();
-  if (filter.query)          params.set('q',        String(filter.query));
-  if (filter.orderBy)        params.set('orderBy',   String(filter.orderBy));
-  if (filter.category)       params.set('category',  String(filter.category));
-  if (filter.tag)            params.set('tag',        String(filter.tag));
-  if (filter.is_vrat_friendly) params.set('vrat',   'true');
-  if (filter.vibe)           params.set('vibe',       String(filter.vibe));
-  if (filter.limit)          params.set('limit',      String(filter.limit));
+  if (filter.category)         params.set('category', String(filter.category));
+  if (filter.tag)              params.set('tag',      String(filter.tag));
+  if (filter.is_vrat_friendly) params.set('vrat',     'true');
+  if (filter.vibe)             params.set('vibe',     String(filter.vibe));
+  if (filter.limit)            params.set('limit',    String(filter.limit));
 
+  const res = await fetch(`/api/recipes/browse?${params.toString()}`);
+  if (!res.ok) return [];
+  const data = await res.json();
+  return data.recipes ?? [];
+}
+
+/** RAG search — uses embedding + vector similarity. Only for text queries. */
+async function fetchSearch(query: string): Promise<Recipe[]> {
+  const params = new URLSearchParams();
+  params.set('q', query);
   const res = await fetch(`/api/recipes/search?${params.toString()}`);
   if (!res.ok) return [];
   const data = await res.json();
@@ -50,11 +60,11 @@ export default function SearchPage() {
   const [activeSource, setActiveSource] = useState<ActiveSource>({ type: 'none' });
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Default: load top recipes on mount
+  // Default: load top recipes on mount (fast browse, no vector search)
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    fetchByFilter({ orderBy: 'cooked_count', limit: 20 }).then((recipes) => {
+    fetchBrowse({ limit: 24 }).then((recipes) => {
       if (!cancelled) {
         setResults(recipes);
         setLoading(false);
@@ -72,7 +82,7 @@ export default function SearchPage() {
       // Translate English terms to Hinglish equivalents for better embedding match
       const words = searchTerm.split(/[,\s]+/).filter(Boolean);
       const translatedQuery = buildHinglishQuery(words);
-      const data = await fetchByFilter({ query: translatedQuery });
+      const data = await fetchSearch(translatedQuery);
       setResults(data);
     } catch {
       setResults([]);
@@ -87,7 +97,7 @@ export default function SearchPage() {
       if (activeSource.type === 'search') {
         setLoading(true);
         setActiveSource({ type: 'none' });
-        fetchByFilter({ orderBy: 'cooked_count', limit: 20 }).then((recipes) => {
+        fetchBrowse({ limit: 24 }).then((recipes) => {
           setResults(recipes);
           setLoading(false);
         });
@@ -108,7 +118,12 @@ export default function SearchPage() {
     setQuery('');
     setLoading(true);
     setActiveSource({ type: 'chip', label: chip.label, query: chip.query });
-    fetchByFilter({ query: chip.query }).then((recipes) => {
+    // Chips use browse API (category filter) not vector search
+    const chipFilter: Record<string, unknown> = { limit: 24 };
+    // Map chip queries to browse params
+    if (chip.query === 'vrat') chipFilter.is_vrat_friendly = true;
+    else chipFilter.category = chip.query;
+    fetchBrowse(chipFilter).then((recipes) => {
       setResults(recipes);
       setLoading(false);
     });
@@ -118,7 +133,7 @@ export default function SearchPage() {
     setQuery('');
     setLoading(true);
     setActiveSource({ type: 'collection', id: collection.id, label: collection.label, emoji: collection.emoji });
-    fetchByFilter({ ...collection.filter }).then((recipes) => {
+    fetchBrowse({ ...collection.filter }).then((recipes) => {
       setResults(recipes);
       setLoading(false);
     });
@@ -127,6 +142,15 @@ export default function SearchPage() {
   const handleClear = () => {
     setQuery('');
   };
+
+  const handleRefresh = useCallback(async () => {
+    setQuery('');
+    setLoading(true);
+    setActiveSource({ type: 'none' });
+    const recipes = await fetchBrowse({ limit: 24 });
+    setResults(recipes);
+    setLoading(false);
+  }, []);
 
   const activeCollectionId = activeSource.type === 'collection' ? activeSource.id : null;
 
@@ -138,6 +162,7 @@ export default function SearchPage() {
   })();
 
   return (
+    <PullToRefresh onRefresh={handleRefresh}>
     <div className="flex flex-col min-h-full bg-[#FFFAF6]">
       {/* Sticky header */}
       <div
@@ -248,16 +273,11 @@ export default function SearchPage() {
         )}
 
         {/* Loading */}
-        {loading && (
-          <div className="flex flex-col items-center justify-center py-12 gap-3">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#E8640C] border-t-transparent" />
-            <p className="text-[#8B7355]" style={{ fontSize: 12 }}>Dhundh rahi hoon...</p>
-          </div>
-        )}
+        {loading && <ArtiLoader className="py-12" message="Dhundh rahi hoon" />}
 
         {/* Recipe grid */}
         {!loading && results.length > 0 && (
-          <div className="grid grid-cols-2 gap-3.5 pb-24">
+          <div className="animate-content-fade grid grid-cols-2 gap-3.5 pb-24">
             {results.map((recipe) => (
               <RecipeCardCompact
                 key={recipe.id}
@@ -290,5 +310,6 @@ export default function SearchPage() {
         )}
       </div>
     </div>
+    </PullToRefresh>
   );
 }

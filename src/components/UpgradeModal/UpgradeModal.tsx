@@ -148,7 +148,7 @@ export default function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
         aria-label="Premium upgrade"
       >
         <div
-          className="animate-fade-in-up w-full max-w-md"
+          className="animate-sheet-spring w-full max-w-md"
           style={{
             background: 'var(--cream)',
             borderRadius: '24px 24px 0 0',

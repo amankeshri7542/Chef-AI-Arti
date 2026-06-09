@@ -8,6 +8,7 @@ import IngredientChips from '@/components/IngredientChips/IngredientChips';
 import RecipeCard from '@/components/RecipeCard/RecipeCard';
 import { buildHinglishQuery } from '@/lib/ingredient-map';
 import BackButton from '@/components/BackButton/BackButton';
+import ArtiLoader from '@/components/ArtiLoader/ArtiLoader';
 
 type PageState = 'capture' | 'review' | 'results';
 
@@ -244,12 +245,7 @@ export default function FridgePage() {
           </button>
         </div>
 
-        {loading && (
-          <div className="mt-6 flex flex-col items-center gap-2">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#E8640C] border-t-transparent" />
-            <p className="text-[13px] text-[#8B7355]">Dekh rahi hoon... 👀</p>
-          </div>
-        )}
+        {loading && <ArtiLoader className="mt-6" message="Dekh rahi hoon 👀" />}
 
         {error && !loading && (
           <div className="mt-4 rounded-xl border border-[#FBC08A] bg-[#FFF0E6] px-4 py-3">
@@ -304,10 +300,7 @@ export default function FridgePage() {
       {triggerCase2 ? (
         <div className="mt-6 flex flex-col items-center gap-4 text-center">
           {generating ? (
-            <div className="flex flex-col items-center gap-3">
-              <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#E8640C] border-t-transparent" />
-              <p className="text-[14px] text-[#1A1A1A]">Arti soch rahi hai... 🤔</p>
-            </div>
+            <ArtiLoader message="Arti recipe bana rahi hai" />
           ) : (
             <>
               <p className="text-[15px] font-bold text-[#1A1A1A]">

@@ -1,5 +1,5 @@
-import PageSkeleton from '@/components/Skeletons/PageSkeleton';
+import SearchPageSkeleton from '@/components/Skeletons/SearchPageSkeleton';
 
 export default function SearchLoading() {
-  return <PageSkeleton />;
+  return <SearchPageSkeleton />;
 }

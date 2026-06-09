@@ -13,6 +13,7 @@ const isPublicPage = createRouteMatcher([
 
 const isPublicApi = createRouteMatcher([
   '/api/recipes/search',
+  '/api/recipes/browse',
   '/api/recipes/(.*)',
   '/api/webhooks/(.*)',
   '/api/cron/(.*)',

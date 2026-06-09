@@ -50,6 +50,49 @@ export async function validateImage(
   }
 }
 
+/**
+ * Validate that an uploaded photo is actually cooked food / a dish.
+ * Used by community photo uploads to prevent non-food images (products, screenshots, etc).
+ * Separate from validateImage() which checks for fridge/kitchen/ingredients.
+ */
+export async function validateFoodPhoto(
+  imageBase64: string,
+): Promise<{ valid: boolean; reason: string }> {
+  try {
+    const res = await openai.chat.completions.create({
+      model: VISION_MODEL,
+      messages: [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'image_url',
+              image_url: { url: `data:image/jpeg;base64,${imageBase64}`, detail: 'low' },
+            },
+            {
+              type: 'text',
+              text: 'Is this a photo of a cooked food dish or meal? It should be actual home-cooked food, not a product package, screenshot, or non-food item. Reply ONLY with JSON: {"valid": boolean, "reason": string}',
+            },
+          ],
+        },
+      ],
+      max_tokens: 100,
+    });
+    const content = res.choices[0].message.content ?? '';
+    const jsonMatch = content.match(/\{[\s\S]*\}/);
+    return jsonMatch
+      ? (JSON.parse(jsonMatch[0]) as { valid: boolean; reason: string })
+      : { valid: false, reason: 'parse_error' };
+  } catch (err) {
+    console.error('[openai] validateFoodPhoto error:', {
+      model: VISION_MODEL,
+      error: err instanceof Error ? err.message : String(err),
+    });
+    // On error, allow upload (don't block user for API hiccups)
+    return { valid: true, reason: 'validation_skipped' };
+  }
+}
+
 export async function extractIngredients(
   imageBase64: string,
 ): Promise<Array<{ name: string; confidence: number }>> {

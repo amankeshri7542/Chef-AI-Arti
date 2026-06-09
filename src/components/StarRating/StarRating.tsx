@@ -7,7 +7,7 @@ import { useState } from 'react';
 interface InteractiveProps {
   value: number;
   onChange: (rating: number) => void;
-  size?: 'sm' | 'md';
+  size?: 'sm' | 'md' | 'lg';
   disabled?: boolean;
 }
 
@@ -18,8 +18,8 @@ export function StarRatingInteractive({
   disabled = false,
 }: InteractiveProps) {
   const [hovered, setHovered] = useState(0);
-  const tapSize = size === 'md' ? 28 : 20;
-  const starSize = size === 'md' ? 20 : 14;
+  const tapSize = size === 'lg' ? 44 : size === 'md' ? 28 : 20;
+  const starSize = size === 'lg' ? 36 : size === 'md' ? 20 : 14;
   const active = hovered || value;
 
   return (
