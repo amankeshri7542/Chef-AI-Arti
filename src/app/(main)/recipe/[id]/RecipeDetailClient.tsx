@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Recipe, Ingredient, UnitPreference, SubscriptionStatus, VibeBadgeKey } from '@/types/index';
-import { scaleIngredients } from '@/lib/portion';
+import { scaleIngredients, shouldShowScalingWarning } from '@/lib/portion';
 import PortionSelector from '@/components/PortionSelector/PortionSelector';
 import TTSButton from '@/components/TTSButton/TTSButton';
 import VibeBadges from '@/components/VibeBadges/VibeBadges';
@@ -318,26 +318,34 @@ export default function RecipeDetailClient({
           Banana shuru karein
         </button>
 
-        {/* Portion selector */}
-        <div className="flex items-center gap-3">
-          <PortionSelector
-            baseSize={recipe.base_family_size}
-            currentSize={portionSize}
-            onChange={setPortionSize}
-            subscriptionStatus={subscriptionStatus}
-            onUpgradeClick={() => setUpgradeOpen(true)}
-          />
-          <div className="flex gap-2">
-            <TTSButton
-              text={ttsText(recipe, scaledIngredients, portionSize)}
+        {/* Portion selector + actions */}
+        <div>
+          <div className="flex items-center justify-between gap-3">
+            <PortionSelector
+              baseSize={recipe.base_family_size}
+              currentSize={portionSize}
+              onChange={setPortionSize}
+              subscriptionStatus={subscriptionStatus}
+              onUpgradeClick={() => setUpgradeOpen(true)}
             />
-            <WhatsAppShare
-              recipeName={recipe.name_hinglish}
-              recipeId={recipe.id}
-              isPaid={isPaid}
-              onUpgradeClick={isAuthenticated ? () => setUpgradeOpen(true) : () => showLoginPrompt('WhatsApp share')}
-            />
+            <div className="flex gap-2">
+              <TTSButton text={ttsText(recipe, scaledIngredients, portionSize)} />
+              <WhatsAppShare
+                recipeName={recipe.name_hinglish}
+                recipeId={recipe.id}
+                isPaid={isPaid}
+                onUpgradeClick={isAuthenticated ? () => setUpgradeOpen(true) : () => showLoginPrompt('WhatsApp share')}
+              />
+            </div>
           </div>
+          {shouldShowScalingWarning(recipe.base_family_size, portionSize) && (
+            <div className="mt-2.5 flex items-start gap-2 rounded-xl bg-[#FFF7ED] px-3 py-2" style={{ border: '1px solid #FBC08A' }}>
+              <span className="text-[13px] leading-none">⚠️</span>
+              <p className="text-[12px] leading-snug text-[#8B6B4A]">
+                Namak thoda-thoda milao — ek baar mein mat daal dena.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Ingredients */}

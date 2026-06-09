@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import RecipeCardCompact from '@/components/RecipeCard/RecipeCardCompact';
 import CollectionCard from '@/components/CollectionCard/CollectionCard';
 import BackButton from '@/components/BackButton/BackButton';
-import ArtiLoader from '@/components/ArtiLoader/ArtiLoader';
+import RecipeGridSkeleton from '@/components/Skeletons/RecipeGridSkeleton';
 import PullToRefresh from '@/components/PullToRefresh/PullToRefresh';
 import { RECIPE_COLLECTIONS } from '@/lib/collections';
 import { buildHinglishQuery } from '@/lib/ingredient-map';
@@ -272,8 +272,8 @@ export default function SearchPage() {
           </p>
         )}
 
-        {/* Loading */}
-        {loading && <ArtiLoader className="py-12" message="Dhundh rahi hoon" />}
+        {/* Loading — content-shaped skeleton so it never feels slow */}
+        {loading && <RecipeGridSkeleton className="pb-24" />}
 
         {/* Recipe grid */}
         {!loading && results.length > 0 && (

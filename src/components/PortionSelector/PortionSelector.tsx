@@ -1,13 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { shouldShowScalingWarning } from '@/lib/portion';
 import AnimatedNumber from '@/components/AnimatedNumber/AnimatedNumber';
 import { haptic } from '@/lib/haptics';
 import type { SubscriptionStatus } from '@/types/index';
 
 interface PortionSelectorProps {
-  baseSize: number;
+  /** Base family size the recipe is written for. Kept for callers; warning is rendered by the parent. */
+  baseSize?: number;
   currentSize: number;
   onChange: (size: number) => void;
   subscriptionStatus: SubscriptionStatus;
@@ -20,7 +20,6 @@ const MIN = 1;
 const COLS = 5;
 
 export default function PortionSelector({
-  baseSize,
   currentSize,
   onChange,
   subscriptionStatus,
@@ -28,7 +27,6 @@ export default function PortionSelector({
 }: PortionSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const isPaid = subscriptionStatus === 'paid';
-  const showWarning = shouldShowScalingWarning(baseSize, currentSize);
 
   function handleSeatTap(n: number) {
     if (n < MIN) return;
@@ -65,12 +63,6 @@ export default function PortionSelector({
         <span><AnimatedNumber value={currentSize} /> log ke liye</span>
         <span className="text-[10px] ml-1">▼</span>
       </button>
-
-      {showWarning && (
-        <p className="mt-1 text-[11px] text-[#8B7355]">
-          ⚠️ Namak thoda thoda milao — ek baar mein mat daal dena.
-        </p>
-      )}
 
       {/* Bottom sheet overlay */}
       {isOpen && (

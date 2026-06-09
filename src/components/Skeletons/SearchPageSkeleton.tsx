@@ -1,20 +1,8 @@
+import RecipeGridSkeleton from '@/components/Skeletons/RecipeGridSkeleton';
+
 export default function SearchPageSkeleton() {
   return (
     <div className="flex flex-col min-h-full bg-[#FFFAF6]">
-      {/* Shimmer keyframes injected inline */}
-      <style>{`
-        @keyframes skel-shimmer {
-          0% { background-position: -200% 0 }
-          100% { background-position: 200% 0 }
-        }
-        .skel-shine {
-          background: linear-gradient(90deg, #F5EDE3 0%, #FDDBC2 50%, #F5EDE3 100%);
-          background-size: 200% 100%;
-          animation: skel-shimmer 1.5s infinite;
-          border-radius: 8px;
-        }
-      `}</style>
-
       {/* Sticky header skeleton */}
       <div className="sticky top-0 z-10 bg-white px-4 pt-3 pb-2" style={{ borderBottom: '1px solid #E8DDD0' }}>
         {/* Title bar */}
@@ -53,17 +41,7 @@ export default function SearchPageSkeleton() {
         <div className="skel-shine mb-3" style={{ width: 80, height: 12 }} />
 
         {/* 2-col recipe grid */}
-        <div className="grid grid-cols-2 gap-3.5">
-          {[0, 1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="rounded-xl overflow-hidden" style={{ background: '#FFF0E6' }}>
-              <div className="skel-shine" style={{ width: '100%', aspectRatio: '3/2', borderRadius: 0 }} />
-              <div className="p-2.5">
-                <div className="skel-shine mb-2" style={{ width: '80%', height: 13 }} />
-                <div className="skel-shine" style={{ width: '50%', height: 11 }} />
-              </div>
-            </div>
-          ))}
-        </div>
+        <RecipeGridSkeleton />
       </div>
     </div>
   );

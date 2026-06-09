@@ -140,3 +140,15 @@ body {
   100% { transform: scale(1); }
 }
 .animate-heart-pop { animation: heartPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+/* Warm shimmer skeleton (used by Search/Home skeletons + grid placeholders) */
+@keyframes skel-shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.skel-shine {
+  background: linear-gradient(90deg, #F5EDE3 0%, #FDDBC2 50%, #F5EDE3 100%);
+  background-size: 200% 100%;
+  animation: skel-shimmer 1.5s infinite;
+  border-radius: 8px;
+}
