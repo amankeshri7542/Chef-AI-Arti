@@ -290,19 +290,24 @@ async function main(): Promise<void> {
 
   // --file overrides the recipes seed path (used for batch2, etc.)
   const fileOverride = getFlagValue('--file');
+  // --knowledge-file overrides the knowledge seed path (seed only new chunks)
+  const knowledgeFileOverride = getFlagValue('--knowledge-file');
   const recipesPath = fileOverride
     ? path.resolve(process.cwd(), fileOverride)
     : path.join(__dirname, 'seed', 'recipes.json');
-  const knowledgePath = path.join(__dirname, 'seed', 'knowledge.json');
+  const knowledgePath = knowledgeFileOverride
+    ? path.resolve(process.cwd(), knowledgeFileOverride)
+    : path.join(__dirname, 'seed', 'knowledge.json');
 
-  const recipes =
-    knowledgeOnly
-      ? []
-      : (JSON.parse(fs.readFileSync(recipesPath, 'utf-8')) as RecipeSeed[]);
-  const knowledge =
-    recipesOnly || fileOverride
-      ? []
-      : (JSON.parse(fs.readFileSync(knowledgePath, 'utf-8')) as KnowledgeSeed[]);
+  const seedRecipesFlag = !knowledgeOnly && !(knowledgeFileOverride && !fileOverride);
+  const seedKnowledgeFlag = !recipesOnly && !(fileOverride && !knowledgeFileOverride);
+
+  const recipes = seedRecipesFlag
+    ? (JSON.parse(fs.readFileSync(recipesPath, 'utf-8')) as RecipeSeed[])
+    : [];
+  const knowledge = seedKnowledgeFlag
+    ? (JSON.parse(fs.readFileSync(knowledgePath, 'utf-8')) as KnowledgeSeed[])
+    : [];
 
   console.log(
     `Seeding — recipes: ${recipes.length} (from ${path.relative(process.cwd(), recipesPath)})` +

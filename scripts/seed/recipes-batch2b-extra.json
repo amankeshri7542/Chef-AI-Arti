@@ -1,0 +1,2631 @@
+[
+  {
+    "name_hinglish": "Masoor Dal",
+    "name_hindi": "मसूर दाल",
+    "description": "Sabse jaldi banne wali dal — jab kuch samajh na aaye kya banao, yahi safe bet hai! 💛",
+    "category": "dal",
+    "meal_type": [
+      "lunch",
+      "dinner"
+    ],
+    "diet_type": "veg",
+    "is_vrat_friendly": false,
+    "excluded_items": [],
+    "ingredients": [
+      {
+        "name": "Masoor dal",
+        "qty_desi": "1 katori",
+        "qty_metric": "180g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Tamatar",
+        "prep": "kata",
+        "qty_desi": "1 medium",
+        "qty_metric": "100g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Pyaaz",
+        "prep": "kata",
+        "qty_desi": "1 medium",
+        "qty_metric": "100g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Adrak-lehsun paste",
+        "qty_desi": "1 chammach",
+        "qty_metric": "10g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Haldi",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Lal mirch powder",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Jeera",
+        "prep": "whole",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "fixed"
+      },
+      {
+        "name": "Tel",
+        "qty_desi": "1 chammach",
+        "qty_metric": "15ml",
+        "scale_type": "oil"
+      },
+      {
+        "name": "Namak",
+        "qty_desi": "1 chammach",
+        "qty_metric": "5g",
+        "scale_type": "salt"
+      },
+      {
+        "name": "Paani",
+        "qty_desi": "3 katori",
+        "qty_metric": "600ml",
+        "scale_type": "water"
+      }
+    ],
+    "steps": [
+      {
+        "step": 1,
+        "instruction": "Masoor dal ko dho kar cooker mein haldi, namak aur paani ke saath 3 seeti laga lo.",
+        "time_minutes": 15
+      },
+      {
+        "step": 2,
+        "instruction": "Alag kadhai mein tel garam karke jeera tadka do.",
+        "time_minutes": 2
+      },
+      {
+        "step": 3,
+        "instruction": "Pyaaz golden karke adrak-lehsun aur tamatar daal kar bhuno.",
+        "time_minutes": 6
+      },
+      {
+        "step": 4,
+        "instruction": "Lal mirch daal kar masala tel chhodne tak bhuno, phir dal mein milao.",
+        "time_minutes": 3
+      },
+      {
+        "step": 5,
+        "instruction": "2 minute ubaal kar hara dhaniya daalo, chawal ya roti ke saath garam serve karo.",
+        "time_minutes": 3
+      }
+    ],
+    "cook_time_minutes": 25,
+    "prep_time_minutes": 10,
+    "soak_required": false,
+    "base_family_size": 4,
+    "spice_level": "medium",
+    "cooking_style": "tadka-based",
+    "region_origin": "pan-north-indian",
+    "heaviness": "halka",
+    "goes_well_with": [
+      "chawal",
+      "roti"
+    ],
+    "vibes": [
+      "jaldi-bane",
+      "halki-dish",
+      "comfort-food",
+      "protein-rich"
+    ],
+    "tags": [
+      "dal",
+      "masoor",
+      "quick",
+      "north-indian"
+    ],
+    "thumbnail_url": null,
+    "thumbnail_source": "none",
+    "cooked_count": 0,
+    "source": "curated",
+    "embedding_text": null
+  },
+  {
+    "name_hinglish": "Sookhi Moong Dal",
+    "name_hindi": "सूखी मूंग दाल",
+    "description": "Pet halka rakhna hai? Yeh sookhi moong dal — har daana khila-khila, ghee ka tadka aur bas! 🌿",
+    "category": "dal",
+    "meal_type": [
+      "lunch",
+      "dinner"
+    ],
+    "diet_type": "veg",
+    "is_vrat_friendly": false,
+    "excluded_items": [],
+    "ingredients": [
+      {
+        "name": "Dhuli moong dal",
+        "qty_desi": "1 katori",
+        "qty_metric": "180g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Hari mirch",
+        "prep": "slit",
+        "qty_desi": "2 piece",
+        "qty_metric": "6g",
+        "scale_type": "fixed"
+      },
+      {
+        "name": "Haldi",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Hing",
+        "qty_desi": "1 chutki",
+        "qty_metric": "1g",
+        "scale_type": "fixed"
+      },
+      {
+        "name": "Jeera",
+        "prep": "whole",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "fixed"
+      },
+      {
+        "name": "Ghee",
+        "qty_desi": "1 chammach",
+        "qty_metric": "15ml",
+        "scale_type": "oil"
+      },
+      {
+        "name": "Namak",
+        "qty_desi": "1 chammach",
+        "qty_metric": "5g",
+        "scale_type": "salt"
+      },
+      {
+        "name": "Paani",
+        "qty_desi": "1.5 katori",
+        "qty_metric": "300ml",
+        "scale_type": "water"
+      }
+    ],
+    "steps": [
+      {
+        "step": 1,
+        "instruction": "Moong dal ko 15 minute bhigo kar paani nikaal do.",
+        "time_minutes": 15
+      },
+      {
+        "step": 2,
+        "instruction": "Kadhai mein ghee garam karke jeera, hing aur hari mirch ka tadka lagao.",
+        "time_minutes": 2
+      },
+      {
+        "step": 3,
+        "instruction": "Dal, haldi aur namak daal kar halka bhuno.",
+        "time_minutes": 3
+      },
+      {
+        "step": 4,
+        "instruction": "Naapa hua paani daal kar dhak do, dheemi aanch par daana khila-khila pakao.",
+        "time_minutes": 12
+      },
+      {
+        "step": 5,
+        "instruction": "Paani sookh jaaye to hara dhaniya daal kar serve karo.",
+        "time_minutes": 1
+      }
+    ],
+    "cook_time_minutes": 18,
+    "prep_time_minutes": 15,
+    "soak_required": false,
+    "base_family_size": 4,
+    "spice_level": "mild",
+    "cooking_style": "tadka-based",
+    "region_origin": "UP",
+    "heaviness": "halka",
+    "goes_well_with": [
+      "roti",
+      "chawal",
+      "achaar"
+    ],
+    "vibes": [
+      "halki-dish",
+      "bujurg-friendly",
+      "bina-pyaz-lehsun",
+      "low-oil"
+    ],
+    "tags": [
+      "dal",
+      "moong",
+      "sukhi",
+      "halka",
+      "north-indian"
+    ],
+    "thumbnail_url": null,
+    "thumbnail_source": "none",
+    "cooked_count": 0,
+    "source": "curated",
+    "embedding_text": null
+  },
+  {
+    "name_hinglish": "Chilka Moong Dal",
+    "name_hindi": "छिलका मूंग दाल",
+    "description": "Chilke wali moong — thodi rustic, thodi taakatwar. Bihari ghar ki seedhi-saadi daily dal.",
+    "category": "dal",
+    "meal_type": [
+      "lunch",
+      "dinner"
+    ],
+    "diet_type": "veg",
+    "is_vrat_friendly": false,
+    "excluded_items": [],
+    "ingredients": [
+      {
+        "name": "Chilka moong dal",
+        "qty_desi": "1 katori",
+        "qty_metric": "180g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Tamatar",
+        "prep": "kata",
+        "qty_desi": "1 medium",
+        "qty_metric": "100g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Lehsun",
+        "prep": "kuta",
+        "qty_desi": "4 kali",
+        "qty_metric": "12g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Haldi",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Lal mirch powder",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Sookhi lal mirch",
+        "qty_desi": "2 piece",
+        "qty_metric": "2g",
+        "scale_type": "fixed"
+      },
+      {
+        "name": "Jeera",
+        "prep": "whole",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "fixed"
+      },
+      {
+        "name": "Sarson tel",
+        "qty_desi": "1 chammach",
+        "qty_metric": "15ml",
+        "scale_type": "oil"
+      },
+      {
+        "name": "Namak",
+        "qty_desi": "1 chammach",
+        "qty_metric": "5g",
+        "scale_type": "salt"
+      },
+      {
+        "name": "Paani",
+        "qty_desi": "3 katori",
+        "qty_metric": "600ml",
+        "scale_type": "water"
+      }
+    ],
+    "steps": [
+      {
+        "step": 1,
+        "instruction": "Chilka moong dal ko dho kar haldi-namak ke saath cooker mein 3 seeti laga lo.",
+        "time_minutes": 15
+      },
+      {
+        "step": 2,
+        "instruction": "Sarson tel garam karke jeera, sookhi lal mirch aur kuta lehsun golden karo.",
+        "time_minutes": 3
+      },
+      {
+        "step": 3,
+        "instruction": "Tamatar aur lal mirch powder daal kar gala lo.",
+        "time_minutes": 4
+      },
+      {
+        "step": 4,
+        "instruction": "Yeh chhaunk dal par daal kar 2 minute ubaalo.",
+        "time_minutes": 3
+      },
+      {
+        "step": 5,
+        "instruction": "Hara dhaniya daal kar chawal ke saath garam serve karo.",
+        "time_minutes": 1
+      }
+    ],
+    "cook_time_minutes": 22,
+    "prep_time_minutes": 10,
+    "soak_required": false,
+    "base_family_size": 4,
+    "spice_level": "medium",
+    "cooking_style": "tadka-based",
+    "region_origin": "Bihar",
+    "heaviness": "medium",
+    "goes_well_with": [
+      "chawal",
+      "roti"
+    ],
+    "vibes": [
+      "comfort-food",
+      "protein-rich",
+      "taakat-wali"
+    ],
+    "tags": [
+      "dal",
+      "moong",
+      "chilka",
+      "bihar",
+      "north-indian"
+    ],
+    "thumbnail_url": null,
+    "thumbnail_source": "none",
+    "cooked_count": 0,
+    "source": "curated",
+    "embedding_text": null
+  },
+  {
+    "name_hinglish": "Lobia Masala",
+    "name_hindi": "लोबिया मसाला",
+    "description": "Rongi ki rasili sabzi-dal — protein se bhari, chawal ke saage khilao to plate saaf! 💪",
+    "category": "dal",
+    "meal_type": [
+      "lunch",
+      "dinner"
+    ],
+    "diet_type": "veg",
+    "is_vrat_friendly": false,
+    "excluded_items": [],
+    "ingredients": [
+      {
+        "name": "Lobia",
+        "qty_desi": "1 katori",
+        "qty_metric": "180g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Pyaaz",
+        "prep": "pisa",
+        "qty_desi": "1 medium",
+        "qty_metric": "100g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Tamatar",
+        "prep": "pisa",
+        "qty_desi": "2 medium",
+        "qty_metric": "200g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Adrak-lehsun paste",
+        "qty_desi": "1 chammach",
+        "qty_metric": "10g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Haldi",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Lal mirch powder",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Dhaniya powder",
+        "qty_desi": "1 chammach",
+        "qty_metric": "5g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Garam masala",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Jeera",
+        "prep": "whole",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "fixed"
+      },
+      {
+        "name": "Tel",
+        "qty_desi": "2 chammach",
+        "qty_metric": "30ml",
+        "scale_type": "oil"
+      },
+      {
+        "name": "Namak",
+        "qty_desi": "1 chammach",
+        "qty_metric": "5g",
+        "scale_type": "salt"
+      },
+      {
+        "name": "Paani",
+        "qty_desi": "2 katori",
+        "qty_metric": "400ml",
+        "scale_type": "water"
+      }
+    ],
+    "steps": [
+      {
+        "step": 1,
+        "instruction": "Lobia ko raat bhar bhigo kar cooker mein namak-paani ke saath 5-6 seeti laga lo.",
+        "time_minutes": 20
+      },
+      {
+        "step": 2,
+        "instruction": "Tel mein jeera tadka kar pisa pyaaz golden bhuno.",
+        "time_minutes": 6
+      },
+      {
+        "step": 3,
+        "instruction": "Adrak-lehsun aur pisa tamatar daal kar haldi-mirch-dhaniya ke saath tel chhodne tak bhuno.",
+        "time_minutes": 7
+      },
+      {
+        "step": 4,
+        "instruction": "Uble lobia apne paani sameth daal kar 8 minute pakao.",
+        "time_minutes": 8
+      },
+      {
+        "step": 5,
+        "instruction": "Garam masala milao, hara dhaniya daal kar serve karo.",
+        "time_minutes": 1
+      }
+    ],
+    "cook_time_minutes": 30,
+    "prep_time_minutes": 20,
+    "soak_required": true,
+    "base_family_size": 4,
+    "spice_level": "medium",
+    "cooking_style": "tadka-based",
+    "region_origin": "Punjab",
+    "heaviness": "medium",
+    "goes_well_with": [
+      "chawal",
+      "roti"
+    ],
+    "vibes": [
+      "protein-rich",
+      "taakat-wali",
+      "comfort-food"
+    ],
+    "tags": [
+      "dal",
+      "lobia",
+      "rongi",
+      "protein-rich",
+      "north-indian"
+    ],
+    "thumbnail_url": null,
+    "thumbnail_source": "none",
+    "cooked_count": 0,
+    "source": "curated",
+    "embedding_text": null
+  },
+  {
+    "name_hinglish": "Kala Chana Masala",
+    "name_hindi": "काला चना मसाला",
+    "description": "Ashtami wale kale chane — taakat se bhare, ras-ras khaane mein maza. Halwa-poori ke saath jod toot ke!",
+    "category": "dal",
+    "meal_type": [
+      "breakfast",
+      "lunch"
+    ],
+    "diet_type": "veg",
+    "is_vrat_friendly": false,
+    "excluded_items": [],
+    "ingredients": [
+      {
+        "name": "Kala chana",
+        "qty_desi": "1 katori",
+        "qty_metric": "180g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Pyaaz",
+        "prep": "kata",
+        "qty_desi": "1 medium",
+        "qty_metric": "100g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Tamatar",
+        "prep": "kata",
+        "qty_desi": "2 medium",
+        "qty_metric": "200g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Adrak-lehsun paste",
+        "qty_desi": "1 chammach",
+        "qty_metric": "10g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Haldi",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Lal mirch powder",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Chana masala",
+        "qty_desi": "1 chammach",
+        "qty_metric": "5g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Jeera",
+        "prep": "whole",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "fixed"
+      },
+      {
+        "name": "Tel",
+        "qty_desi": "2 chammach",
+        "qty_metric": "30ml",
+        "scale_type": "oil"
+      },
+      {
+        "name": "Namak",
+        "qty_desi": "1 chammach",
+        "qty_metric": "5g",
+        "scale_type": "salt"
+      },
+      {
+        "name": "Paani",
+        "qty_desi": "2 katori",
+        "qty_metric": "400ml",
+        "scale_type": "water"
+      }
+    ],
+    "steps": [
+      {
+        "step": 1,
+        "instruction": "Kala chana raat bhar bhigo kar cooker mein namak ke saath 6-7 seeti laga lo.",
+        "time_minutes": 25
+      },
+      {
+        "step": 2,
+        "instruction": "Tel mein jeera tadka kar pyaaz golden bhuno.",
+        "time_minutes": 6
+      },
+      {
+        "step": 3,
+        "instruction": "Adrak-lehsun aur tamatar daal kar haldi-mirch-chana masala ke saath bhuno.",
+        "time_minutes": 7
+      },
+      {
+        "step": 4,
+        "instruction": "Uble chane apne paani sameth daal kar 8-10 minute ubaalo, ras gaadha karo.",
+        "time_minutes": 10
+      },
+      {
+        "step": 5,
+        "instruction": "Hara dhaniya daal kar poori ya chawal ke saath serve karo.",
+        "time_minutes": 1
+      }
+    ],
+    "cook_time_minutes": 32,
+    "prep_time_minutes": 25,
+    "soak_required": true,
+    "base_family_size": 4,
+    "spice_level": "medium",
+    "cooking_style": "tadka-based",
+    "region_origin": "UP",
+    "heaviness": "medium",
+    "goes_well_with": [
+      "poori",
+      "chawal",
+      "roti"
+    ],
+    "vibes": [
+      "protein-rich",
+      "taakat-wali",
+      "tyohar-special"
+    ],
+    "tags": [
+      "dal",
+      "kala-chana",
+      "protein-rich",
+      "ashtami",
+      "north-indian"
+    ],
+    "thumbnail_url": null,
+    "thumbnail_source": "none",
+    "cooked_count": 0,
+    "source": "curated",
+    "embedding_text": null
+  },
+  {
+    "name_hinglish": "Punjabi Kadhi",
+    "name_hindi": "पंजाबी कढ़ी",
+    "description": "Khatti-meethi kadhi aur narm pakode — Punjab ki aatma. Garam chawal ke upar daalo, swarg yahi hai! 🧡",
+    "category": "dal",
+    "meal_type": [
+      "lunch",
+      "dinner"
+    ],
+    "diet_type": "veg",
+    "is_vrat_friendly": false,
+    "excluded_items": [],
+    "ingredients": [
+      {
+        "name": "Besan",
+        "qty_desi": "half katori",
+        "qty_metric": "60g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Khatta dahi",
+        "qty_desi": "1 katori",
+        "qty_metric": "200g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Pyaaz",
+        "prep": "kata",
+        "qty_desi": "1 medium",
+        "qty_metric": "100g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Haldi",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Lal mirch powder",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Methi dana",
+        "prep": "whole",
+        "qty_desi": "quarter chammach",
+        "qty_metric": "1g",
+        "scale_type": "fixed"
+      },
+      {
+        "name": "Jeera",
+        "prep": "whole",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "fixed"
+      },
+      {
+        "name": "Sookhi lal mirch",
+        "qty_desi": "2 piece",
+        "qty_metric": "2g",
+        "scale_type": "fixed"
+      },
+      {
+        "name": "Tel",
+        "qty_desi": "2 chammach",
+        "qty_metric": "30ml",
+        "scale_type": "oil"
+      },
+      {
+        "name": "Namak",
+        "qty_desi": "1 chammach",
+        "qty_metric": "5g",
+        "scale_type": "salt"
+      },
+      {
+        "name": "Paani",
+        "qty_desi": "4 katori",
+        "qty_metric": "800ml",
+        "scale_type": "water"
+      }
+    ],
+    "steps": [
+      {
+        "step": 1,
+        "instruction": "Aadhe besan, pyaaz, namak aur thoda paani se gaadha mix banakar chote pakode tal lo.",
+        "time_minutes": 10
+      },
+      {
+        "step": 2,
+        "instruction": "Bache besan ko dahi aur paani mein achhe se gholo, gaanth na rahe.",
+        "time_minutes": 4
+      },
+      {
+        "step": 3,
+        "instruction": "Tel mein jeera, methi, sookhi mirch ka tadka laga kar haldi daalo.",
+        "time_minutes": 2
+      },
+      {
+        "step": 4,
+        "instruction": "Dahi-besan ghol daal kar lagataar chalate hue ubaal lao, phir dheemi aanch par 20 minute pakao.",
+        "time_minutes": 22
+      },
+      {
+        "step": 5,
+        "instruction": "Pakode daal kar 5 minute aur pakao, lal mirch chhidak kar chawal ke saath serve karo.",
+        "time_minutes": 5
+      }
+    ],
+    "cook_time_minutes": 40,
+    "prep_time_minutes": 12,
+    "soak_required": false,
+    "base_family_size": 4,
+    "spice_level": "medium",
+    "cooking_style": "tadka-based",
+    "region_origin": "Punjab",
+    "heaviness": "medium",
+    "goes_well_with": [
+      "chawal",
+      "roti"
+    ],
+    "vibes": [
+      "comfort-food",
+      "guest-special",
+      "sardi-warmth"
+    ],
+    "tags": [
+      "kadhi",
+      "dahi",
+      "besan",
+      "pakora",
+      "punjab",
+      "north-indian"
+    ],
+    "thumbnail_url": null,
+    "thumbnail_source": "none",
+    "cooked_count": 0,
+    "source": "curated",
+    "embedding_text": null
+  },
+  {
+    "name_hinglish": "Dal Dhokli",
+    "name_hindi": "दाल ढोकली",
+    "description": "Ek hi handi mein dal bhi aur roti bhi! Rajasthani-style aata pattiyan dal mein ubli — one-pot pet-bhar khaana.",
+    "category": "dal",
+    "meal_type": [
+      "lunch",
+      "dinner"
+    ],
+    "diet_type": "veg",
+    "is_vrat_friendly": false,
+    "excluded_items": [],
+    "ingredients": [
+      {
+        "name": "Arhar dal",
+        "qty_desi": "1 katori",
+        "qty_metric": "180g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Gehu ka atta",
+        "qty_desi": "1 katori",
+        "qty_metric": "120g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Tamatar",
+        "prep": "kata",
+        "qty_desi": "1 medium",
+        "qty_metric": "100g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Haldi",
+        "qty_desi": "1 chammach",
+        "qty_metric": "4g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Lal mirch powder",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Ajwain",
+        "prep": "whole",
+        "qty_desi": "quarter chammach",
+        "qty_metric": "1g",
+        "scale_type": "fixed"
+      },
+      {
+        "name": "Jeera",
+        "prep": "whole",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "fixed"
+      },
+      {
+        "name": "Sookhi lal mirch",
+        "qty_desi": "2 piece",
+        "qty_metric": "2g",
+        "scale_type": "fixed"
+      },
+      {
+        "name": "Tel",
+        "qty_desi": "2 chammach",
+        "qty_metric": "30ml",
+        "scale_type": "oil"
+      },
+      {
+        "name": "Namak",
+        "qty_desi": "1 chammach",
+        "qty_metric": "5g",
+        "scale_type": "salt"
+      },
+      {
+        "name": "Paani",
+        "qty_desi": "4 katori",
+        "qty_metric": "800ml",
+        "scale_type": "water"
+      }
+    ],
+    "steps": [
+      {
+        "step": 1,
+        "instruction": "Atte mein haldi, ajwain, namak aur thoda tel daal kar tight aata gundh lo, pattiyan kaat lo.",
+        "time_minutes": 10
+      },
+      {
+        "step": 2,
+        "instruction": "Arhar dal ko haldi-namak ke saath ubaal kar patli dal banao.",
+        "time_minutes": 15
+      },
+      {
+        "step": 3,
+        "instruction": "Tel mein jeera, sookhi mirch ka tadka kar tamatar aur lal mirch daalo.",
+        "time_minutes": 4
+      },
+      {
+        "step": 4,
+        "instruction": "Tadka dal mein milao, ubaal aane do.",
+        "time_minutes": 3
+      },
+      {
+        "step": 5,
+        "instruction": "Aata pattiyan ek-ek karke daal kar 12 minute pakao, beech mein chalate raho.",
+        "time_minutes": 12
+      },
+      {
+        "step": 6,
+        "instruction": "Gaadhi ho jaaye to hara dhaniya daal kar garam serve karo.",
+        "time_minutes": 1
+      }
+    ],
+    "cook_time_minutes": 40,
+    "prep_time_minutes": 15,
+    "soak_required": false,
+    "base_family_size": 4,
+    "spice_level": "medium",
+    "cooking_style": "tadka-based",
+    "region_origin": "Rajasthan",
+    "heaviness": "bhaari",
+    "goes_well_with": [
+      "chaas",
+      "achaar"
+    ],
+    "vibes": [
+      "one-pot",
+      "comfort-food",
+      "taakat-wali"
+    ],
+    "tags": [
+      "dal",
+      "dhokli",
+      "one-pot",
+      "rajasthan",
+      "north-indian"
+    ],
+    "thumbnail_url": null,
+    "thumbnail_source": "none",
+    "cooked_count": 0,
+    "source": "curated",
+    "embedding_text": null
+  },
+  {
+    "name_hinglish": "Gahat ki Dal",
+    "name_hindi": "गहत की दाल",
+    "description": "Pahadi gharon ki taakatwar gahat (kulthi) dal — sardi mein badan garam rakhe, swaad gehra-gehra.",
+    "category": "dal",
+    "meal_type": [
+      "lunch",
+      "dinner"
+    ],
+    "diet_type": "veg",
+    "is_vrat_friendly": false,
+    "excluded_items": [],
+    "ingredients": [
+      {
+        "name": "Gahat dal",
+        "qty_desi": "1 katori",
+        "qty_metric": "180g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Pyaaz",
+        "prep": "kata",
+        "qty_desi": "1 medium",
+        "qty_metric": "100g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Tamatar",
+        "prep": "kata",
+        "qty_desi": "1 medium",
+        "qty_metric": "100g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Lehsun",
+        "prep": "kuta",
+        "qty_desi": "5 kali",
+        "qty_metric": "15g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Haldi",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Lal mirch powder",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Jakhya ya jeera",
+        "prep": "whole",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "fixed"
+      },
+      {
+        "name": "Sarson tel",
+        "qty_desi": "2 chammach",
+        "qty_metric": "30ml",
+        "scale_type": "oil"
+      },
+      {
+        "name": "Namak",
+        "qty_desi": "1 chammach",
+        "qty_metric": "5g",
+        "scale_type": "salt"
+      },
+      {
+        "name": "Paani",
+        "qty_desi": "4 katori",
+        "qty_metric": "800ml",
+        "scale_type": "water"
+      }
+    ],
+    "steps": [
+      {
+        "step": 1,
+        "instruction": "Gahat dal ko 4-5 ghante bhigo kar cooker mein namak-haldi ke saath 6-7 seeti laga lo.",
+        "time_minutes": 25
+      },
+      {
+        "step": 2,
+        "instruction": "Sarson tel garam karke jakhya/jeera aur kuta lehsun golden karo.",
+        "time_minutes": 3
+      },
+      {
+        "step": 3,
+        "instruction": "Pyaaz aur tamatar daal kar lal mirch ke saath bhuno.",
+        "time_minutes": 6
+      },
+      {
+        "step": 4,
+        "instruction": "Yeh masala dal mein milakar 10 minute ubaalo, gaadhi karo.",
+        "time_minutes": 10
+      },
+      {
+        "step": 5,
+        "instruction": "Hara dhaniya daal kar bhaat (chawal) ke saath garam serve karo.",
+        "time_minutes": 1
+      }
+    ],
+    "cook_time_minutes": 30,
+    "prep_time_minutes": 25,
+    "soak_required": true,
+    "base_family_size": 4,
+    "spice_level": "medium",
+    "cooking_style": "tadka-based",
+    "region_origin": "Uttarakhand",
+    "heaviness": "medium",
+    "goes_well_with": [
+      "chawal",
+      "roti"
+    ],
+    "vibes": [
+      "taakat-wali",
+      "sardi-warmth",
+      "protein-rich"
+    ],
+    "tags": [
+      "dal",
+      "gahat",
+      "kulthi",
+      "pahadi",
+      "uttarakhand"
+    ],
+    "thumbnail_url": null,
+    "thumbnail_source": "none",
+    "cooked_count": 0,
+    "source": "curated",
+    "embedding_text": null
+  },
+  {
+    "name_hinglish": "Bhuni Chana Dal",
+    "name_hindi": "भुनी चना दाल",
+    "description": "Sookhi-bhuni chana dal — daana daana alag, lehsun ka chhaunk. Bihari thali ki shaan, roti ke saath kamaal.",
+    "category": "dal",
+    "meal_type": [
+      "lunch",
+      "dinner"
+    ],
+    "diet_type": "veg",
+    "is_vrat_friendly": false,
+    "excluded_items": [],
+    "ingredients": [
+      {
+        "name": "Chana dal",
+        "qty_desi": "1 katori",
+        "qty_metric": "180g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Pyaaz",
+        "prep": "kata",
+        "qty_desi": "1 medium",
+        "qty_metric": "100g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Lehsun",
+        "prep": "kuta",
+        "qty_desi": "5 kali",
+        "qty_metric": "15g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Haldi",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Lal mirch powder",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Sookhi lal mirch",
+        "qty_desi": "2 piece",
+        "qty_metric": "2g",
+        "scale_type": "fixed"
+      },
+      {
+        "name": "Jeera",
+        "prep": "whole",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "fixed"
+      },
+      {
+        "name": "Sarson tel",
+        "qty_desi": "2 chammach",
+        "qty_metric": "30ml",
+        "scale_type": "oil"
+      },
+      {
+        "name": "Namak",
+        "qty_desi": "1 chammach",
+        "qty_metric": "5g",
+        "scale_type": "salt"
+      },
+      {
+        "name": "Paani",
+        "qty_desi": "2 katori",
+        "qty_metric": "400ml",
+        "scale_type": "water"
+      }
+    ],
+    "steps": [
+      {
+        "step": 1,
+        "instruction": "Chana dal ko 30 minute bhigo kar cooker mein haldi-namak ke saath 4 seeti laga lo, daana sabut rahe.",
+        "time_minutes": 20
+      },
+      {
+        "step": 2,
+        "instruction": "Sarson tel garam karke jeera, sookhi mirch aur lehsun golden karo.",
+        "time_minutes": 3
+      },
+      {
+        "step": 3,
+        "instruction": "Pyaaz daal kar bhuno, phir lal mirch daalo.",
+        "time_minutes": 5
+      },
+      {
+        "step": 4,
+        "instruction": "Ubli dal (paani nikaal kar) daal kar 6-7 minute sookha-bhuna karo.",
+        "time_minutes": 7
+      },
+      {
+        "step": 5,
+        "instruction": "Hara dhaniya daal kar roti ke saath garam serve karo.",
+        "time_minutes": 1
+      }
+    ],
+    "cook_time_minutes": 25,
+    "prep_time_minutes": 20,
+    "soak_required": false,
+    "base_family_size": 4,
+    "spice_level": "medium",
+    "cooking_style": "bhuna",
+    "region_origin": "Bihar",
+    "heaviness": "medium",
+    "goes_well_with": [
+      "roti",
+      "chawal"
+    ],
+    "vibes": [
+      "protein-rich",
+      "comfort-food",
+      "tiffin-ready"
+    ],
+    "tags": [
+      "dal",
+      "chana",
+      "bhuni",
+      "sukhi",
+      "bihar"
+    ],
+    "thumbnail_url": null,
+    "thumbnail_source": "none",
+    "cooked_count": 0,
+    "source": "curated",
+    "embedding_text": null
+  },
+  {
+    "name_hinglish": "Dal Palak",
+    "name_hindi": "दाल पालक",
+    "description": "Dal aur palak ka jhakaas jod — iron bhi, protein bhi. Bacchon ko palak chupke se khila do! 🌿",
+    "category": "dal",
+    "meal_type": [
+      "lunch",
+      "dinner"
+    ],
+    "diet_type": "veg",
+    "is_vrat_friendly": false,
+    "excluded_items": [],
+    "ingredients": [
+      {
+        "name": "Moong-arhar dal",
+        "qty_desi": "1 katori",
+        "qty_metric": "180g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Palak",
+        "prep": "kata",
+        "qty_desi": "2 katori",
+        "qty_metric": "200g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Tamatar",
+        "prep": "kata",
+        "qty_desi": "1 medium",
+        "qty_metric": "100g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Lehsun",
+        "prep": "kuta",
+        "qty_desi": "4 kali",
+        "qty_metric": "12g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Haldi",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Lal mirch powder",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Jeera",
+        "prep": "whole",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "fixed"
+      },
+      {
+        "name": "Ghee",
+        "qty_desi": "1 chammach",
+        "qty_metric": "15ml",
+        "scale_type": "oil"
+      },
+      {
+        "name": "Namak",
+        "qty_desi": "1 chammach",
+        "qty_metric": "5g",
+        "scale_type": "salt"
+      },
+      {
+        "name": "Paani",
+        "qty_desi": "3 katori",
+        "qty_metric": "600ml",
+        "scale_type": "water"
+      }
+    ],
+    "steps": [
+      {
+        "step": 1,
+        "instruction": "Dal ko haldi-namak aur paani ke saath cooker mein 3 seeti laga lo.",
+        "time_minutes": 15
+      },
+      {
+        "step": 2,
+        "instruction": "Kata palak daal kar dal mein 4 minute ubaalo.",
+        "time_minutes": 4
+      },
+      {
+        "step": 3,
+        "instruction": "Ghee mein jeera aur kuta lehsun golden karo.",
+        "time_minutes": 2
+      },
+      {
+        "step": 4,
+        "instruction": "Tamatar aur lal mirch daal kar gala lo, phir dal mein chhaunk daalo.",
+        "time_minutes": 4
+      },
+      {
+        "step": 5,
+        "instruction": "2 minute ubaal kar garam-garam chawal ya roti ke saath serve karo.",
+        "time_minutes": 3
+      }
+    ],
+    "cook_time_minutes": 26,
+    "prep_time_minutes": 10,
+    "soak_required": false,
+    "base_family_size": 4,
+    "spice_level": "mild",
+    "cooking_style": "tadka-based",
+    "region_origin": "pan-north-indian",
+    "heaviness": "halka",
+    "goes_well_with": [
+      "chawal",
+      "roti"
+    ],
+    "vibes": [
+      "halki-dish",
+      "protein-rich",
+      "bacchon-ki-fav",
+      "low-oil"
+    ],
+    "tags": [
+      "dal",
+      "palak",
+      "iron",
+      "halka",
+      "north-indian"
+    ],
+    "thumbnail_url": null,
+    "thumbnail_source": "none",
+    "cooked_count": 0,
+    "source": "curated",
+    "embedding_text": null
+  },
+  {
+    "name_hinglish": "Mili Juli Dal",
+    "name_hindi": "मिली जुली दाल",
+    "description": "Paanch dalon ka mela — har daana apna swaad laaye. Dhaba jaisi dal ghar pe, ghee ke tadke ke saath!",
+    "category": "dal",
+    "meal_type": [
+      "lunch",
+      "dinner"
+    ],
+    "diet_type": "veg",
+    "is_vrat_friendly": false,
+    "excluded_items": [],
+    "ingredients": [
+      {
+        "name": "Mili juli dal",
+        "prep": "5 dal mix",
+        "qty_desi": "1 katori",
+        "qty_metric": "180g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Pyaaz",
+        "prep": "kata",
+        "qty_desi": "1 medium",
+        "qty_metric": "100g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Tamatar",
+        "prep": "kata",
+        "qty_desi": "1 medium",
+        "qty_metric": "100g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Adrak-lehsun paste",
+        "qty_desi": "1 chammach",
+        "qty_metric": "10g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Haldi",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Lal mirch powder",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Garam masala",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Jeera",
+        "prep": "whole",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "fixed"
+      },
+      {
+        "name": "Ghee",
+        "qty_desi": "1 chammach",
+        "qty_metric": "15ml",
+        "scale_type": "oil"
+      },
+      {
+        "name": "Namak",
+        "qty_desi": "1 chammach",
+        "qty_metric": "5g",
+        "scale_type": "salt"
+      },
+      {
+        "name": "Paani",
+        "qty_desi": "3 katori",
+        "qty_metric": "600ml",
+        "scale_type": "water"
+      }
+    ],
+    "steps": [
+      {
+        "step": 1,
+        "instruction": "Paanchon dal ko mila kar dho lo, cooker mein haldi-namak-paani ke saath 4 seeti laga lo.",
+        "time_minutes": 18
+      },
+      {
+        "step": 2,
+        "instruction": "Ghee mein jeera tadka kar pyaaz golden bhuno.",
+        "time_minutes": 5
+      },
+      {
+        "step": 3,
+        "instruction": "Adrak-lehsun aur tamatar daal kar lal mirch ke saath bhuno.",
+        "time_minutes": 6
+      },
+      {
+        "step": 4,
+        "instruction": "Tadka dal mein milao, 3 minute ubaalo.",
+        "time_minutes": 4
+      },
+      {
+        "step": 5,
+        "instruction": "Garam masala aur hara dhaniya daal kar chawal ke saath serve karo.",
+        "time_minutes": 1
+      }
+    ],
+    "cook_time_minutes": 28,
+    "prep_time_minutes": 10,
+    "soak_required": false,
+    "base_family_size": 4,
+    "spice_level": "medium",
+    "cooking_style": "tadka-based",
+    "region_origin": "MP",
+    "heaviness": "medium",
+    "goes_well_with": [
+      "chawal",
+      "roti"
+    ],
+    "vibes": [
+      "comfort-food",
+      "protein-rich",
+      "guest-special"
+    ],
+    "tags": [
+      "dal",
+      "mixed-dal",
+      "panchmel",
+      "north-indian"
+    ],
+    "thumbnail_url": null,
+    "thumbnail_source": "none",
+    "cooked_count": 0,
+    "source": "curated",
+    "embedding_text": null
+  },
+  {
+    "name_hinglish": "Tamatar ka Shorba",
+    "name_hindi": "टमाटर का शोरबा",
+    "description": "Garam-garam tamatar shorba — sardi-zukaam mein aaram, sip karte hi badan halka. Halki-phulki shuruaat.",
+    "category": "dal",
+    "meal_type": [
+      "dinner",
+      "snack"
+    ],
+    "diet_type": "veg",
+    "is_vrat_friendly": false,
+    "excluded_items": [],
+    "ingredients": [
+      {
+        "name": "Tamatar",
+        "prep": "kata",
+        "qty_desi": "5 medium",
+        "qty_metric": "500g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Adrak",
+        "prep": "kisa",
+        "qty_desi": "1 inch",
+        "qty_metric": "10g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Lehsun",
+        "prep": "kuta",
+        "qty_desi": "3 kali",
+        "qty_metric": "9g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Kali mirch",
+        "prep": "kuti",
+        "qty_desi": "quarter chammach",
+        "qty_metric": "1g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Jeera",
+        "prep": "whole",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "fixed"
+      },
+      {
+        "name": "Tej patta",
+        "qty_desi": "1 piece",
+        "qty_metric": "1g",
+        "scale_type": "fixed"
+      },
+      {
+        "name": "Ghee",
+        "qty_desi": "1 chammach",
+        "qty_metric": "15ml",
+        "scale_type": "oil"
+      },
+      {
+        "name": "Namak",
+        "qty_desi": "half chammach",
+        "qty_metric": "3g",
+        "scale_type": "salt"
+      },
+      {
+        "name": "Paani",
+        "qty_desi": "3 katori",
+        "qty_metric": "600ml",
+        "scale_type": "water"
+      }
+    ],
+    "steps": [
+      {
+        "step": 1,
+        "instruction": "Tamatar, adrak, lehsun aur paani daal kar 10 minute ubaalo.",
+        "time_minutes": 10
+      },
+      {
+        "step": 2,
+        "instruction": "Thanda karke mathani/mixer se chaan lo, beej-chhilka alag karo.",
+        "time_minutes": 4
+      },
+      {
+        "step": 3,
+        "instruction": "Ghee mein jeera aur tej patta tadka karo.",
+        "time_minutes": 2
+      },
+      {
+        "step": 4,
+        "instruction": "Chana hua shorba, namak aur kali mirch daal kar ek ubaal lao.",
+        "time_minutes": 4
+      },
+      {
+        "step": 5,
+        "instruction": "Hara dhaniya daal kar garam-garam cup mein serve karo.",
+        "time_minutes": 1
+      }
+    ],
+    "cook_time_minutes": 20,
+    "prep_time_minutes": 8,
+    "soak_required": false,
+    "base_family_size": 4,
+    "spice_level": "mild",
+    "cooking_style": "boiled",
+    "region_origin": "pan-north-indian",
+    "heaviness": "halka",
+    "goes_well_with": [
+      "bread",
+      "khichdi"
+    ],
+    "vibes": [
+      "halki-dish",
+      "sardi-warmth",
+      "bujurg-friendly",
+      "low-oil"
+    ],
+    "tags": [
+      "soup",
+      "shorba",
+      "tamatar",
+      "halka",
+      "winter"
+    ],
+    "thumbnail_url": null,
+    "thumbnail_source": "none",
+    "cooked_count": 0,
+    "source": "curated",
+    "embedding_text": null
+  },
+  {
+    "name_hinglish": "Palak ka Shorba",
+    "name_hindi": "पालक का शोरबा",
+    "description": "Hara-bhara palak shorba — iron se bhara, pet ko halka. Dinner se pehle ek garam cup, bas perfect!",
+    "category": "dal",
+    "meal_type": [
+      "dinner",
+      "snack"
+    ],
+    "diet_type": "veg",
+    "is_vrat_friendly": false,
+    "excluded_items": [],
+    "ingredients": [
+      {
+        "name": "Palak",
+        "prep": "kata",
+        "qty_desi": "3 katori",
+        "qty_metric": "300g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Pyaaz",
+        "prep": "kata",
+        "qty_desi": "1 small",
+        "qty_metric": "60g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Lehsun",
+        "prep": "kuta",
+        "qty_desi": "3 kali",
+        "qty_metric": "9g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Kali mirch",
+        "prep": "kuti",
+        "qty_desi": "quarter chammach",
+        "qty_metric": "1g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Jeera",
+        "prep": "whole",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "fixed"
+      },
+      {
+        "name": "Makhan",
+        "qty_desi": "1 chammach",
+        "qty_metric": "15g",
+        "scale_type": "oil"
+      },
+      {
+        "name": "Namak",
+        "qty_desi": "half chammach",
+        "qty_metric": "3g",
+        "scale_type": "salt"
+      },
+      {
+        "name": "Paani",
+        "qty_desi": "3 katori",
+        "qty_metric": "600ml",
+        "scale_type": "water"
+      }
+    ],
+    "steps": [
+      {
+        "step": 1,
+        "instruction": "Palak, pyaaz, lehsun aur paani daal kar 6-7 minute ubaalo.",
+        "time_minutes": 7
+      },
+      {
+        "step": 2,
+        "instruction": "Thanda karke mixer mein peeskar smooth banao.",
+        "time_minutes": 3
+      },
+      {
+        "step": 3,
+        "instruction": "Makhan mein jeera tadka karo.",
+        "time_minutes": 2
+      },
+      {
+        "step": 4,
+        "instruction": "Palak puree, namak aur kali mirch daal kar 4 minute pakao, gaadha karo.",
+        "time_minutes": 4
+      },
+      {
+        "step": 5,
+        "instruction": "Garam cup mein daal kar upar se kali mirch chhidko.",
+        "time_minutes": 1
+      }
+    ],
+    "cook_time_minutes": 17,
+    "prep_time_minutes": 8,
+    "soak_required": false,
+    "base_family_size": 4,
+    "spice_level": "mild",
+    "cooking_style": "boiled",
+    "region_origin": "pan-north-indian",
+    "heaviness": "halka",
+    "goes_well_with": [
+      "bread",
+      "roti"
+    ],
+    "vibes": [
+      "halki-dish",
+      "protein-rich",
+      "sardi-warmth",
+      "low-oil"
+    ],
+    "tags": [
+      "soup",
+      "shorba",
+      "palak",
+      "iron",
+      "halka"
+    ],
+    "thumbnail_url": null,
+    "thumbnail_source": "none",
+    "cooked_count": 0,
+    "source": "curated",
+    "embedding_text": null
+  },
+  {
+    "name_hinglish": "Mix Veg Shorba",
+    "name_hindi": "मिक्स वेज शोरबा",
+    "description": "Fridge ki saari sabziyon ka garam shorba — bachi sabzi ka jugaad bhi, sehat ka khazana bhi! 🍲",
+    "category": "dal",
+    "meal_type": [
+      "dinner",
+      "snack"
+    ],
+    "diet_type": "veg",
+    "is_vrat_friendly": false,
+    "excluded_items": [],
+    "ingredients": [
+      {
+        "name": "Mili juli sabzi",
+        "prep": "kati (gajar, beans, matar, gobhi)",
+        "qty_desi": "2 katori",
+        "qty_metric": "250g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Tamatar",
+        "prep": "kata",
+        "qty_desi": "1 medium",
+        "qty_metric": "100g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Adrak",
+        "prep": "kisa",
+        "qty_desi": "1 inch",
+        "qty_metric": "10g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Kali mirch",
+        "prep": "kuti",
+        "qty_desi": "quarter chammach",
+        "qty_metric": "1g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Jeera",
+        "prep": "whole",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "fixed"
+      },
+      {
+        "name": "Makhan",
+        "qty_desi": "1 chammach",
+        "qty_metric": "15g",
+        "scale_type": "oil"
+      },
+      {
+        "name": "Namak",
+        "qty_desi": "half chammach",
+        "qty_metric": "3g",
+        "scale_type": "salt"
+      },
+      {
+        "name": "Paani",
+        "qty_desi": "4 katori",
+        "qty_metric": "800ml",
+        "scale_type": "water"
+      }
+    ],
+    "steps": [
+      {
+        "step": 1,
+        "instruction": "Saari sabzi, tamatar, adrak aur paani daal kar 12 minute ubaalo.",
+        "time_minutes": 12
+      },
+      {
+        "step": 2,
+        "instruction": "Thanda karke mixer mein peeskar chaan lo.",
+        "time_minutes": 4
+      },
+      {
+        "step": 3,
+        "instruction": "Makhan mein jeera tadka karo.",
+        "time_minutes": 2
+      },
+      {
+        "step": 4,
+        "instruction": "Chana shorba, namak aur kali mirch daal kar 4 minute pakao.",
+        "time_minutes": 4
+      },
+      {
+        "step": 5,
+        "instruction": "Garam cup mein serve karo, chahe to nimbu ki boond daalo.",
+        "time_minutes": 1
+      }
+    ],
+    "cook_time_minutes": 22,
+    "prep_time_minutes": 10,
+    "soak_required": false,
+    "base_family_size": 4,
+    "spice_level": "mild",
+    "cooking_style": "boiled",
+    "region_origin": "pan-north-indian",
+    "heaviness": "halka",
+    "goes_well_with": [
+      "bread",
+      "toast"
+    ],
+    "vibes": [
+      "halki-dish",
+      "leftover-friendly",
+      "bujurg-friendly",
+      "low-oil"
+    ],
+    "tags": [
+      "soup",
+      "shorba",
+      "mix-veg",
+      "halka",
+      "leftover"
+    ],
+    "thumbnail_url": null,
+    "thumbnail_source": "none",
+    "cooked_count": 0,
+    "source": "curated",
+    "embedding_text": null
+  },
+  {
+    "name_hinglish": "Aam ka Achaar",
+    "name_hindi": "आम का अचार",
+    "description": "Dadi-naani wala kacche aam ka achaar — dhoop mein pakta, har thali ka chhota sa raja. Saalon chale!",
+    "category": "sabzi",
+    "meal_type": [
+      "lunch",
+      "dinner"
+    ],
+    "diet_type": "veg",
+    "is_vrat_friendly": false,
+    "excluded_items": [],
+    "ingredients": [
+      {
+        "name": "Kaccha aam",
+        "prep": "tukde",
+        "qty_desi": "4 katori",
+        "qty_metric": "500g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Sarson tel",
+        "qty_desi": "1 katori",
+        "qty_metric": "200ml",
+        "scale_type": "oil"
+      },
+      {
+        "name": "Saunf",
+        "prep": "kuti",
+        "qty_desi": "2 chammach",
+        "qty_metric": "16g",
+        "scale_type": "fixed"
+      },
+      {
+        "name": "Methi dana",
+        "prep": "kuti",
+        "qty_desi": "1 chammach",
+        "qty_metric": "8g",
+        "scale_type": "fixed"
+      },
+      {
+        "name": "Rai dana",
+        "prep": "kuti",
+        "qty_desi": "1 chammach",
+        "qty_metric": "8g",
+        "scale_type": "fixed"
+      },
+      {
+        "name": "Haldi",
+        "qty_desi": "1 chammach",
+        "qty_metric": "4g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Lal mirch powder",
+        "qty_desi": "2 chammach",
+        "qty_metric": "10g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Hing",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "fixed"
+      },
+      {
+        "name": "Namak",
+        "qty_desi": "3 chammach",
+        "qty_metric": "45g",
+        "scale_type": "salt"
+      }
+    ],
+    "steps": [
+      {
+        "step": 1,
+        "instruction": "Aam ke tukde dho kar achhe se sukha lo, ek bhi boond paani na rahe.",
+        "time_minutes": 30
+      },
+      {
+        "step": 2,
+        "instruction": "Kuti saunf, methi, rai, haldi, lal mirch, hing aur namak mila lo.",
+        "time_minutes": 5
+      },
+      {
+        "step": 3,
+        "instruction": "Aam ke tukdon mein yeh masala achhe se lapeto.",
+        "time_minutes": 5
+      },
+      {
+        "step": 4,
+        "instruction": "Sarson tel garam karke thanda karo, achaar par daal kar mix karo.",
+        "time_minutes": 5
+      },
+      {
+        "step": 5,
+        "instruction": "Kaanch ke jaar mein bhar kar 4-5 din dhoop dikhao, roz hilao — achaar taiyaar.",
+        "time_minutes": 5
+      }
+    ],
+    "cook_time_minutes": 10,
+    "prep_time_minutes": 40,
+    "soak_required": false,
+    "base_family_size": 4,
+    "spice_level": "hot",
+    "cooking_style": "sukha",
+    "region_origin": "UP",
+    "heaviness": "halka",
+    "goes_well_with": [
+      "dal-chawal",
+      "paratha",
+      "khichdi"
+    ],
+    "vibes": [
+      "tyohar-special",
+      "leftover-friendly",
+      "guest-special"
+    ],
+    "tags": [
+      "achaar",
+      "aam",
+      "pickle",
+      "summer",
+      "north-indian"
+    ],
+    "thumbnail_url": null,
+    "thumbnail_source": "none",
+    "cooked_count": 0,
+    "source": "curated",
+    "embedding_text": null
+  },
+  {
+    "name_hinglish": "Nimbu ka Achaar",
+    "name_hindi": "नींबू का अचार",
+    "description": "Khatta-meetha-namkeen nimbu achaar — hazma bhi theek, swaad bhi. Khichdi ke saath toh jaan hai!",
+    "category": "sabzi",
+    "meal_type": [
+      "lunch",
+      "dinner"
+    ],
+    "diet_type": "veg",
+    "is_vrat_friendly": false,
+    "excluded_items": [],
+    "ingredients": [
+      {
+        "name": "Nimbu",
+        "prep": "tukde",
+        "qty_desi": "8 piece",
+        "qty_metric": "400g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Kala namak",
+        "qty_desi": "2 chammach",
+        "qty_metric": "30g",
+        "scale_type": "salt"
+      },
+      {
+        "name": "Namak",
+        "qty_desi": "2 chammach",
+        "qty_metric": "30g",
+        "scale_type": "salt"
+      },
+      {
+        "name": "Lal mirch powder",
+        "qty_desi": "1 chammach",
+        "qty_metric": "5g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Bhuna jeera powder",
+        "qty_desi": "1 chammach",
+        "qty_metric": "5g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Kali mirch",
+        "prep": "kuti",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Gud",
+        "prep": "kisa",
+        "qty_desi": "half katori",
+        "qty_metric": "80g",
+        "scale_type": "linear"
+      }
+    ],
+    "steps": [
+      {
+        "step": 1,
+        "instruction": "Nimbu dho kar achhe se sukha lo, har ek ke 4-6 tukde kar lo.",
+        "time_minutes": 10
+      },
+      {
+        "step": 2,
+        "instruction": "Kala namak, safed namak, lal mirch, jeera aur kali mirch mila lo.",
+        "time_minutes": 3
+      },
+      {
+        "step": 3,
+        "instruction": "Nimbu tukdon mein masala aur gud milakar kaanch ke jaar mein bhar do.",
+        "time_minutes": 5
+      },
+      {
+        "step": 4,
+        "instruction": "Roz hilate hue 8-10 din dhoop dikhao, nimbu galne aur rang badalne tak.",
+        "time_minutes": 5
+      },
+      {
+        "step": 5,
+        "instruction": "Tayyar achaar ko thande jagah rakho, har khaane ke saath thoda nikaalo.",
+        "time_minutes": 2
+      }
+    ],
+    "cook_time_minutes": 5,
+    "prep_time_minutes": 15,
+    "soak_required": false,
+    "base_family_size": 4,
+    "spice_level": "medium",
+    "cooking_style": "sukha",
+    "region_origin": "pan-north-indian",
+    "heaviness": "halka",
+    "goes_well_with": [
+      "khichdi",
+      "dal-chawal",
+      "paratha"
+    ],
+    "vibes": [
+      "bujurg-friendly",
+      "leftover-friendly",
+      "garmi-cool"
+    ],
+    "tags": [
+      "achaar",
+      "nimbu",
+      "pickle",
+      "hazma",
+      "north-indian"
+    ],
+    "thumbnail_url": null,
+    "thumbnail_source": "none",
+    "cooked_count": 0,
+    "source": "curated",
+    "embedding_text": null
+  },
+  {
+    "name_hinglish": "Lehsun ki Chutney",
+    "name_hindi": "लहसुन की चटनी",
+    "description": "Teekhi-tamatari lehsun chutney — Rajasthani thali ka tadka. Baati, roti ya paratha ke saath aag laga de! 🔥",
+    "category": "sabzi",
+    "meal_type": [
+      "lunch",
+      "dinner"
+    ],
+    "diet_type": "veg",
+    "is_vrat_friendly": false,
+    "excluded_items": [],
+    "ingredients": [
+      {
+        "name": "Lehsun",
+        "prep": "chhila",
+        "qty_desi": "1 katori",
+        "qty_metric": "100g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Sookhi lal mirch",
+        "prep": "bhigoyi",
+        "qty_desi": "8 piece",
+        "qty_metric": "20g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Jeera",
+        "prep": "whole",
+        "qty_desi": "1 chammach",
+        "qty_metric": "5g",
+        "scale_type": "fixed"
+      },
+      {
+        "name": "Amchur",
+        "qty_desi": "1 chammach",
+        "qty_metric": "5g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Sarson tel",
+        "qty_desi": "2 chammach",
+        "qty_metric": "30ml",
+        "scale_type": "oil"
+      },
+      {
+        "name": "Namak",
+        "qty_desi": "1 chammach",
+        "qty_metric": "5g",
+        "scale_type": "salt"
+      }
+    ],
+    "steps": [
+      {
+        "step": 1,
+        "instruction": "Sookhi lal mirch ko garam paani mein 20 minute bhigo do, beej nikaal do.",
+        "time_minutes": 20
+      },
+      {
+        "step": 2,
+        "instruction": "Lehsun, bhigoyi mirch, jeera, amchur aur namak ko peeskar gaadha paste banao.",
+        "time_minutes": 5
+      },
+      {
+        "step": 3,
+        "instruction": "Sarson tel garam karo, halka thanda karke paste daalo.",
+        "time_minutes": 2
+      },
+      {
+        "step": 4,
+        "instruction": "Dheemi aanch par 5-6 minute bhuno jab tak tel alag na ho jaaye.",
+        "time_minutes": 6
+      },
+      {
+        "step": 5,
+        "instruction": "Thanda karke jaar mein bhar lo, baati ya paratha ke saath thoda-thoda lo.",
+        "time_minutes": 2
+      }
+    ],
+    "cook_time_minutes": 12,
+    "prep_time_minutes": 20,
+    "soak_required": false,
+    "base_family_size": 4,
+    "spice_level": "hot",
+    "cooking_style": "bhuna",
+    "region_origin": "Rajasthan",
+    "heaviness": "halka",
+    "goes_well_with": [
+      "baati",
+      "roti",
+      "paratha"
+    ],
+    "vibes": [
+      "teekha-alert",
+      "tyohar-special",
+      "leftover-friendly"
+    ],
+    "tags": [
+      "chutney",
+      "lehsun",
+      "teekhi",
+      "rajasthan",
+      "north-indian"
+    ],
+    "thumbnail_url": null,
+    "thumbnail_source": "none",
+    "cooked_count": 0,
+    "source": "curated",
+    "embedding_text": null
+  },
+  {
+    "name_hinglish": "Hara Choliya Masala",
+    "name_hindi": "हरा छोलिया मसाला",
+    "description": "Sardi ke hare choliye ki masaledar sabzi — Haryana ke kheton ki taazgi. Roti ke saath ekdum dhaasu! 🧡",
+    "category": "sabzi",
+    "meal_type": [
+      "lunch",
+      "dinner"
+    ],
+    "diet_type": "veg",
+    "is_vrat_friendly": false,
+    "excluded_items": [],
+    "ingredients": [
+      {
+        "name": "Hara choliya",
+        "qty_desi": "2 katori",
+        "qty_metric": "300g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Pyaaz",
+        "prep": "kata",
+        "qty_desi": "1 medium",
+        "qty_metric": "100g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Tamatar",
+        "prep": "kata",
+        "qty_desi": "1 medium",
+        "qty_metric": "100g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Adrak-lehsun paste",
+        "qty_desi": "1 chammach",
+        "qty_metric": "10g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Haldi",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Lal mirch powder",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Dhaniya powder",
+        "qty_desi": "1 chammach",
+        "qty_metric": "5g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Jeera",
+        "prep": "whole",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "fixed"
+      },
+      {
+        "name": "Tel",
+        "qty_desi": "2 chammach",
+        "qty_metric": "30ml",
+        "scale_type": "oil"
+      },
+      {
+        "name": "Namak",
+        "qty_desi": "1 chammach",
+        "qty_metric": "5g",
+        "scale_type": "salt"
+      },
+      {
+        "name": "Paani",
+        "qty_desi": "1 katori",
+        "qty_metric": "200ml",
+        "scale_type": "water"
+      }
+    ],
+    "steps": [
+      {
+        "step": 1,
+        "instruction": "Tel mein jeera tadka kar pyaaz golden bhuno.",
+        "time_minutes": 5
+      },
+      {
+        "step": 2,
+        "instruction": "Adrak-lehsun aur tamatar daal kar haldi-mirch-dhaniya ke saath bhuno.",
+        "time_minutes": 6
+      },
+      {
+        "step": 3,
+        "instruction": "Hara choliya daal kar 2 minute masale mein bhuno.",
+        "time_minutes": 2
+      },
+      {
+        "step": 4,
+        "instruction": "Thoda paani aur namak daal kar dhak kar 12 minute galne tak pakao.",
+        "time_minutes": 12
+      },
+      {
+        "step": 5,
+        "instruction": "Hara dhaniya daal kar roti ke saath garam serve karo.",
+        "time_minutes": 1
+      }
+    ],
+    "cook_time_minutes": 26,
+    "prep_time_minutes": 12,
+    "soak_required": false,
+    "base_family_size": 4,
+    "spice_level": "medium",
+    "cooking_style": "tariwala",
+    "region_origin": "Haryana",
+    "heaviness": "medium",
+    "goes_well_with": [
+      "roti",
+      "chawal"
+    ],
+    "vibes": [
+      "protein-rich",
+      "sardi-warmth",
+      "comfort-food"
+    ],
+    "tags": [
+      "sabzi",
+      "choliya",
+      "green-chickpea",
+      "winter",
+      "haryana"
+    ],
+    "thumbnail_url": null,
+    "thumbnail_source": "none",
+    "cooked_count": 0,
+    "source": "curated",
+    "embedding_text": null
+  },
+  {
+    "name_hinglish": "Bhutte ka Kees",
+    "name_hindi": "भुट्टे का कीस",
+    "description": "Indori barish ka favourite — kise hue bhutte ko doodh mein pakaya, upar nimbu-nariyal. Ek baar khaya to yaad rahega! 🌽",
+    "category": "sabzi",
+    "meal_type": [
+      "snack",
+      "lunch"
+    ],
+    "diet_type": "veg",
+    "is_vrat_friendly": false,
+    "excluded_items": [],
+    "ingredients": [
+      {
+        "name": "Bhutta",
+        "prep": "kisa",
+        "qty_desi": "3 bhutte",
+        "qty_metric": "400g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Doodh",
+        "qty_desi": "1 katori",
+        "qty_metric": "200ml",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Hari mirch",
+        "prep": "kati",
+        "qty_desi": "2 piece",
+        "qty_metric": "6g",
+        "scale_type": "fixed"
+      },
+      {
+        "name": "Rai dana",
+        "prep": "whole",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "fixed"
+      },
+      {
+        "name": "Haldi",
+        "qty_desi": "quarter chammach",
+        "qty_metric": "1g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Hing",
+        "qty_desi": "1 chutki",
+        "qty_metric": "1g",
+        "scale_type": "fixed"
+      },
+      {
+        "name": "Ghee",
+        "qty_desi": "1 chammach",
+        "qty_metric": "15ml",
+        "scale_type": "oil"
+      },
+      {
+        "name": "Namak",
+        "qty_desi": "half chammach",
+        "qty_metric": "3g",
+        "scale_type": "salt"
+      },
+      {
+        "name": "Nariyal",
+        "prep": "kisa",
+        "qty_desi": "2 chammach",
+        "qty_metric": "15g",
+        "scale_type": "fixed"
+      }
+    ],
+    "steps": [
+      {
+        "step": 1,
+        "instruction": "Ghee mein rai, hing aur hari mirch ka tadka lagao.",
+        "time_minutes": 2
+      },
+      {
+        "step": 2,
+        "instruction": "Kisa bhutta, haldi aur namak daal kar 4-5 minute bhuno.",
+        "time_minutes": 5
+      },
+      {
+        "step": 3,
+        "instruction": "Doodh daal kar dheemi aanch par gaadha hone tak pakao.",
+        "time_minutes": 8
+      },
+      {
+        "step": 4,
+        "instruction": "Upar se nimbu nichod kar kisa nariyal aur hara dhaniya daalo.",
+        "time_minutes": 1
+      }
+    ],
+    "cook_time_minutes": 18,
+    "prep_time_minutes": 12,
+    "soak_required": false,
+    "base_family_size": 4,
+    "spice_level": "mild",
+    "cooking_style": "bhuna",
+    "region_origin": "MP",
+    "heaviness": "medium",
+    "goes_well_with": [
+      "chai",
+      "roti"
+    ],
+    "vibes": [
+      "monsoon-special",
+      "bacchon-ki-fav",
+      "garmi-cool"
+    ],
+    "tags": [
+      "bhutta",
+      "corn",
+      "kees",
+      "monsoon",
+      "mp",
+      "indori"
+    ],
+    "thumbnail_url": null,
+    "thumbnail_source": "none",
+    "cooked_count": 0,
+    "source": "curated",
+    "embedding_text": null
+  },
+  {
+    "name_hinglish": "Ram Ladoo",
+    "name_hindi": "राम लड्डू",
+    "description": "Dilli ki gali-gali ka chatpata Ram ladoo — moong dal ke garam pakode, upar mooli aur teekhi chutney. Barish ho to maza dugna!",
+    "category": "nashta",
+    "meal_type": [
+      "snack"
+    ],
+    "diet_type": "veg",
+    "is_vrat_friendly": false,
+    "excluded_items": [],
+    "ingredients": [
+      {
+        "name": "Moong dal",
+        "qty_desi": "1 katori",
+        "qty_metric": "180g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Chana dal",
+        "qty_desi": "quarter katori",
+        "qty_metric": "45g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Mooli",
+        "prep": "kisi",
+        "qty_desi": "1 medium",
+        "qty_metric": "150g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Hari mirch",
+        "prep": "kati",
+        "qty_desi": "2 piece",
+        "qty_metric": "6g",
+        "scale_type": "fixed"
+      },
+      {
+        "name": "Hing",
+        "qty_desi": "1 chutki",
+        "qty_metric": "1g",
+        "scale_type": "fixed"
+      },
+      {
+        "name": "Chaat masala",
+        "qty_desi": "1 chammach",
+        "qty_metric": "5g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Tel",
+        "qty_desi": "2 chammach",
+        "qty_metric": "30ml",
+        "scale_type": "oil"
+      },
+      {
+        "name": "Namak",
+        "qty_desi": "half chammach",
+        "qty_metric": "3g",
+        "scale_type": "salt"
+      }
+    ],
+    "steps": [
+      {
+        "step": 1,
+        "instruction": "Dono dal ko 3-4 ghante bhigo kar darkhdara peeso, hari mirch-hing mila do.",
+        "time_minutes": 15
+      },
+      {
+        "step": 2,
+        "instruction": "Batter ko phent kar halka karo taaki pakode phoole.",
+        "time_minutes": 4
+      },
+      {
+        "step": 3,
+        "instruction": "Garam tel mein chote-chote ladoo dheemi-medium aanch par golden talein.",
+        "time_minutes": 10
+      },
+      {
+        "step": 4,
+        "instruction": "Upar kisi mooli, chaat masala aur teekhi hari chutney daal kar turant khao.",
+        "time_minutes": 2
+      }
+    ],
+    "cook_time_minutes": 20,
+    "prep_time_minutes": 15,
+    "soak_required": false,
+    "base_family_size": 4,
+    "spice_level": "medium",
+    "cooking_style": "fried",
+    "region_origin": "Delhi-NCR",
+    "heaviness": "medium",
+    "goes_well_with": [
+      "hari-chutney",
+      "chai"
+    ],
+    "vibes": [
+      "monsoon-special",
+      "teekha-alert",
+      "bacchon-ki-fav"
+    ],
+    "tags": [
+      "nashta",
+      "ram-ladoo",
+      "moong-dal",
+      "street-food",
+      "delhi",
+      "chaat"
+    ],
+    "thumbnail_url": null,
+    "thumbnail_source": "none",
+    "cooked_count": 0,
+    "source": "curated",
+    "embedding_text": null
+  }
+]

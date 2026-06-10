@@ -1,0 +1,585 @@
+[
+  {
+    "name_hinglish": "Arbi Masala",
+    "name_hindi": "अरबी मसाला",
+    "description": "Chatpati arbi jo ungliyaan chaatne pe majboor kar de. Halka sukha-tariwala, roti ke saath laajawaab.",
+    "category": "sabzi",
+    "meal_type": [
+      "lunch",
+      "dinner"
+    ],
+    "diet_type": "veg",
+    "is_vrat_friendly": false,
+    "excluded_items": [],
+    "ingredients": [
+      {
+        "name": "Arbi",
+        "prep": "ubli, tukde",
+        "qty_desi": "2 katori",
+        "qty_metric": "400g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Tamatar",
+        "prep": "pisa hua",
+        "qty_desi": "2 medium",
+        "qty_metric": "200g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Adrak-lehsun paste",
+        "qty_desi": "1 chammach",
+        "qty_metric": "15g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Haldi",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Lal mirch powder",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Dhaniya powder",
+        "qty_desi": "1 chammach",
+        "qty_metric": "5g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Amchur",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Ajwain",
+        "prep": "whole",
+        "qty_desi": "quarter chammach",
+        "qty_metric": "1g",
+        "scale_type": "fixed"
+      },
+      {
+        "name": "Jeera",
+        "prep": "whole",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "fixed"
+      },
+      {
+        "name": "Tel",
+        "qty_desi": "2 chammach",
+        "qty_metric": "30ml",
+        "scale_type": "oil"
+      },
+      {
+        "name": "Namak",
+        "qty_desi": "1 chammach",
+        "qty_metric": "5g",
+        "scale_type": "salt"
+      },
+      {
+        "name": "Paani",
+        "qty_desi": "half katori",
+        "qty_metric": "100ml",
+        "scale_type": "water"
+      }
+    ],
+    "steps": [
+      {
+        "step": 1,
+        "instruction": "Ubli arbi ko halka daba kar tel mein crisp tal lo, alag rakho.",
+        "time_minutes": 8
+      },
+      {
+        "step": 2,
+        "instruction": "Usi tel mein jeera-ajwain tadka kar pisa tamatar daalo.",
+        "time_minutes": 3
+      },
+      {
+        "step": 3,
+        "instruction": "Adrak-lehsun, haldi, mirch, dhaniya daal kar tel chhodne tak bhuno.",
+        "time_minutes": 6
+      },
+      {
+        "step": 4,
+        "instruction": "Arbi, namak aur thoda paani daal kar dhak kar 5 minute pakao.",
+        "time_minutes": 5
+      },
+      {
+        "step": 5,
+        "instruction": "Amchur chhidak kar hara dhaniya se sajao, garam serve karo.",
+        "time_minutes": 1
+      }
+    ],
+    "cook_time_minutes": 23,
+    "prep_time_minutes": 15,
+    "soak_required": false,
+    "base_family_size": 4,
+    "spice_level": "medium",
+    "cooking_style": "tariwala",
+    "region_origin": "UP",
+    "heaviness": "medium",
+    "goes_well_with": [
+      "roti",
+      "poori"
+    ],
+    "vibes": [
+      "comfort-food",
+      "teekha-alert",
+      "tiffin-ready"
+    ],
+    "tags": [
+      "sabzi",
+      "arbi",
+      "north-indian"
+    ],
+    "thumbnail_url": null,
+    "thumbnail_source": "none",
+    "cooked_count": 0,
+    "source": "curated",
+    "embedding_text": null
+  },
+  {
+    "name_hinglish": "Soya Chunk Curry",
+    "name_hindi": "सोया कर्री",
+    "description": "Protein ka tadka! Nutri ki nutritious gravy — bacchon ko bhi pasand aur sehat ko bhi.",
+    "category": "sabzi",
+    "meal_type": [
+      "lunch",
+      "dinner"
+    ],
+    "diet_type": "veg",
+    "is_vrat_friendly": false,
+    "excluded_items": [],
+    "ingredients": [
+      {
+        "name": "Soya chunks",
+        "prep": "bhigoye, nichode",
+        "qty_desi": "1 katori",
+        "qty_metric": "100g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Pyaz",
+        "prep": "pisa hua",
+        "qty_desi": "1 medium",
+        "qty_metric": "100g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Tamatar",
+        "prep": "pisa hua",
+        "qty_desi": "2 medium",
+        "qty_metric": "200g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Adrak-lehsun paste",
+        "qty_desi": "1 chammach",
+        "qty_metric": "15g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Haldi",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Lal mirch powder",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Garam masala",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Jeera",
+        "prep": "whole",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "fixed"
+      },
+      {
+        "name": "Tel",
+        "qty_desi": "2 chammach",
+        "qty_metric": "30ml",
+        "scale_type": "oil"
+      },
+      {
+        "name": "Namak",
+        "qty_desi": "1 chammach",
+        "qty_metric": "5g",
+        "scale_type": "salt"
+      },
+      {
+        "name": "Paani",
+        "qty_desi": "1.5 katori",
+        "qty_metric": "300ml",
+        "scale_type": "water"
+      }
+    ],
+    "steps": [
+      {
+        "step": 1,
+        "instruction": "Soya chunks ko garam paani mein 10 minute bhigo kar nichod lo.",
+        "time_minutes": 10
+      },
+      {
+        "step": 2,
+        "instruction": "Tel mein jeera tadka kar pisa pyaz golden bhuno.",
+        "time_minutes": 6
+      },
+      {
+        "step": 3,
+        "instruction": "Adrak-lehsun aur pisa tamatar daal kar haldi-mirch ke saath bhuno.",
+        "time_minutes": 7
+      },
+      {
+        "step": 4,
+        "instruction": "Soya chunks, namak aur paani daal kar 8 minute pakao.",
+        "time_minutes": 8
+      },
+      {
+        "step": 5,
+        "instruction": "Garam masala milao, hara dhaniya daal kar chawal ke saath do.",
+        "time_minutes": 1
+      }
+    ],
+    "cook_time_minutes": 32,
+    "prep_time_minutes": 12,
+    "soak_required": false,
+    "base_family_size": 4,
+    "spice_level": "medium",
+    "cooking_style": "tariwala",
+    "region_origin": "pan-north-indian",
+    "heaviness": "medium",
+    "goes_well_with": [
+      "chawal",
+      "roti"
+    ],
+    "vibes": [
+      "protein-rich",
+      "taakat-wali",
+      "bacchon-ki-fav"
+    ],
+    "tags": [
+      "sabzi",
+      "soya",
+      "protein-rich",
+      "north-indian"
+    ],
+    "thumbnail_url": null,
+    "thumbnail_source": "none",
+    "cooked_count": 0,
+    "source": "curated",
+    "embedding_text": null
+  },
+  {
+    "name_hinglish": "Bhindi Masala Gravy",
+    "name_hindi": "भिंडी मसाला ग्रेवी",
+    "description": "Tariwali bhindi jo dum pe pakti hai — pyaz-tamatar ki gravy mein lipti, roti ke saath sona.",
+    "category": "sabzi",
+    "meal_type": [
+      "lunch",
+      "dinner"
+    ],
+    "diet_type": "veg",
+    "is_vrat_friendly": false,
+    "excluded_items": [],
+    "ingredients": [
+      {
+        "name": "Bhindi",
+        "prep": "kati, tali",
+        "qty_desi": "2 katori",
+        "qty_metric": "300g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Pyaz",
+        "prep": "barik kati",
+        "qty_desi": "2 medium",
+        "qty_metric": "200g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Tamatar",
+        "prep": "pisa hua",
+        "qty_desi": "2 medium",
+        "qty_metric": "200g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Adrak-lehsun paste",
+        "qty_desi": "1 chammach",
+        "qty_metric": "15g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Haldi",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Lal mirch powder",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Dhaniya powder",
+        "qty_desi": "1 chammach",
+        "qty_metric": "5g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Amchur",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Jeera",
+        "prep": "whole",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "fixed"
+      },
+      {
+        "name": "Tel",
+        "qty_desi": "3 chammach",
+        "qty_metric": "45ml",
+        "scale_type": "oil"
+      },
+      {
+        "name": "Namak",
+        "qty_desi": "1 chammach",
+        "qty_metric": "5g",
+        "scale_type": "salt"
+      },
+      {
+        "name": "Paani",
+        "qty_desi": "half katori",
+        "qty_metric": "100ml",
+        "scale_type": "water"
+      }
+    ],
+    "steps": [
+      {
+        "step": 1,
+        "instruction": "Kati bhindi ko tel mein crisp tak fry karke nikal lo, lasdaar pan nikalne do.",
+        "time_minutes": 8
+      },
+      {
+        "step": 2,
+        "instruction": "Usi tel mein jeera tadka kar pyaz golden bhuno.",
+        "time_minutes": 6
+      },
+      {
+        "step": 3,
+        "instruction": "Adrak-lehsun, pisa tamatar, haldi-mirch-dhaniya daal kar tel chhodne tak bhuno.",
+        "time_minutes": 7
+      },
+      {
+        "step": 4,
+        "instruction": "Thoda paani aur namak daal kar gravy banao.",
+        "time_minutes": 3
+      },
+      {
+        "step": 5,
+        "instruction": "Tali bhindi daal kar dhak kar dum pe 4 minute pakao.",
+        "time_minutes": 4
+      },
+      {
+        "step": 6,
+        "instruction": "Amchur chhidak kar serve karo.",
+        "time_minutes": 1
+      }
+    ],
+    "cook_time_minutes": 29,
+    "prep_time_minutes": 15,
+    "soak_required": false,
+    "base_family_size": 4,
+    "spice_level": "medium",
+    "cooking_style": "dum",
+    "region_origin": "pan-north-indian",
+    "heaviness": "medium",
+    "goes_well_with": [
+      "roti",
+      "chawal"
+    ],
+    "vibes": [
+      "comfort-food",
+      "guest-special",
+      "monsoon-special"
+    ],
+    "tags": [
+      "sabzi",
+      "bhindi",
+      "gravy",
+      "north-indian"
+    ],
+    "thumbnail_url": null,
+    "thumbnail_source": "none",
+    "cooked_count": 0,
+    "source": "curated",
+    "embedding_text": null
+  },
+  {
+    "name_hinglish": "Egg Curry",
+    "name_hindi": "अंडा कर्री",
+    "description": "Sunday special anda curry — chatpati gravy mein ubla anda doob ke aata hai. Chawal ke saath ekdum mast.",
+    "category": "sabzi",
+    "meal_type": [
+      "lunch",
+      "dinner"
+    ],
+    "diet_type": "non-veg",
+    "is_vrat_friendly": false,
+    "excluded_items": [
+      "egg"
+    ],
+    "ingredients": [
+      {
+        "name": "Ande",
+        "prep": "uble",
+        "qty_desi": "4 ande",
+        "qty_metric": "4 pcs",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Pyaz",
+        "prep": "pisa hua",
+        "qty_desi": "2 medium",
+        "qty_metric": "200g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Tamatar",
+        "prep": "pisa hua",
+        "qty_desi": "2 medium",
+        "qty_metric": "200g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Adrak-lehsun paste",
+        "qty_desi": "1 chammach",
+        "qty_metric": "15g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Haldi",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Lal mirch powder",
+        "qty_desi": "1 chammach",
+        "qty_metric": "5g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Garam masala",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Jeera",
+        "prep": "whole",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "fixed"
+      },
+      {
+        "name": "Tel",
+        "qty_desi": "2 chammach",
+        "qty_metric": "30ml",
+        "scale_type": "oil"
+      },
+      {
+        "name": "Namak",
+        "qty_desi": "1 chammach",
+        "qty_metric": "5g",
+        "scale_type": "salt"
+      },
+      {
+        "name": "Paani",
+        "qty_desi": "1.5 katori",
+        "qty_metric": "300ml",
+        "scale_type": "water"
+      }
+    ],
+    "steps": [
+      {
+        "step": 1,
+        "instruction": "Uble ande chheel kar halki haldi-mirch laga kar tel mein halka fry karo.",
+        "time_minutes": 5
+      },
+      {
+        "step": 2,
+        "instruction": "Usi tel mein jeera tadka kar pisa pyaz golden bhuno.",
+        "time_minutes": 7
+      },
+      {
+        "step": 3,
+        "instruction": "Adrak-lehsun, pisa tamatar, haldi-mirch daal kar tel chhodne tak bhuno.",
+        "time_minutes": 7
+      },
+      {
+        "step": 4,
+        "instruction": "Paani aur namak daal kar gravy ubaalo.",
+        "time_minutes": 5
+      },
+      {
+        "step": 5,
+        "instruction": "Fry kiye ande daal kar 4 minute pakao, garam masala milao.",
+        "time_minutes": 4
+      },
+      {
+        "step": 6,
+        "instruction": "Hara dhaniya daal kar chawal ke saath garam serve karo.",
+        "time_minutes": 1
+      }
+    ],
+    "cook_time_minutes": 29,
+    "prep_time_minutes": 12,
+    "soak_required": false,
+    "base_family_size": 4,
+    "spice_level": "hot",
+    "cooking_style": "tariwala",
+    "region_origin": "pan-north-indian",
+    "heaviness": "medium",
+    "goes_well_with": [
+      "chawal",
+      "roti"
+    ],
+    "vibes": [
+      "protein-rich",
+      "teekha-alert",
+      "guest-special"
+    ],
+    "tags": [
+      "sabzi",
+      "egg",
+      "curry",
+      "non-veg"
+    ],
+    "thumbnail_url": null,
+    "thumbnail_source": "none",
+    "cooked_count": 0,
+    "source": "curated",
+    "embedding_text": null
+  }
+]
