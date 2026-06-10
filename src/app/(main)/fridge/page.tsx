@@ -218,7 +218,7 @@ export default function FridgePage() {
           type="button"
           disabled={remaining <= 0 || loading}
           onClick={() => galleryInputRef.current?.click()}
-          className="mt-6 flex flex-col items-center justify-center gap-2 rounded-[14px] border-2 border-dashed disabled:opacity-40"
+          className="tap-spring mt-6 flex flex-col items-center justify-center gap-2 rounded-[14px] border-2 border-dashed disabled:opacity-40"
           style={{ borderColor: '#F5A55B', background: '#FFF0E6', minHeight: 120 }}
         >
           <span className="text-[28px]" style={{ color: '#E8640C' }}>📷</span>
@@ -231,7 +231,7 @@ export default function FridgePage() {
             type="button"
             disabled={remaining <= 0 || loading}
             onClick={() => cameraInputRef.current?.click()}
-            className="flex h-12 flex-1 items-center justify-center gap-1.5 rounded-xl border border-[#E8DDD0] bg-white text-[13px] font-medium text-[#1A1A1A] disabled:opacity-40"
+            className="tap-spring flex h-12 flex-1 items-center justify-center gap-1.5 rounded-xl border border-[#E8DDD0] bg-white text-[13px] font-medium text-[#1A1A1A] disabled:opacity-40"
           >
             📷 Camera se lo
           </button>
@@ -239,7 +239,7 @@ export default function FridgePage() {
             type="button"
             disabled={remaining <= 0 || loading}
             onClick={() => galleryInputRef.current?.click()}
-            className="flex h-12 flex-1 items-center justify-center gap-1.5 rounded-xl border border-[#E8DDD0] bg-white text-[13px] font-medium text-[#1A1A1A] disabled:opacity-40"
+            className="tap-spring flex h-12 flex-1 items-center justify-center gap-1.5 rounded-xl border border-[#E8DDD0] bg-white text-[13px] font-medium text-[#1A1A1A] disabled:opacity-40"
           >
             🖼️ Gallery se upload karo
           </button>
@@ -279,7 +279,7 @@ export default function FridgePage() {
             type="button"
             disabled={chips.length === 0 || loading}
             onClick={handleConfirm}
-            className="flex h-14 w-full items-center justify-center rounded-2xl text-[15px] font-bold text-white disabled:opacity-40"
+            className="tap-spring flex h-14 w-full items-center justify-center rounded-2xl text-[15px] font-bold text-white disabled:opacity-40"
             style={{ background: '#2D6A4F' }}
           >
             {loading ? 'Dhundh rahi hoon...' : 'Haan, yahi sahi hai ✓'}
@@ -309,7 +309,7 @@ export default function FridgePage() {
               <button
                 type="button"
                 onClick={handleGenerate}
-                className="flex h-14 w-full items-center justify-center rounded-2xl text-[15px] font-bold text-white"
+                className="tap-spring flex h-14 w-full items-center justify-center rounded-2xl text-[15px] font-bold text-white"
                 style={{ background: '#E8640C' }}
               >
                 Haan, Arti se banwao!
@@ -320,7 +320,7 @@ export default function FridgePage() {
               <button
                 type="button"
                 onClick={resetToCapture}
-                className="flex h-12 items-center gap-2 rounded-xl border border-[#E8DDD0] bg-white px-6 text-[13px] font-medium text-[#1A1A1A]"
+                className="tap-spring flex h-12 items-center gap-2 rounded-xl border border-[#E8DDD0] bg-white px-6 text-[13px] font-medium text-[#1A1A1A]"
               >
                 Fir se try karo
               </button>
@@ -349,7 +349,7 @@ export default function FridgePage() {
       <button
         type="button"
         onClick={resetToCapture}
-        className="mt-6 flex h-12 w-full items-center justify-center rounded-xl border border-[#E8DDD0] bg-white text-[13px] font-medium text-[#1A1A1A]"
+        className="tap-spring mt-6 flex h-12 w-full items-center justify-center rounded-xl border border-[#E8DDD0] bg-white text-[13px] font-medium text-[#1A1A1A]"
       >
         📷 Fir se scan karo
       </button>

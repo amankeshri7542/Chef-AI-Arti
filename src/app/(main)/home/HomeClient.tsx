@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Recipe, DietType } from '@/types/index';
 import VratToggle from '@/components/VratToggle/VratToggle';
-import QuickActions from '@/components/QuickActions/QuickActions';
 import FloatingChatButton from '@/components/FloatingChatButton/FloatingChatButton';
 import PullToRefresh from '@/components/PullToRefresh/PullToRefresh';
 
@@ -34,18 +34,17 @@ const CATEGORY_BG: Record<string, string> = {
   default: 'linear-gradient(135deg,#FDDBC2,#FBC08A)',
 };
 
-function greeting(name: string | null): string {
+function timeSubtitle(): string {
   const h = new Date().getHours();
-  const n = name ? name.split(' ')[0] : '';
-  const tail = n ? `, ${n}` : '';
-  if (h >= 6 && h < 11) return `Subah ka namaskar${tail}! ☀️`;
-  if (h >= 11 && h < 16) return `Dopahar mein kya bana rahi hain${tail}? 🍽️`;
-  if (h >= 16 && h < 19) return `Chai ke saath kuch snack?${n ? ` ${n}` : ''} 🍵`;
-  if (h >= 19 && h < 22) return `Dinner ka time ho gaya${tail}! 🌙`;
-  return `Raat ka khaana soch rahi hain?${n ? ` ${n}` : ''} 🌛`;
+  const day = WEEKDAYS_HI[new Date().getDay()];
+  if (h >= 6 && h < 11) return `${day} ki subah — nashte mein kya banayein? ☀️`;
+  if (h >= 11 && h < 16) return `Dopahar ka khaana soch rahi hain? 🍽️`;
+  if (h >= 16 && h < 19) return `Chai ke saath kuch snack? 🍵`;
+  if (h >= 19 && h < 22) return `Dinner ka time ho gaya! 🌙`;
+  return `Raat ka khaana soch rahi hain? 🌛`;
 }
 
-function FeaturedCard({ recipe, onClick }: { recipe: Recipe; onClick: () => void }) {
+function FeaturedCard({ recipe, onClick, index }: { recipe: Recipe; onClick: () => void; index: number }) {
   const emoji = CATEGORY_EMOJI[recipe.category] ?? CATEGORY_EMOJI.default;
   const bg = CATEGORY_BG[recipe.category] ?? CATEGORY_BG.default;
   const totalMin = recipe.cook_time_minutes + recipe.prep_time_minutes;
@@ -54,17 +53,18 @@ function FeaturedCard({ recipe, onClick }: { recipe: Recipe; onClick: () => void
     <button
       type="button"
       onClick={onClick}
-      className="flex flex-shrink-0 flex-col overflow-hidden rounded-2xl text-left transition-transform active:scale-95"
-      style={{ width: 160, height: 180, background: '#FFFFFF', border: '1px solid var(--border)' }}
+      className={`card-entry stagger-${Math.min(index + 1, 6)} tap-spring flex flex-shrink-0 flex-col overflow-hidden rounded-2xl text-left`}
+      style={{ width: 160, height: 190, background: '#FFFFFF', border: '1px solid var(--border)' }}
     >
-      {/* Image — top 60% */}
-      <div className="relative w-full" style={{ height: 108 }}>
+      {/* Image — top 65% */}
+      <div className="relative w-full" style={{ height: '65%' }}>
         {recipe.thumbnail_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={recipe.thumbnail_url}
             alt={recipe.name_hinglish}
-            className="absolute inset-0 h-full w-full object-cover"
+            fill
+            sizes="160px"
+            className="object-cover"
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center text-4xl" style={{ background: bg }}>
@@ -81,23 +81,31 @@ function FeaturedCard({ recipe, onClick }: { recipe: Recipe; onClick: () => void
         )}
       </div>
 
-      {/* Text — bottom 40% */}
-      <div className="flex flex-1 flex-col justify-between px-2.5 py-2">
+      {/* Text — bottom 35% */}
+      <div className="flex flex-1 flex-col justify-between bg-white px-2.5 py-2">
         <p
-          className="font-semibold leading-tight text-[#1A1A1A]"
-          style={{ fontSize: 13, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
+          className="font-bold leading-tight"
+          style={{ fontSize: 11, color: 'var(--text)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
         >
           {recipe.name_hinglish}
         </p>
         <div className="flex items-center gap-2">
-          <span className="text-[11px] text-[#8B7355]">⏱ {totalMin} min</span>
+          <span style={{ fontSize: 9, color: 'var(--muted)' }}>⏱ {totalMin} min</span>
           {recipe.rating_count >= 3 && (
-            <span className="text-[11px] text-[#D97706]">⭐ {recipe.avg_rating.toFixed(1)}</span>
+            <span style={{ fontSize: 9, color: '#D97706' }}>⭐ {recipe.avg_rating.toFixed(1)}</span>
           )}
         </div>
       </div>
     </button>
   );
+}
+
+interface FeatureCardDef {
+  emoji: string;
+  title: string;
+  subtitle: string;
+  gradient: string;
+  onClick: () => void;
 }
 
 export default function HomeClient({
@@ -113,14 +121,15 @@ export default function HomeClient({
   const [isVrat, setIsVrat] = useState(initialIsVrat);
   const [vatLoading, setVatLoading] = useState(false);
   const [recipes] = useState<Recipe[]>(initialRecipes);
+  const [surpriseLoading, setSurpriseLoading] = useState(false);
 
-  // Time-based greeting — compute after mount to avoid hydration mismatch
-  const [greet, setGreet] = useState<string>(`Namaskar${userName ? `, ${userName.split(' ')[0]}` : ''}! 🙏`);
+  // Time-based subtitle — compute after mount to avoid hydration mismatch
+  const [subtitle, setSubtitle] = useState('Aaj kya banayein? 🍽️');
   useEffect(() => {
-    setGreet(greeting(userName));
-  }, [userName]);
+    setSubtitle(timeSubtitle());
+  }, []);
 
-  const dayHi = WEEKDAYS_HI[new Date().getDay()];
+  const firstName = userName ? userName.split(' ')[0] : '';
 
   // Top 4 for "Aaj ke liye": vrat + diet filtered (non-veg/egg users see all).
   const featured = recipes
@@ -139,70 +148,145 @@ export default function HomeClient({
     setVatLoading(false);
   }
 
+  async function onSurprise() {
+    if (surpriseLoading) return;
+    setSurpriseLoading(true);
+    try {
+      const res = await fetch('/api/recipes/surprise');
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.recipe?.id) {
+          router.push('/recipe/' + data.recipe.id);
+          return;
+        }
+      }
+      router.push('/search');
+    } finally {
+      setSurpriseLoading(false);
+    }
+  }
+
   const showExploreTeaser = !isAuthenticated || cookedCount < 5;
+
+  const featureCards: FeatureCardDef[] = [
+    {
+      emoji: '📷', title: 'Fridge Scan', subtitle: 'Photo lo → recipe pao',
+      gradient: 'linear-gradient(135deg, #E8640C, #F5A55B)',
+      onClick: () => router.push('/fridge'),
+    },
+    {
+      emoji: '💬', title: 'Chef Arti', subtitle: 'Koi bhi sawaal poochho',
+      gradient: 'linear-gradient(135deg, #6B46C1, #9F7AEA)',
+      onClick: () => router.push('/chat'),
+    },
+    {
+      emoji: '🍱', title: 'Bacha Hua', subtitle: 'Leftovers → naya dish',
+      gradient: 'linear-gradient(135deg, #2D6A4F, #52B788)',
+      onClick: () => router.push('/bacha-hua'),
+    },
+    {
+      emoji: '🍽️', title: 'Aaj ki Thali', subtitle: 'Teen waqt ka plan',
+      gradient: 'linear-gradient(135deg, #7C3AED, #A78BFA)',
+      onClick: () => router.push('/aaj-ki-thali'),
+    },
+  ];
 
   return (
     <PullToRefresh onRefresh={() => router.refresh()}>
-      {/* Sticky header */}
-      <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#E8DDD0] bg-white px-4 py-3">
-        <div>
-          <p className="text-[14px] font-semibold text-[#1A1A1A]">{greet}</p>
-          <p className="text-[13px] text-[#8B7355]">{dayHi} ka khaana</p>
+      {/* Sticky header: brand + vrat toggle + search bar */}
+      <div
+        className="sticky top-0 z-10 bg-white px-4 pb-3 pt-3"
+        style={{ boxShadow: '0 1px 0 var(--border)' }}
+      >
+        <div className="flex items-center justify-between">
+          <p className="text-[14px] font-bold" style={{ color: 'var(--text)' }}>
+            🍳 Chief-AI-Arti
+          </p>
+          {isAuthenticated && (
+            <VratToggle isVrat={isVrat} onToggle={onVratToggle} loading={vatLoading} />
+          )}
         </div>
-        {isAuthenticated && (
-          <VratToggle isVrat={isVrat} onToggle={onVratToggle} loading={vatLoading} />
-        )}
+        <button
+          type="button"
+          onClick={() => router.push('/search')}
+          className="tap-spring mt-2.5 flex h-10 w-full items-center gap-2 rounded-full px-4 text-left"
+          style={{ background: 'var(--saffron-lt)' }}
+        >
+          <span className="text-[13px]" style={{ color: 'var(--muted)' }}>🔍 Kuch bhi dhundho...</span>
+        </button>
       </div>
 
-      {/* Tappable search bar */}
-      <button
-        type="button"
-        onClick={() => router.push('/search')}
-        className="mx-3 mt-3 flex h-10 w-[calc(100%-24px)] items-center gap-2 rounded-full bg-[#FFF0E6] px-4 text-left"
+      {/* Greeting card */}
+      <div
+        className="page-enter mx-4 mt-3"
+        style={{ background: '#FFF0E6', borderRadius: 16, padding: 16 }}
       >
-        <span className="text-[13px] text-[#8B7355]">🔍 Kuch bhi dhundho...</span>
-      </button>
+        <h2 className="font-display" style={{ fontSize: 18, color: 'var(--terracotta)' }}>
+          Namaskar{firstName ? `, ${firstName}` : ''}! 🙏
+        </h2>
+        <p className="mt-0.5" style={{ fontSize: 12, color: 'var(--muted)' }}>{subtitle}</p>
+      </div>
 
-      {/* Quick actions */}
-      <QuickActions />
+      {/* Feature grid */}
+      <section className="mt-5 px-4">
+        <p className="mb-2 font-semibold" style={{ fontSize: 13, color: 'var(--muted)' }}>
+          Kya karna hai? 🍳
+        </p>
+        <div className="grid grid-cols-2 gap-2">
+          {featureCards.map((card, i) => (
+            <button
+              key={card.title}
+              type="button"
+              onClick={card.onClick}
+              className={`card-entry stagger-${i + 1} tap-spring flex flex-col justify-between rounded-2xl p-3 text-left`}
+              style={{ height: 100, background: card.gradient }}
+            >
+              <span className="text-[32px] leading-none">{card.emoji}</span>
+              <span>
+                <span className="block text-[13px] font-bold text-white">{card.title}</span>
+                <span className="block text-[10px] text-white/80">{card.subtitle}</span>
+              </span>
+            </button>
+          ))}
+          {/* Surprise — full width */}
+          <button
+            type="button"
+            onClick={onSurprise}
+            className="card-entry stagger-5 tap-spring col-span-2 flex items-center gap-3 rounded-2xl px-4 text-left"
+            style={{ height: 64, background: 'linear-gradient(135deg, #D97706, #FBBF24)' }}
+          >
+            <span className="text-[32px] leading-none">{surpriseLoading ? '⏳' : '🎲'}</span>
+            <span>
+              <span className="block text-[13px] font-bold text-white">Surprise karo!</span>
+              <span className="block text-[10px] text-white/80">Naya kuch try karein</span>
+            </span>
+          </button>
+        </div>
+      </section>
 
       {/* Aaj ke liye — horizontal scroll of 4 */}
-      <section className="mb-6 mt-2">
-        <p className="px-4 text-[14px] font-bold text-[#C4621E]">🍽️ Aaj ke liye</p>
+      <section className="mb-6 mt-6">
+        <p className="px-4 text-[14px] font-bold" style={{ color: 'var(--terracotta)' }}>🍽️ Aaj ke liye</p>
         {featured.length === 0 ? (
-          <p className="px-4 py-6 text-center text-sm text-[#8B7355]">Koi recipe nahi mili 😕</p>
+          <p className="px-4 py-6 text-center text-sm" style={{ color: 'var(--muted)' }}>Koi recipe nahi mili 😕</p>
         ) : (
           <div className="mt-3 flex gap-3 overflow-x-auto px-4 pb-1 scrollbar-hide">
-            {featured.map((r) => (
-              <FeaturedCard key={r.id} recipe={r} onClick={() => router.push('/recipe/' + r.id)} />
+            {featured.map((r, i) => (
+              <FeaturedCard key={r.id} recipe={r} index={i} onClick={() => router.push('/recipe/' + r.id)} />
             ))}
           </div>
         )}
       </section>
-
-      {/* Aapki Chef Arti promo */}
-      <button
-        type="button"
-        onClick={() => router.push('/chat')}
-        className="mx-4 mb-6 flex w-[calc(100%-32px)] items-center gap-3 rounded-2xl px-4 py-3.5 text-left"
-        style={{ background: '#FFF0E6' }}
-      >
-        <span className="text-[36px] leading-none">🍳</span>
-        <div>
-          <p className="text-[14px] font-semibold text-[#1A1A1A]">Koi sawaal? Arti se poochho!</p>
-          <p className="text-[13px] text-[#8B7355]">Khaana pakane mein help milegi 💬</p>
-        </div>
-      </button>
 
       {/* Naye Recipes explore teaser */}
       {showExploreTeaser && (
         <button
           type="button"
           onClick={() => router.push('/search')}
-          className="mx-4 flex w-[calc(100%-32px)] items-center justify-between rounded-2xl bg-white px-4 py-3 text-left"
-          style={{ border: '1px solid #E8640C' }}
+          className="tap-spring mx-4 flex w-[calc(100%-32px)] items-center justify-between rounded-2xl bg-white px-4 py-3 text-left"
+          style={{ border: '1px solid #E8640C', minHeight: 52 }}
         >
-          <span className="text-[14px] font-semibold text-[#1A1A1A]">🍲 100+ recipes explore karo</span>
+          <span className="text-[14px] font-semibold" style={{ color: 'var(--text)' }}>🍲 100+ recipes explore karo</span>
           <span className="text-[16px] text-[#E8640C]">→</span>
         </button>
       )}

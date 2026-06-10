@@ -152,3 +152,71 @@ body {
   animation: skel-shimmer 1.5s infinite;
   border-radius: 8px;
 }
+
+/* ───── Session 26: shared motion system (AnimationAgent) ───── */
+
+/* Page enter — fade + gentle rise (used by PageTransition on route change) */
+@keyframes pageEnter {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.page-enter {
+  animation: pageEnter 0.3s ease-out forwards;
+}
+
+/* Card entry — reuses existing cardEntry keyframes (opacity 0 + translateY 16px → visible) */
+.card-entry {
+  opacity: 0;
+  animation: cardEntry 0.35s ease-out forwards;
+}
+
+/* Stagger delays — pair with .card-entry / .page-enter (60ms steps) */
+.stagger-1 { animation-delay: 0ms; }
+.stagger-2 { animation-delay: 60ms; }
+.stagger-3 { animation-delay: 120ms; }
+.stagger-4 { animation-delay: 180ms; }
+.stagger-5 { animation-delay: 240ms; }
+.stagger-6 { animation-delay: 300ms; }
+
+/* Tap spring — soft press on tap, springs back */
+.tap-spring {
+  transition:
+    transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.2s ease;
+}
+.tap-spring:active {
+  transform: scale(0.96);
+}
+
+/* Bottom-sheet slide-up with subtle spring */
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+.slide-up {
+  animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Plain fade-in */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.fade-in {
+  animation: fadeIn 0.25s ease-out forwards;
+}
+
+/* Heart/save pop (class form of existing heartPop keyframes) */
+.heart-pop {
+  animation: heartPop 0.3s ease-out;
+}
+
+/* Slow ambient float (decorative emojis) */
+@keyframes float {
+  0%   { transform: translateY(0); }
+  50%  { transform: translateY(-6px); }
+  100% { transform: translateY(0); }
+}
+.float-slow {
+  animation: float 3s ease-in-out infinite;
+}

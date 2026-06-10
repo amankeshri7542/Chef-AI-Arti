@@ -1,14 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { SignOutButton } from '@clerk/nextjs';
 import UpgradeModal from '@/components/UpgradeModal/UpgradeModal';
 import PWAInstallButton from '@/components/PWAInstallButton/PWAInstallButton';
 import PushNotificationButton from '@/components/PushNotificationButton/PushNotificationButton';
 import BackButton from '@/components/BackButton/BackButton';
-import ArtiLoader from '@/components/ArtiLoader/ArtiLoader';
-import type { SubscriptionStatus, UnitPreference, DietType, Recipe } from '@/types/index';
+import type { SubscriptionStatus, UnitPreference, DietType } from '@/types/index';
 
 interface ProfileClientProps {
   name: string | null;
@@ -30,30 +28,17 @@ export default function ProfileClient({
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [unit, setUnit] = useState<UnitPreference>(initialUnit);
   const [unitLoading, setUnitLoading] = useState(false);
-  const [savedRecipes, setSavedRecipes] = useState<Recipe[]>([]);
-  const [savedLoading, setSavedLoading] = useState(true);
-  const router = useRouter();
-  const isPaid = subscriptionStatus === 'paid';
 
-  // Fetch saved recipes
-  useEffect(() => {
-    fetch('/api/recipes/saved')
-      .then(r => r.json())
-      .then(data => {
-        setSavedRecipes(data.recipes ?? []);
-      })
-      .catch(() => {})
-      .finally(() => setSavedLoading(false));
-  }, []);
+  const isPaid = subscriptionStatus === 'paid';
 
   const displayName = name ?? 'Aap';
 
   const endsAtFormatted = subscriptionEndsAt
     ? new Date(subscriptionEndsAt).toLocaleDateString('hi-IN', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-      })
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    })
     : null;
 
   const dietLabels: Record<DietType, string> = {
@@ -157,11 +142,10 @@ export default function ProfileClient({
               type="button"
               disabled={unitLoading}
               onClick={() => toggleUnit('desi')}
-              className={`min-h-[40px] rounded-full px-4 text-[12px] font-semibold transition-colors ${
-                unit === 'desi'
+              className={`min-h-[40px] rounded-full px-4 text-[12px] font-semibold transition-colors ${unit === 'desi'
                   ? 'bg-[#E8640C] text-white'
                   : 'text-[#8B7355]'
-              }`}
+                }`}
             >
               Desi
             </button>
@@ -169,67 +153,15 @@ export default function ProfileClient({
               type="button"
               disabled={unitLoading}
               onClick={() => toggleUnit('metric')}
-              className={`min-h-[40px] rounded-full px-4 text-[12px] font-semibold transition-colors ${
-                unit === 'metric'
+              className={`min-h-[40px] rounded-full px-4 text-[12px] font-semibold transition-colors ${unit === 'metric'
                   ? 'bg-[#E8640C] text-white'
                   : 'text-[#8B7355]'
-              }`}
+                }`}
             >
               Metric
             </button>
           </div>
         </div>
-      </div>
-
-      {/* Saved Recipes */}
-      <div className="rounded-2xl border border-[#E8DDD0] bg-white px-4 py-4">
-        <p className="mb-3 text-[13px] font-semibold text-[#1A1A1A]">❤️ Saved Recipes</p>
-        {savedLoading ? (
-          <ArtiLoader className="py-4" size={28} message="Saved recipes laa rahi hoon" />
-        ) : savedRecipes.length === 0 ? (
-          <div className="py-3 text-center">
-            <p className="text-[12px] text-[#8B7355]">Abhi tak koi recipe save nahi ki 🤍</p>
-            <button
-              type="button"
-              onClick={() => router.push('/search')}
-              className="mt-2 rounded-full bg-[#FFF0E6] px-4 py-2 text-[12px] font-medium text-[#E8640C]"
-              style={{ minHeight: 36 }}
-            >
-              Recipes dekhein →
-            </button>
-          </div>
-        ) : (
-          <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-1">
-            {savedRecipes.slice(0, 8).map((recipe) => (
-              <button
-                key={recipe.id}
-                type="button"
-                onClick={() => router.push(`/recipe/${recipe.id}`)}
-                className="flex flex-shrink-0 flex-col items-center gap-1.5 active:scale-95"
-                style={{ width: 80 }}
-              >
-                <div
-                  className="flex items-center justify-center rounded-xl overflow-hidden"
-                  style={{ width: 70, height: 70, background: '#FFF0E6' }}
-                >
-                  {recipe.thumbnail_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={recipe.thumbnail_url}
-                      alt={recipe.name_hinglish}
-                      className="h-full w-full object-cover rounded-xl"
-                    />
-                  ) : (
-                    <span className="text-2xl">🍽️</span>
-                  )}
-                </div>
-                <span className="text-[10px] text-[#1A1A1A] font-medium text-center line-clamp-2 leading-tight">
-                  {recipe.name_hinglish}
-                </span>
-              </button>
-            ))}
-          </div>
-        )}
       </div>
 
       {/* Profile info */}

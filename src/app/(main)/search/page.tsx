@@ -154,6 +154,14 @@ export default function SearchPage() {
 
   const activeCollectionId = activeSource.type === 'collection' ? activeSource.id : null;
 
+  // Key for the results grid — changes with query/filter so cards re-animate
+  const gridKey: string = (() => {
+    if (activeSource.type === 'search') return `search:${activeSource.term}`;
+    if (activeSource.type === 'chip') return `chip:${activeSource.query}`;
+    if (activeSource.type === 'collection') return `col:${activeSource.id}`;
+    return 'browse';
+  })();
+
   const resultsHeading: string | null = (() => {
     if (activeSource.type === 'search') return `"${activeSource.term}" ke results`;
     if (activeSource.type === 'chip') return `${activeSource.label} recipes`;
@@ -227,13 +235,16 @@ export default function SearchPage() {
                 key={chip.query}
                 type="button"
                 onClick={() => handleChipClick(chip)}
-                className="flex-shrink-0 px-3 py-1 rounded-full text-sm font-medium transition-colors"
+                className="tap-spring flex-shrink-0 rounded-full font-medium"
                 style={{
-                  background: isActive ? '#E8640C' : '#FFF0E6',
-                  border: '1px solid #E8DDD0',
-                  color: isActive ? '#fff' : '#5C3D1E',
-                  fontSize: 12,
-                  minHeight: 32,
+                  background: isActive ? 'var(--saffron)' : '#FFFFFF',
+                  border: isActive ? '1px solid var(--saffron)' : '1px solid var(--border)',
+                  color: isActive ? '#fff' : 'var(--text)',
+                  fontSize: 13,
+                  padding: '10px 16px',
+                  minHeight: 40,
+                  transform: isActive ? 'scale(1.02)' : 'scale(1)',
+                  transition: 'all 200ms ease',
                 }}
               >
                 {chip.label}
@@ -264,47 +275,55 @@ export default function SearchPage() {
           </div>
         )}
 
-        {/* Results heading */}
+        {/* Results heading + count */}
         {resultsHeading && !loading && (
           <p className="text-[#8B7355] mb-3" style={{ fontSize: 12 }}>
             {resultsHeading}
-            {results.length > 0 && ` — ${results.length} recipes`}
+            {results.length > 0 &&
+              (activeSource.type === 'none'
+                ? ` — ${results.length} recipes`
+                : ` — ${results.length} recipes mili`)}
           </p>
         )}
 
         {/* Loading — content-shaped skeleton so it never feels slow */}
         {loading && <RecipeGridSkeleton className="pb-24" />}
 
-        {/* Recipe grid */}
+        {/* Recipe grid — keyed by active source so it re-animates on filter change */}
         {!loading && results.length > 0 && (
-          <div className="animate-content-fade grid grid-cols-2 gap-3.5 pb-24">
-            {results.map((recipe) => (
-              <RecipeCardCompact
+          <div key={gridKey} className="grid grid-cols-2 gap-3.5 pb-24">
+            {results.map((recipe, i) => (
+              <div
                 key={recipe.id}
-                recipe={recipe}
-                onClick={() => router.push(`/recipe/${recipe.id}`)}
-              />
+                className="card-entry"
+                style={{ animationDelay: `${Math.min(i, 11) * 60}ms` }}
+              >
+                <RecipeCardCompact
+                  recipe={recipe}
+                  onClick={() => router.push(`/recipe/${recipe.id}`)}
+                />
+              </div>
             ))}
           </div>
         )}
 
         {/* Empty state */}
         {!loading && results.length === 0 && activeSource.type !== 'none' && (
-          <div className="flex flex-col items-center justify-center py-16 text-center gap-3">
-            <p className="text-3xl">😕</p>
+          <div className="animate-fade-in-up flex flex-col items-center justify-center py-16 text-center gap-3">
+            <p className="text-4xl">🍲</p>
             <p className="font-semibold text-[#1A1A1A]" style={{ fontSize: 15 }}>
-              Koi recipe nahi mili
+              Arre, yeh recipe abhi nahi mili!
             </p>
             <p className="text-[#8B7355]" style={{ fontSize: 13 }}>
-              Kuch aur try karein ya fridge scan karein
+              Koi baat nahi — kuch aur likh ke dekho, ya fridge ki photo se recipe banwao 🥕
             </p>
             <button
               type="button"
               onClick={() => router.push('/fridge')}
-              className="mt-2 px-5 py-2.5 rounded-full font-semibold text-white"
-              style={{ background: '#E07B39', fontSize: 14, minHeight: 44 }}
+              className="tap-spring mt-2 px-6 py-3 rounded-full font-semibold text-white"
+              style={{ background: 'var(--saffron)', fontSize: 14, minHeight: 52 }}
             >
-              📷 Fridge Scan
+              📷 Fridge Scan karo
             </button>
           </div>
         )}

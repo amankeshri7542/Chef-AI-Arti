@@ -102,7 +102,7 @@ export default function ThaliClient({ userId }: { userId: string }) {
                       <button
                         type="button"
                         onClick={() => router.push('/search')}
-                        className="mt-2 rounded-full bg-[#E8640C] px-4 py-2 text-[12px] font-semibold text-white"
+                        className="tap-spring mt-2 rounded-full bg-[#E8640C] px-4 py-2 text-[12px] font-semibold text-white"
                         style={{ minHeight: 40 }}
                       >
                         Browse karein
@@ -136,7 +136,7 @@ export default function ThaliClient({ userId }: { userId: string }) {
                 <button
                   type="button"
                   onClick={confirmThali}
-                  className="flex h-12 items-center justify-center gap-2 rounded-xl text-[14px] font-semibold text-white"
+                  className="tap-spring flex h-12 items-center justify-center gap-2 rounded-xl text-[14px] font-semibold text-white"
                   style={{ background: '#2D6A4F' }}
                 >
                   Yeh theek hai ✓
@@ -145,7 +145,7 @@ export default function ThaliClient({ userId }: { userId: string }) {
               <button
                 type="button"
                 onClick={fetchThali}
-                className="flex h-12 items-center justify-center gap-2 rounded-xl text-[14px] font-semibold"
+                className="tap-spring flex h-12 items-center justify-center gap-2 rounded-xl text-[14px] font-semibold"
                 style={{ background: '#FFF0E6', color: '#E8640C', border: '1px solid #E8DDD0' }}
               >
                 🔄 Phir se suggest karo

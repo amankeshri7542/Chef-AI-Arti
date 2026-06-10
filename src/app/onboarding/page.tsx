@@ -180,7 +180,7 @@ export default function OnboardingPage() {
 
       {/* Step 1 — Diet */}
       {step === 1 && (
-        <div key="q1" className="animate-fade-in-up flex flex-1 flex-col">
+        <div key="q1" className="page-enter flex flex-1 flex-col">
           <h2 className="font-display" style={{ fontSize: 22, color: 'var(--terracotta)' }}>
             Aap kya khaate hain?
           </h2>
@@ -216,7 +216,7 @@ export default function OnboardingPage() {
 
       {/* Step 2 — Family size */}
       {step === 2 && (
-        <div key="q2" className="animate-fade-in-up flex flex-1 flex-col">
+        <div key="q2" className="page-enter flex flex-1 flex-col">
           <h2 className="font-display" style={{ fontSize: 22, color: 'var(--terracotta)' }}>
             Ghar mein kitne log hain?
           </h2>
@@ -248,7 +248,7 @@ export default function OnboardingPage() {
 
       {/* Step 3 — Region */}
       {step === 3 && (
-        <div key="q3" className="animate-fade-in-up flex flex-1 flex-col">
+        <div key="q3" className="page-enter flex flex-1 flex-col">
           <h2 className="font-display" style={{ fontSize: 22, color: 'var(--terracotta)' }}>
             Aap kahan se hain?
           </h2>
@@ -313,14 +313,13 @@ function OptionCard({
   return (
     <button
       onClick={onClick}
-      className="relative flex items-center gap-4 text-left"
+      className={`tap-spring relative flex items-center gap-4 text-left ${selected ? 'scale-[1.02]' : ''}`}
       style={{
         minHeight: 64,
         padding: '16px 20px',
         borderRadius: 16,
         border: selected ? '2px solid var(--saffron)' : '2px solid var(--border)',
         background: selected ? 'var(--saffron-lt)' : '#fff',
-        transform: selected ? 'scale(1.02)' : 'scale(1)',
         boxShadow: selected ? '0 6px 18px var(--shadow)' : '0 2px 8px rgba(180,80,20,0.05)',
         transition: 'all 0.25s cubic-bezier(0.34,1.56,0.64,1)',
       }}

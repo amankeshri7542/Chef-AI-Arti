@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { Recipe, Ingredient, UnitPreference, SubscriptionStatus, VibeBadgeKey } from '@/types/index';
+import { Recipe, Ingredient, UnitPreference, SubscriptionStatus } from '@/types/index';
 import { scaleIngredients, shouldShowScalingWarning } from '@/lib/portion';
+import { getIngredientEmoji } from '@/lib/emoji';
 import PortionSelector from '@/components/PortionSelector/PortionSelector';
 import TTSButton from '@/components/TTSButton/TTSButton';
-import VibeBadges from '@/components/VibeBadges/VibeBadges';
 import WhatsAppShare from '@/components/WhatsAppShare/WhatsAppShare';
 import FloatingChatButton from '@/components/FloatingChatButton/FloatingChatButton';
 import UpgradeModal from '@/components/UpgradeModal/UpgradeModal';
@@ -14,7 +15,6 @@ import LoginPromptModal from '@/components/LoginPromptModal/LoginPromptModal';
 import NutritionDisplay from '@/components/NutritionDisplay/NutritionDisplay';
 import { StarRatingInteractive, StarRatingDisplay } from '@/components/StarRating/StarRating';
 import CommunityPhotos from '@/components/CommunityPhotos/CommunityPhotos';
-import CookingMode from '@/components/CookingMode/CookingMode';
 import { toast } from '@/lib/toast';
 import { haptic } from '@/lib/haptics';
 
@@ -80,8 +80,19 @@ export default function RecipeDetailClient({
   const [nutritionOpen, setNutritionOpen] = useState(false);
   const [photosOpen, setPhotosOpen] = useState(false);
 
-  // Cooking mode
-  const [showCookingMode, setShowCookingMode] = useState(false);
+  // Inline cooking mode (steps highlighted in place)
+  const [cookingActive, setCookingActive] = useState(false);
+  const [activeStep, setActiveStep] = useState(0);
+  const [stepSpeaking, setStepSpeaking] = useState(false);
+  const stepsRef = useRef<HTMLDivElement>(null);
+  const activeStepRef = useRef<HTMLDivElement>(null);
+
+  // Hero entry: scale 1.05 → 1.0 over 400ms
+  const [heroIn, setHeroIn] = useState(false);
+  useEffect(() => {
+    const t = requestAnimationFrame(() => setHeroIn(true));
+    return () => cancelAnimationFrame(t);
+  }, []);
 
   // Fetch user's existing rating on mount
   useEffect(() => {
@@ -107,6 +118,38 @@ export default function RecipeDetailClient({
       })
       .catch(() => {});
   }, [recipe.id, isAuthenticated]);
+
+  // Scroll active step into view while cooking
+  useEffect(() => {
+    if (cookingActive && activeStepRef.current) {
+      activeStepRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [cookingActive, activeStep]);
+
+  // Stop step TTS when leaving cooking or changing step
+  useEffect(() => {
+    setStepSpeaking(false);
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+  }, [activeStep, cookingActive]);
+
+  const speakStep = useCallback((text: string) => {
+    if (typeof window === 'undefined' || !window.speechSynthesis) return;
+    if (stepSpeaking) {
+      window.speechSynthesis.cancel();
+      setStepSpeaking(false);
+      return;
+    }
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = 'hi-IN';
+    utter.rate = 0.9;
+    utter.onend = () => setStepSpeaking(false);
+    utter.onerror = () => setStepSpeaking(false);
+    window.speechSynthesis.speak(utter);
+    setStepSpeaking(true);
+  }, [stepSpeaking]);
 
   async function handleSaveToggle() {
     if (!isAuthenticated) {
@@ -178,6 +221,31 @@ export default function RecipeDetailClient({
     setShowPhotoPrompt(true);
   }
 
+  function startCooking() {
+    haptic('tap');
+    setActiveStep(0);
+    setCookingActive(true);
+  }
+
+  function goNextStep() {
+    if (activeStep < recipe.steps.length - 1) {
+      haptic('tap');
+      setActiveStep(activeStep + 1);
+    } else {
+      // Finished — close inline cooking, fire existing "Bana liya!" flow
+      haptic('success');
+      setCookingActive(false);
+      handleCooked();
+    }
+  }
+
+  function goPrevStep() {
+    if (activeStep > 0) {
+      haptic('tap');
+      setActiveStep(activeStep - 1);
+    }
+  }
+
   async function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -209,46 +277,56 @@ export default function RecipeDetailClient({
   }
 
   const totalMinutes = recipe.prep_time_minutes + recipe.cook_time_minutes;
+  const totalSteps = recipe.steps.length;
+  const cookProgress = ((activeStep + 1) / Math.max(totalSteps, 1)) * 100;
 
-  // Cooking Mode overlay
-  if (showCookingMode) {
-    return (
-      <CookingMode
-        recipe={recipe}
-        portionSize={portionSize}
-        unitPreference={unitPreference}
-        onExit={() => setShowCookingMode(false)}
-      />
-    );
-  }
+  const REGION_LABEL: Record<string, string> = {
+    'pan-north-indian': 'North India',
+  };
 
   return (
-    <div className="min-h-screen bg-[#FFFDF9] pb-32">
-      {/* Hero thumbnail */}
-      <div
-        className="relative flex h-56 w-full items-center justify-center text-6xl overflow-hidden"
-        style={{
-          background: 'linear-gradient(135deg, #FDDBC2, #FBC08A)',
-        }}
-      >
-        {recipe.thumbnail_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={recipe.thumbnail_url}
-            alt={recipe.name_hinglish}
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          getCategoryEmoji(recipe.category)
-        )}
+    <div className="min-h-screen pb-32" style={{ background: 'var(--cream)' }}>
+      {/* Hero — full-bleed image, 260px, dark gradient bottom */}
+      <div className="relative w-full overflow-hidden" style={{ height: 260 }}>
+        <div
+          className="absolute inset-0"
+          style={{
+            transform: heroIn ? 'scale(1)' : 'scale(1.05)',
+            transition: 'transform 400ms ease-out',
+          }}
+        >
+          {recipe.thumbnail_url ? (
+            <Image
+              src={recipe.thumbnail_url}
+              alt={recipe.name_hinglish}
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover"
+            />
+          ) : (
+            <div
+              className="flex h-full w-full items-center justify-center text-6xl"
+              style={{ background: 'linear-gradient(135deg, #FDDBC2, #FBC08A)' }}
+            >
+              {getCategoryEmoji(recipe.category)}
+            </div>
+          )}
+        </div>
+
+        {/* Gradient overlay */}
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{ background: 'linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.6) 100%)' }}
+        />
 
         {/* Overlay back button */}
         <button
           type="button"
           onClick={() => router.back()}
           aria-label="Wapas jao"
-          className="absolute left-3 top-3 flex h-10 w-10 items-center justify-center rounded-full text-white text-lg transition-opacity active:opacity-70"
-          style={{ background: 'rgba(255,255,255,0.22)', backdropFilter: 'blur(6px)', minHeight: 44, minWidth: 44 }}
+          className="tap-spring absolute left-3 top-3 flex items-center justify-center rounded-full text-lg text-white"
+          style={{ background: 'rgba(255,255,255,0.22)', backdropFilter: 'blur(6px)', height: 44, width: 44, minHeight: 44, minWidth: 44 }}
         >
           ←
         </button>
@@ -257,66 +335,86 @@ export default function RecipeDetailClient({
         <button
           type="button"
           onClick={handleSaveToggle}
-          aria-label={isSaved ? 'Unsave recipe' : 'Save recipe'}
-          className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full text-lg transition-all active:scale-90"
-          style={{ background: 'rgba(255,255,255,0.22)', backdropFilter: 'blur(6px)', minHeight: 44, minWidth: 44 }}
+          aria-label={isSaved ? 'Save hata do' : 'Recipe save karo'}
+          className="tap-spring absolute right-3 top-3 flex items-center justify-center rounded-full text-lg"
+          style={{ background: 'rgba(255,255,255,0.22)', backdropFilter: 'blur(6px)', height: 44, width: 44, minHeight: 44, minWidth: 44 }}
         >
-          <span key={isSaved ? 'saved' : 'unsaved'} className={isSaved ? 'animate-heart-pop' : ''}>
+          <span key={isSaved ? 'saved' : 'unsaved'} className={isSaved ? 'heart-pop animate-heart-pop' : ''}>
             {isSaved ? '❤️' : '🤍'}
           </span>
         </button>
+
+        {/* Name (bottom-left) + vibe pills (bottom-right) */}
+        <div className="absolute bottom-0 left-0 right-0 flex items-end justify-between gap-2 p-4">
+          <h1
+            className="font-display flex-1 text-white"
+            style={{ fontSize: 20, lineHeight: 1.25, textShadow: '0 1px 8px rgba(0,0,0,0.4)' }}
+          >
+            {recipe.name_hinglish}
+          </h1>
+          {recipe.vibes.length > 0 && (
+            <div className="flex flex-shrink-0 flex-col items-end gap-1">
+              {recipe.vibes.slice(0, 2).map((vibe) => (
+                <span
+                  key={vibe}
+                  className="rounded-full px-2 py-0.5 text-[9px] font-semibold"
+                  style={{ background: 'rgba(255,255,255,0.88)', color: 'var(--terracotta)' }}
+                >
+                  {vibe}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Info pills — horizontal scroll */}
+      <div className="mt-3 flex gap-2 overflow-x-auto px-4 pb-1 scrollbar-hide">
+        <InfoPill emoji="⏱" label={`${totalMinutes} min`} />
+        <InfoPill emoji="👥" label={`${portionSize} log`} />
+        <InfoPill emoji="🌶" label={recipe.spice_level} />
+        <InfoPill emoji="🌾" label={REGION_LABEL[recipe.region_origin] ?? recipe.region_origin} />
+        {ratingCount >= 3 && <InfoPill emoji="⭐" label={avgRating.toFixed(1)} />}
+        {recipe.soak_required && <InfoPill emoji="💧" label="Raat bhar bhigao" />}
       </div>
 
       <div className="flex flex-col gap-4 px-4 py-4">
-        {/* Name + meta */}
-        <div>
-          <h1 className="text-[20px] font-bold text-[#1A1A1A]">{recipe.name_hinglish}</h1>
-          {recipe.name_hindi && (
-            <p className="mt-0.5 text-[13px] text-[#8B7355]" style={{ fontFamily: 'var(--font-devanagari)' }}>
-              {recipe.name_hindi}
-            </p>
-          )}
-          {recipe.description && (
-            <p className="mt-2 text-[13px] text-[#8B7355]">{recipe.description}</p>
-          )}
-        </div>
-
-        {/* Quick stats */}
-        <div className="flex flex-wrap gap-2">
-          <StatChip emoji="⏱" label={`${recipe.cook_time_minutes} min cooking`} />
-          {recipe.prep_time_minutes > 0 && (
-            <StatChip emoji="🔪" label={`${recipe.prep_time_minutes} min prep`} />
-          )}
-          {recipe.soak_required && <StatChip emoji="💧" label="Raat bhar bhigao" />}
-          <StatChip emoji="🌶" label={recipe.spice_level} />
-          <StatChip emoji="⚖️" label={recipe.heaviness} />
-        </div>
-
-        {/* Vibes */}
-        {recipe.vibes.length > 0 && (
-          <VibeBadges vibes={recipe.vibes as VibeBadgeKey[]} />
+        {/* Hindi name + description */}
+        {(recipe.name_hindi || recipe.description) && (
+          <div>
+            {recipe.name_hindi && (
+              <p className="text-[13px]" style={{ color: 'var(--muted)', fontFamily: 'var(--font-devanagari)' }}>
+                {recipe.name_hindi}
+              </p>
+            )}
+            {recipe.description && (
+              <p className="mt-1 text-[13px]" style={{ color: 'var(--muted)' }}>{recipe.description}</p>
+            )}
+          </div>
         )}
 
         {/* Rating display */}
         {ratingCount >= 3 && (
-          <div className="mt-0">
-            <StarRatingDisplay avg_rating={avgRating} rating_count={ratingCount} size="md" />
-          </div>
+          <StarRatingDisplay avg_rating={avgRating} rating_count={ratingCount} size="md" />
         )}
 
-        {/* 🍳 Banana shuru karein CTA */}
-        <button
-          type="button"
-          onClick={() => { haptic('tap'); setShowCookingMode(true); }}
-          className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl text-[16px] font-bold text-white transition-all active:scale-[0.98]"
-          style={{
-            background: 'linear-gradient(135deg, #E8640C, #F5A55B)',
-            boxShadow: '0 4px 16px rgba(232,100,12,0.35)',
-          }}
-        >
-          <span className="text-[20px]">🍳</span>
-          Banana shuru karein
-        </button>
+        {/* 🍳 Banana Shuru Karein CTA */}
+        {!cookingActive && (
+          <button
+            type="button"
+            onClick={startCooking}
+            className="tap-spring flex w-full items-center justify-center gap-2 rounded-2xl font-medium text-white"
+            style={{
+              height: 56,
+              fontSize: 15,
+              background: 'linear-gradient(135deg, #E8640C, #BF4E06)',
+              boxShadow: '0 4px 16px rgba(180,80,20,0.3)',
+            }}
+          >
+            <span className="text-[20px]">🍳</span>
+            Banana Shuru Karein
+          </button>
+        )}
 
         {/* Portion selector + actions */}
         <div>
@@ -341,24 +439,37 @@ export default function RecipeDetailClient({
           {shouldShowScalingWarning(recipe.base_family_size, portionSize) && (
             <div className="mt-2.5 flex items-start gap-2 rounded-xl bg-[#FFF7ED] px-3 py-2" style={{ border: '1px solid #FBC08A' }}>
               <span className="text-[13px] leading-none">⚠️</span>
-              <p className="text-[12px] leading-snug text-[#8B6B4A]">
+              <p className="text-[12px] leading-snug" style={{ color: 'var(--muted)' }}>
                 Namak thoda-thoda milao — ek baar mein mat daal dena.
               </p>
             </div>
           )}
         </div>
 
-        {/* Ingredients */}
+        {/* Ingredients — 2-col emoji cards */}
         <section>
-          <h3 className="mb-2 text-[15px] font-semibold text-[#1A1A1A]">Samagri 🛒</h3>
-          <div className="rounded-xl border border-[#E8DDD0] bg-white divide-y divide-[#E8DDD0]">
+          <h2 className="font-display mb-2" style={{ fontSize: 16, color: 'var(--terracotta)' }}>
+            🧂 Samagri
+          </h2>
+          <div className="grid grid-cols-2 gap-3">
             {scaledIngredients.map((ing, i) => (
-              <div key={i} className="flex items-center justify-between px-4 py-3">
-                <div>
-                  <p className="text-[13px] font-medium text-[#1A1A1A]">{ing.name}</p>
-                  {ing.prep && <p className="text-[11px] text-[#8B7355]">{ing.prep}</p>}
-                </div>
-                <p className="text-[13px] text-[#E8640C] font-semibold">
+              <div
+                key={`${ing.name}-${i}`}
+                className="card-entry flex flex-col items-center rounded-xl bg-white text-center"
+                style={{
+                  padding: 10,
+                  border: '1px solid var(--border)',
+                  animationDelay: `${i * 40}ms`,
+                }}
+              >
+                <span className="leading-none" style={{ fontSize: 28 }}>
+                  {getIngredientEmoji(ing.name)}
+                </span>
+                <p className="mt-1.5 font-bold leading-tight" style={{ fontSize: 10, color: 'var(--text)' }}>
+                  {ing.name}
+                  {ing.prep ? ` (${ing.prep})` : ''}
+                </p>
+                <p className="mt-0.5 font-semibold" style={{ fontSize: 11, color: 'var(--saffron)' }}>
                   {unitPreference === 'metric' ? ing.qty_metric : ing.qty_desi}
                 </p>
               </div>
@@ -366,32 +477,117 @@ export default function RecipeDetailClient({
           </div>
         </section>
 
-        {/* Steps */}
-        <section>
-          <h3 className="mb-3 text-[15px] font-semibold text-[#1A1A1A]">Banane ka tarika 👩‍🍳</h3>
-          <div className="flex flex-col gap-3">
-            {recipe.steps.map((step) => (
-              <div key={step.step} className="flex gap-3">
-                <div
-                  className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-[13px] font-bold text-white"
-                  style={{ background: '#E8640C' }}
-                >
-                  {step.step}
-                </div>
-                <div className="flex-1 pt-0.5">
-                  <p className="text-[13px] text-[#1A1A1A]">{step.instruction}</p>
-                  {step.time_minutes > 0 && (
-                    <p className="mt-1 text-[11px] text-[#8B7355]">⏱ ~{step.time_minutes} min</p>
+        {/* Steps — 📋 Vidhi */}
+        <section ref={stepsRef}>
+          <h2 className="font-display mb-3" style={{ fontSize: 16, color: 'var(--terracotta)' }}>
+            📋 Vidhi
+          </h2>
+
+          {/* Progress bar while cooking */}
+          {cookingActive && (
+            <div className="mb-3 h-[3px] w-full overflow-hidden rounded-full" style={{ background: 'var(--border)' }}>
+              <div
+                className="h-full rounded-full transition-all duration-300"
+                style={{ width: `${cookProgress}%`, background: 'var(--saffron)' }}
+              />
+            </div>
+          )}
+
+          <div className="flex flex-col" style={{ gap: 10 }}>
+            {recipe.steps.map((step, idx) => {
+              const isActive = cookingActive && idx === activeStep;
+              const isDone = cookingActive && idx < activeStep;
+              const isFuture = cookingActive && idx > activeStep;
+              return (
+                <div key={step.step} ref={isActive ? activeStepRef : undefined}>
+                  <div
+                    className="flex gap-3 rounded-xl bg-white p-3 transition-all duration-300"
+                    style={{
+                      borderLeft: isActive ? '4px solid var(--saffron)' : '3px solid var(--border)',
+                      background: isActive ? '#FFF0E6' : '#FFFFFF',
+                      opacity: isDone ? 0.6 : isFuture ? 0.4 : 1,
+                    }}
+                  >
+                    <div
+                      className="flex flex-shrink-0 items-center justify-center rounded-full text-[13px] font-bold text-white"
+                      style={{
+                        height: 28,
+                        width: 28,
+                        background: isDone ? 'var(--green)' : 'var(--saffron)',
+                      }}
+                    >
+                      {isDone ? '✓' : step.step}
+                    </div>
+                    <div className="flex-1 pt-0.5">
+                      <p style={{ fontSize: 13, lineHeight: 1.6, color: 'var(--text)' }}>{step.instruction}</p>
+                      <div className="mt-1 flex items-center gap-2">
+                        {step.time_minutes > 0 && (
+                          <span
+                            className="rounded-full px-2 py-0.5 text-[11px]"
+                            style={{ color: 'var(--muted)', background: 'var(--cream)' }}
+                          >
+                            ⏱ {step.time_minutes} min
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    {isActive && (
+                      <button
+                        type="button"
+                        onClick={() => speakStep(step.instruction)}
+                        aria-label={stepSpeaking ? 'Awaaz band karo' : 'Step suno'}
+                        className="tap-spring flex flex-shrink-0 items-center justify-center self-start rounded-full text-[18px]"
+                        style={{ height: 40, width: 40, background: 'rgba(232,100,12,0.12)' }}
+                      >
+                        {stepSpeaking ? '⏹' : '🔊'}
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Inline cooking nav — below the active step */}
+                  {isActive && (
+                    <div className="animate-fade-in-up mt-2.5">
+                      <p className="mb-2 text-center text-[12px] font-medium" style={{ color: 'var(--muted)' }}>
+                        {activeStep + 1} / {totalSteps} step
+                      </p>
+                      <div className="flex gap-3">
+                        <button
+                          type="button"
+                          onClick={goPrevStep}
+                          disabled={activeStep === 0}
+                          className="tap-spring flex flex-1 items-center justify-center rounded-xl text-[14px] font-semibold disabled:opacity-30"
+                          style={{ height: 48, background: '#FFFFFF', border: '2px solid var(--saffron)', color: 'var(--saffron)' }}
+                        >
+                          ← Pichla
+                        </button>
+                        <button
+                          type="button"
+                          onClick={goNextStep}
+                          className="tap-spring flex flex-1 items-center justify-center rounded-xl text-[14px] font-bold text-white"
+                          style={{ height: 48, background: 'var(--saffron)' }}
+                        >
+                          {activeStep === totalSteps - 1 ? 'Ho Gaya! 🎉' : 'Agla →'}
+                        </button>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setCookingActive(false)}
+                        className="mt-2 w-full text-center text-[12px] underline"
+                        style={{ color: 'var(--muted)', minHeight: 32 }}
+                      >
+                        Cooking band karo
+                      </button>
+                    </div>
                   )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </section>
 
         {/* Goes well with */}
         {recipe.goes_well_with.length > 0 && (
-          <p className="text-[12px] text-[#8B7355]">
+          <p className="text-[12px]" style={{ color: 'var(--muted)' }}>
             🍽 Ke saath: {recipe.goes_well_with.join(', ')}
           </p>
         )}
@@ -402,13 +598,13 @@ export default function RecipeDetailClient({
             <button
               type="button"
               onClick={() => setNutritionOpen(!nutritionOpen)}
-              className="flex w-full items-center justify-between rounded-xl px-4 py-3 text-[13px] font-semibold text-[#1A1A1A]"
-              style={{ background: '#FFF0E6', border: '1px solid #E8DDD0', minHeight: 48 }}
+              className="flex w-full items-center justify-between rounded-xl px-4 py-3 text-[13px] font-semibold"
+              style={{ background: '#FFF0E6', border: '1px solid var(--border)', minHeight: 48, color: 'var(--text)' }}
             >
               <span>🥗 Nutrition Details</span>
               <span
-                className="text-[#8B7355] transition-transform duration-200"
-                style={{ transform: nutritionOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                className="transition-transform duration-200"
+                style={{ color: 'var(--muted)', transform: nutritionOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
               >
                 ▾
               </span>
@@ -433,13 +629,13 @@ export default function RecipeDetailClient({
           <button
             type="button"
             onClick={() => setPhotosOpen(!photosOpen)}
-            className="flex w-full items-center justify-between rounded-xl px-4 py-3 text-[13px] font-semibold text-[#1A1A1A]"
-            style={{ background: '#FFF0E6', border: '1px solid #E8DDD0', minHeight: 48 }}
+            className="flex w-full items-center justify-between rounded-xl px-4 py-3 text-[13px] font-semibold"
+            style={{ background: '#FFF0E6', border: '1px solid var(--border)', minHeight: 48, color: 'var(--text)' }}
           >
             <span>📸 Community Photos</span>
             <span
-              className="text-[#8B7355] transition-transform duration-200"
-              style={{ transform: photosOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+              className="transition-transform duration-200"
+              style={{ color: 'var(--muted)', transform: photosOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
             >
               ▾
             </span>
@@ -463,32 +659,34 @@ export default function RecipeDetailClient({
           type="button"
           onClick={handleCooked}
           disabled={cooked || cookedLoading}
-          className="flex h-14 w-full items-center justify-center rounded-2xl text-[16px] font-bold text-white transition-opacity disabled:opacity-60"
+          className="tap-spring flex h-14 w-full items-center justify-center rounded-2xl text-[16px] font-bold text-white transition-opacity disabled:opacity-60"
           style={{ background: cooked ? '#22C55E' : '#E8640C' }}
         >
-          {cookedLoading ? 'Saving...' : cooked ? '✅ Bana liya! Shukriya!' : '✅ Bana liya!'}
+          {cookedLoading ? 'Save ho raha hai...' : cooked ? '✅ Bana liya! Shukriya!' : '✅ Bana liya!'}
         </button>
 
         {/* Photo upload prompt after cooking */}
         {showPhotoPrompt && !thumbnailUploaded && (
-          <div className="mt-3 rounded-xl border border-[#F5A55B] bg-[#FFF7F0] p-4">
-            <p className="text-sm font-semibold text-[#1A1A1A]">
+          <div className="animate-fade-in-up mt-3 rounded-xl border border-[#F5A55B] bg-[#FFF7F0] p-4">
+            <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>
               Wah! 🎉 Kya aapka dish acha bana?
             </p>
-            <p className="mt-1 text-xs text-[#8B7355]">
+            <p className="mt-1 text-xs" style={{ color: 'var(--muted)' }}>
               Apne pakaye khane ki photo upload karein! Aapki photo recipe card pe dikhegi ❤️
             </p>
             <div className="mt-3 flex gap-2">
               <button
                 onClick={() => photoInputRef.current?.click()}
                 disabled={uploadingPhoto}
-                className="flex-1 rounded-lg bg-[#E8640C] py-2 text-sm font-medium text-white disabled:opacity-60"
+                className="tap-spring flex-1 rounded-lg bg-[#E8640C] py-2 text-sm font-medium text-white disabled:opacity-60"
+                style={{ minHeight: 44 }}
               >
                 {uploadingPhoto ? 'Upload ho rahi hai...' : '📸 Photo upload karo'}
               </button>
               <button
                 onClick={() => setShowPhotoPrompt(false)}
-                className="px-3 text-xs text-[#8B7355]"
+                className="px-3 text-xs"
+                style={{ color: 'var(--muted)', minHeight: 44 }}
               >
                 Abhi nahi
               </button>
@@ -503,17 +701,17 @@ export default function RecipeDetailClient({
           </div>
         )}
         {thumbnailUploaded && (
-          <p className="mt-2 text-center text-xs text-[#2D6A4F]">
+          <p className="mt-2 text-center text-xs" style={{ color: 'var(--green)' }}>
             Shukriya! Aapki photo save ho gayi 🙏
           </p>
         )}
 
         {/* Rating section — only after user has cooked */}
         {isAuthenticated && cooked && (
-          <div className="mt-3 rounded-xl border border-[#E8DDD0] bg-white px-4 py-3">
+          <div className="mt-3 rounded-xl bg-white px-4 py-3" style={{ border: '1px solid var(--border)' }}>
             {!ratingSubmitted ? (
               <>
-                <p className="text-[12px] font-medium text-[#E8640C] mb-2">
+                <p className="mb-2 text-[12px] font-medium" style={{ color: 'var(--saffron)' }}>
                   Kaise bana? Rating do! ⭐
                 </p>
                 <StarRatingInteractive
@@ -525,7 +723,7 @@ export default function RecipeDetailClient({
               </>
             ) : (
               <>
-                <p className="text-[11px] text-[#2D6A4F] mb-2">
+                <p className="mb-2 text-[11px]" style={{ color: 'var(--green)' }}>
                   Shukriya! Aapki rating save ho gayi 🙏
                 </p>
                 <div className="flex items-center gap-3">
@@ -535,7 +733,7 @@ export default function RecipeDetailClient({
                     size="sm"
                     disabled={ratingLoading}
                   />
-                  <span className="text-[10px] text-[#8B7355]">Rating badal sakte ho</span>
+                  <span className="text-[10px]" style={{ color: 'var(--muted)' }}>Rating badal sakte ho</span>
                 </div>
               </>
             )}
@@ -571,9 +769,12 @@ export default function RecipeDetailClient({
   );
 }
 
-function StatChip({ emoji, label }: { emoji: string; label: string }) {
+function InfoPill({ emoji, label }: { emoji: string; label: string }) {
   return (
-    <span className="flex items-center gap-1 rounded-full border border-[#E8DDD0] bg-white px-3 py-1 text-[11px] text-[#8B7355]">
+    <span
+      className="flex flex-shrink-0 items-center rounded-full bg-white text-[11px]"
+      style={{ padding: '8px 16px', gap: 6, border: '1px solid var(--border)', color: 'var(--muted)' }}
+    >
       {emoji} {label}
     </span>
   );

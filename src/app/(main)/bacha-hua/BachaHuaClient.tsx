@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import BackButton from '@/components/BackButton/BackButton';
 import RecipeCardCompact from '@/components/RecipeCard/RecipeCardCompact';
 import UpgradeModal from '@/components/UpgradeModal/UpgradeModal';
+import ArtiLoader from '@/components/ArtiLoader/ArtiLoader';
 import type { Recipe } from '@/types/index';
 import type { GeneratedRecipe } from '@/lib/generate-recipe';
 
@@ -66,7 +67,7 @@ export default function BachaHuaClient({ isPaid }: Props) {
           <button
             type="button"
             onClick={() => setUpgradeOpen(true)}
-            className="mt-6 flex items-center justify-center rounded-xl bg-[#E8640C] px-6 text-[15px] font-bold text-white"
+            className="tap-spring mt-6 flex items-center justify-center rounded-xl bg-[#E8640C] px-6 text-[15px] font-bold text-white"
             style={{ minHeight: 48 }}
           >
             Premium lo — ₹150/mahine →
@@ -202,7 +203,7 @@ function BachaHuaPaid({
                   key={chip.label}
                   type="button"
                   onClick={() => toggleChip(chip.label)}
-                  className="flex items-center rounded-full px-3 text-[13px] font-medium transition-colors"
+                  className="tap-spring flex items-center rounded-full px-3 text-[13px] font-medium"
                   style={{
                     minHeight: 48,
                     background: isActive ? '#FFF0E6' : '#FFFFFF',
@@ -232,7 +233,7 @@ function BachaHuaPaid({
             type="button"
             onClick={handleSuggest}
             disabled={!hasSelection}
-            className="mt-6 flex w-full items-center justify-center rounded-xl text-[15px] font-bold text-white transition-opacity"
+            className="tap-spring mt-6 flex w-full items-center justify-center rounded-xl text-[15px] font-bold text-white"
             style={{
               minHeight: 48,
               background: hasSelection ? '#E8640C' : '#E8DDD0',
@@ -247,15 +248,7 @@ function BachaHuaPaid({
       {/* LOADING */}
       {stage === 'loading' && (
         <div className="flex flex-col items-center px-6 pt-24 text-center">
-          <div
-            className="h-12 w-12 rounded-full border-4 border-[#E8640C] border-t-transparent"
-            style={{ animation: 'bh-spin 0.8s linear infinite' }}
-            aria-label="Soch rahi hai"
-          />
-          <p className="mt-4 text-[14px] font-medium text-[#8B7355]">
-            Arti soch rahi hai... 🤔
-          </p>
-          <style>{`@keyframes bh-spin { to { transform: rotate(360deg); } }`}</style>
+          <ArtiLoader message="Arti soch rahi hai" />
         </div>
       )}
 
@@ -312,7 +305,7 @@ function BachaHuaPaid({
           <button
             type="button"
             onClick={reset}
-            className="mt-6 flex w-full items-center justify-center rounded-xl border border-[#E8DDD0] bg-white text-[14px] font-medium text-[#1A1A1A]"
+            className="tap-spring mt-6 flex w-full items-center justify-center rounded-xl border border-[#E8DDD0] bg-white text-[14px] font-medium text-[#1A1A1A]"
             style={{ minHeight: 48 }}
           >
             Aur kuch try karo
