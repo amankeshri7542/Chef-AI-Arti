@@ -427,9 +427,9 @@ export default function ProfileClient({
             {prefError && (
               <p
                 className="mb-3 rounded-lg px-4 py-3"
-                style={{ fontSize: 13, background: '#FDEAEA', color: '#B42318' }}
+                style={{ fontSize: 13, background: '#FFF0E6', border: '1px solid #F5A55B', color: '#BF4E06' }}
               >
-                {prefError}
+                ⚠️ {prefError}
               </p>
             )}
 

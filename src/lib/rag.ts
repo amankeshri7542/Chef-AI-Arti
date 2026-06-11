@@ -211,7 +211,12 @@ export async function searchRecipes(
 
   if (error) throw new Error(`match_recipes RPC failed: ${error.message}`);
 
-  const rows = (rpcRows ?? []) as RpcRecipeRow[];
+  // Relevance floor — nearest-neighbour search always returns *something*,
+  // even for nonsense queries (noise sits ≈0.13, weak real matches ≥0.26).
+  const SIMILARITY_FLOOR = 0.25;
+  const rows = ((rpcRows ?? []) as RpcRecipeRow[]).filter(
+    (r) => r.similarity >= SIMILARITY_FLOOR,
+  );
 
   if (rows.length === 0) {
     return await emptyStateFallback(supabase);

@@ -1,6 +1,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
+import { generateThumbnail, youtubeThumbnailUrl } from '@/lib/thumbnail';
 import type { RecipePending } from '@/types/index';
 import type { GeneratedRecipe } from '@/lib/generate-recipe';
 
@@ -117,7 +118,9 @@ export async function POST(
         // (TS RecipeSource = 'curated' | 'user'); 'curated' also makes them visible
         // to /surprise and the empty-state fallback, which filter source='curated'.
         source: 'curated',
-        thumbnail_source: 'none',
+        // YouTube video frame as instant placeholder; replaced by AI art below.
+        thumbnail_url: row.youtube_video_id ? youtubeThumbnailUrl(row.youtube_video_id) : null,
+        thumbnail_source: row.youtube_video_id ? 'youtube-temp' : 'none',
         category: 'sabzi', // safe default — generated recipes lack category
         diet_type: 'veg', // default
         youtube_video_id: row.youtube_video_id ?? null,
@@ -132,6 +135,20 @@ export async function POST(
         .from('recipes_pending')
         .update({ status: 'promoted', promoted_at: new Date().toISOString() })
         .eq('id', id);
+
+      // Best-effort AI thumbnail — promotion already succeeded; failures
+      // just leave the YouTube placeholder in place.
+      try {
+        const thumbnailUrl = await generateThumbnail(promoted.id, gen.name_hinglish ?? '');
+        if (thumbnailUrl) {
+          await supabase
+            .from('recipes')
+            .update({ thumbnail_url: thumbnailUrl, thumbnail_source: 'ai' })
+            .eq('id', promoted.id);
+        }
+      } catch {
+        console.error('[thumbnail] generation failed for', gen.name_hinglish);
+      }
 
       return NextResponse.json({ promoted: true, recipeId: promoted.id });
     }

@@ -27,12 +27,12 @@ export default async function PendingRecipePage({
 
   const { data: row } = await supabase
     .from('recipes_pending')
-    .select('id, generated_recipe, cooked_count, status, shown_to_user_ids')
+    .select('id, generated_recipe, cooked_count, status, shown_to_user_ids, youtube_video_id')
     .eq('id', pendingId)
     .single<
       Pick<
         RecipePending,
-        'id' | 'generated_recipe' | 'cooked_count' | 'status' | 'shown_to_user_ids'
+        'id' | 'generated_recipe' | 'cooked_count' | 'status' | 'shown_to_user_ids' | 'youtube_video_id'
       >
     >();
 
@@ -47,6 +47,7 @@ export default async function PendingRecipePage({
       recipe={row.generated_recipe as GeneratedRecipe}
       cookedCount={row.cooked_count}
       status={row.status}
+      youtubeVideoId={row.youtube_video_id ?? null}
     />
   );
 }

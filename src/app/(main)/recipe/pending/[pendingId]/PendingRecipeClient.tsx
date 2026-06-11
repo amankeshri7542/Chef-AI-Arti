@@ -17,9 +17,10 @@ interface Props {
   recipe: GeneratedRecipe;
   cookedCount: number;
   status: string;
+  youtubeVideoId?: string | null;
 }
 
-export default function PendingRecipeClient({ pendingId, recipe }: Props) {
+export default function PendingRecipeClient({ pendingId, recipe, youtubeVideoId }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<CookResult | null>(null);
@@ -61,6 +62,21 @@ export default function PendingRecipeClient({ pendingId, recipe }: Props) {
           Arti ne yeh aapke liye banaya — try karke batao!
         </p>
       </div>
+
+      {/* YouTube video frame as instant thumbnail (no AI cost while pending) */}
+      {youtubeVideoId && (
+        <div className="mt-4">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={`https://img.youtube.com/vi/${youtubeVideoId}/hqdefault.jpg`}
+            alt={recipe.name_hinglish}
+            className="h-[180px] w-full rounded-2xl object-cover"
+          />
+          <p className="mt-1 text-right text-[#8B7355]" style={{ fontSize: 9 }}>
+            📺 Source: YouTube
+          </p>
+        </div>
+      )}
 
       {/* Name + description */}
       <h1 className="mt-5 text-[22px] font-bold leading-tight text-[#1A1A1A]">

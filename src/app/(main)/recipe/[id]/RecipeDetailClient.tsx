@@ -291,6 +291,16 @@ export default function RecipeDetailClient({
           style={{ background: 'linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.6) 100%)' }}
         />
 
+        {/* YouTube-frame placeholder attribution */}
+        {recipe.thumbnail_source === 'youtube-temp' && (
+          <p
+            className="pointer-events-none absolute bottom-1 right-2 text-white/80"
+            style={{ fontSize: 9 }}
+          >
+            📺 Source: YouTube
+          </p>
+        )}
+
         {/* Overlay back button */}
         <button
           type="button"

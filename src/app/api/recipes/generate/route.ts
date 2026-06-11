@@ -57,7 +57,9 @@ export async function POST(req: NextRequest) {
     const { data: dishMatch } = await supabase
       .from('recipes_pending')
       .select('id, generated_recipe, shown_to_user_ids')
-      .ilike('generated_recipe->>name_hinglish', `%${dishName}%`)
+      // Exact (case-insensitive) name match only. `%${dishName}%` was too
+      // aggressive — "paneer" returned ANY paneer dish ever generated.
+      .ilike('generated_recipe->>name_hinglish', dishName)
       .gte('created_at', cutoff30d)
       .order('created_at', { ascending: false })
       .limit(1)
@@ -84,25 +86,9 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // 4b. Per-user dedup BEFORE rate limit — so we don't burn a token on a no-op.
-  // If this user already generated a pending recipe in the last 24h, return it.
-  const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-  const { data: existing } = await supabase
-    .from('recipes_pending')
-    .select('id, generated_recipe')
-    .eq('requested_by', user.id)
-    .gte('created_at', cutoff)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle<{ id: string; generated_recipe: unknown }>();
-
-  if (existing) {
-    return NextResponse.json({
-      pendingId: existing.id,
-      recipe: existing.generated_recipe,
-      isGenerated: true,
-    });
-  }
+  // (Former step 4b — a blanket per-user 24h dedup — REMOVED. It returned the
+  // user's most recent pending recipe for ANY new query, so every generation
+  // after the first looked identical. The rate limit below now governs volume.)
 
   // 5. Rate limit (atomically increments — call exactly once)
   const allowed = await checkRateLimit(userId, 'ai-gen', user.subscription_status);

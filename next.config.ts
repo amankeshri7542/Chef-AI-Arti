@@ -20,6 +20,11 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: process.env.CLOUDFRONT_DOMAIN ?? 'chief-arti-fridge-scans.s3.ap-south-1.amazonaws.com',
       },
+      {
+        // YouTube video frames — temp thumbnails for freshly promoted recipes
+        protocol: 'https',
+        hostname: 'img.youtube.com',
+      },
     ],
   },
 };

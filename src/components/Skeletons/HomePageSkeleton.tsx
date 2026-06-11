@@ -47,7 +47,7 @@ export default function HomePageSkeleton() {
           <div
             key={i}
             className="flex-shrink-0 rounded-2xl overflow-hidden"
-            style={{ width: 160, height: 180, background: '#FFF0E6', border: '1px solid #E8DDD0' }}
+            style={{ width: 160, height: 190, background: '#FFF0E6', border: '1px solid #E8DDD0' }}
           >
             <div className="skel-shine" style={{ width: '100%', height: 108, borderRadius: 0 }} />
             <div className="p-2.5">

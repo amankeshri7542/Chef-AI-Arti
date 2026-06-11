@@ -31,7 +31,7 @@ export type RecipeCategory =
 
 export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
 
-export type ThumbnailSource = 'none' | 'user' | 'ai';
+export type ThumbnailSource = 'none' | 'user' | 'ai' | 'youtube-temp';
 
 export type SpiceLevel = 'mild' | 'medium' | 'hot';
 

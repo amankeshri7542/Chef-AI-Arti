@@ -61,6 +61,11 @@ export default function BottomNav() {
               >
                 {it.label}
               </span>
+              <span
+                aria-hidden
+                className="h-1 w-1 rounded-full transition-opacity duration-200"
+                style={{ background: '#E8640C', opacity: active ? 1 : 0 }}
+              />
             </Link>
           );
         })}
