@@ -2,8 +2,9 @@ import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
 import { searchRecipes } from '@/lib/rag';
+import { buildHinglishQuery } from '@/lib/ingredient-map';
 import { checkRateLimit, getRateLimitRemaining, RATE_LIMITS } from '@/lib/redis';
-import type { User } from '@/types/index';
+import type { Recipe, User } from '@/types/index';
 
 const GUEST_USER_CONTEXT = {
   diet_type: 'veg' as const,
@@ -103,11 +104,114 @@ async function handleSearch(params: SearchParams, userId: string | null) {
     }
   }
 
-  // RAG search path
+  // Text query path — direct name/tag match FIRST, vector search after.
+  // Recipe embeddings don't strongly match bare dish names ("paratha"),
+  // so a plain SQL ilike on name_hinglish must win over vector similarity.
   try {
-    const result = await searchRecipes(
-      query!,
-      userContext as Pick<
+    const supabase = createServerClient();
+    const raw = query!.trim();
+    const likeTerm = `%${raw.replace(/[%_]/g, '')}%`;
+
+    const applyUserFilters = <T extends { eq: Function; in: Function }>(q: T): T => {
+      let out = q;
+      if (userContext.diet_type === 'veg') out = out.eq('diet_type', 'veg');
+      else if (userContext.diet_type === 'eggetarian')
+        out = out.in('diet_type', ['veg', 'eggetarian']);
+      if (userContext.is_vrat_mode) out = out.eq('is_vrat_friendly', true);
+      return out;
+    };
+
+    const [{ data: nameRows }, { data: tagRows }] = await Promise.all([
+      applyUserFilters(
+        supabase
+          .from('recipes')
+          .select('*')
+          .ilike('name_hinglish', likeTerm)
+          .eq('source', 'curated')
+          .eq('reported_count', 0),
+      )
+        .order('cooked_count', { ascending: false })
+        .limit(10),
+      applyUserFilters(
+        supabase
+          .from('recipes')
+          .select('*')
+          .contains('tags', [raw.toLowerCase()])
+          .eq('source', 'curated')
+          .eq('reported_count', 0),
+      )
+        .order('cooked_count', { ascending: false })
+        .limit(5),
+    ]);
+
+    const nameMatches = (nameRows ?? []) as Recipe[];
+    const tagMatches = (tagRows ?? []) as Recipe[];
+
+    if (nameMatches.length > 0 || tagMatches.length > 0) {
+      // Priority: exact name > partial name > tag > vector fill
+      const lower = raw.toLowerCase();
+      nameMatches.sort((a, b) => {
+        const aExact = a.name_hinglish.toLowerCase() === lower ? 1 : 0;
+        const bExact = b.name_hinglish.toLowerCase() === lower ? 1 : 0;
+        if (aExact !== bExact) return bExact - aExact;
+        return (b.cooked_count ?? 0) - (a.cooked_count ?? 0);
+      });
+
+      const seen = new Set<string>();
+      const combined: Recipe[] = [];
+      for (const r of [...nameMatches, ...tagMatches]) {
+        if (!seen.has(r.id)) {
+          seen.add(r.id);
+          combined.push(r);
+        }
+      }
+
+      // Fill with vector results only when direct matches are sparse
+      if (combined.length < 3) {
+        try {
+          const vectorResult = await runVectorSearch(raw, userContext, userId);
+          for (const r of vectorResult.recipes) {
+            if (!seen.has(r.id) && combined.length < 10) {
+              seen.add(r.id);
+              combined.push(r);
+            }
+          }
+        } catch (err) {
+          console.error('[search] vector fill failed (direct matches still returned):', err);
+        }
+      }
+
+      return NextResponse.json({
+        recipes: combined.slice(0, 10),
+        isEmptyStateFallback: false,
+        triggerCase2: false,
+        ...(remaining !== undefined ? { remaining } : {}),
+      });
+    }
+
+    // No direct match — full RAG vector search
+    const result = await runVectorSearch(raw, userContext, userId);
+    return NextResponse.json({ ...result, ...(remaining !== undefined ? { remaining } : {}) });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error('[search] RAG error:', msg);
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
+}
+
+// Embedding-based search. Translates English ingredient words to bilingual
+// Hinglish terms ("potato aloo") before embedding — dish names pass through
+// buildHinglishQuery unchanged, so this is safe for both query styles.
+async function runVectorSearch(
+  rawQuery: string,
+  userContext: typeof GUEST_USER_CONTEXT,
+  userId: string | null,
+) {
+  const words = rawQuery.split(/[,\s]+/).filter(Boolean);
+  const translated = buildHinglishQuery(words);
+  return searchRecipes(
+    translated,
+    userContext as Pick<
         User,
         | 'diet_type'
         | 'is_vrat_mode'
@@ -117,14 +221,8 @@ async function handleSearch(params: SearchParams, userId: string | null) {
         | 'preferred_region'
         | 'disliked_ingredients'
       >,
-      userId ?? 'guest',
-    );
-    return NextResponse.json({ ...result, ...(remaining !== undefined ? { remaining } : {}) });
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    console.error('[search] RAG error:', msg);
-    return NextResponse.json({ error: msg }, { status: 500 });
-  }
+    userId ?? 'guest',
+  );
 }
 
 // ─── GET — primary handler (SW-safe, cacheable by client) ────────────────────

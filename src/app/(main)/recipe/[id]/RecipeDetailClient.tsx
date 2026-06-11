@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { speakText, stopSpeaking } from '@/lib/tts';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Recipe, Ingredient, UnitPreference, SubscriptionStatus } from '@/types/index';
@@ -29,6 +30,8 @@ interface RecipeDetailClientProps {
   recipe: Recipe;
   user: UserProps | null;
   isAuthenticated: boolean;
+  /** True when cooking_history already has this recipe for this user (rating allowed on revisit). */
+  hasCookedBefore?: boolean;
 }
 
 function ttsText(recipe: Recipe, scaledIngredients: Ingredient[], portionSize: number): string {
@@ -46,6 +49,7 @@ export default function RecipeDetailClient({
   recipe,
   user,
   isAuthenticated,
+  hasCookedBefore = false,
 }: RecipeDetailClientProps) {
   const router = useRouter();
 
@@ -55,7 +59,9 @@ export default function RecipeDetailClient({
   const subscriptionStatus: SubscriptionStatus = user?.subscription_status ?? 'free';
   const isPaid = subscriptionStatus === 'paid';
 
-  const [portionSize, setPortionSize] = useState(familySize);
+  // Free tier caps portions at 6 — a free user with family_size 8 must not
+  // start above the cap (seats 7+ are locked in PortionSelector).
+  const [portionSize, setPortionSize] = useState(isPaid ? familySize : Math.min(familySize, 6));
   const [cookedLoading, setCookedLoading] = useState(false);
   const [cooked, setCooked] = useState(false);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
@@ -86,6 +92,11 @@ export default function RecipeDetailClient({
   const [stepSpeaking, setStepSpeaking] = useState(false);
   const stepsRef = useRef<HTMLDivElement>(null);
   const activeStepRef = useRef<HTMLDivElement>(null);
+
+  // Always open the recipe from the top
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, []);
 
   // Hero entry: scale 1.05 → 1.0 over 400ms
   const [heroIn, setHeroIn] = useState(false);
@@ -129,25 +140,19 @@ export default function RecipeDetailClient({
   // Stop step TTS when leaving cooking or changing step
   useEffect(() => {
     setStepSpeaking(false);
-    if (typeof window !== 'undefined' && window.speechSynthesis) {
-      window.speechSynthesis.cancel();
-    }
+    stopSpeaking();
   }, [activeStep, cookingActive]);
 
   const speakStep = useCallback((text: string) => {
-    if (typeof window === 'undefined' || !window.speechSynthesis) return;
     if (stepSpeaking) {
-      window.speechSynthesis.cancel();
+      stopSpeaking();
       setStepSpeaking(false);
       return;
     }
-    window.speechSynthesis.cancel();
-    const utter = new SpeechSynthesisUtterance(text);
-    utter.lang = 'hi-IN';
-    utter.rate = 0.9;
-    utter.onend = () => setStepSpeaking(false);
-    utter.onerror = () => setStepSpeaking(false);
-    window.speechSynthesis.speak(utter);
+    speakText(text, {
+      onend: () => setStepSpeaking(false),
+      onerror: () => setStepSpeaking(false),
+    });
     setStepSpeaking(true);
   }, [stepSpeaking]);
 
@@ -706,8 +711,8 @@ export default function RecipeDetailClient({
           </p>
         )}
 
-        {/* Rating section — only after user has cooked */}
-        {isAuthenticated && cooked && (
+        {/* Rating section — after cooking now OR on revisit if cooked before */}
+        {isAuthenticated && (cooked || hasCookedBefore) && (
           <div className="mt-3 rounded-xl bg-white px-4 py-3" style={{ border: '1px solid var(--border)' }}>
             {!ratingSubmitted ? (
               <>

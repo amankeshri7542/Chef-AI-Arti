@@ -34,13 +34,24 @@ export default async function RecipeDetailPage({ params }: Props) {
 
   // Fetch user only if logged in
   let user = null
+  let hasCookedBefore = false
   if (userId) {
     const { data } = await supabase
       .from('users')
-      .select('family_size, subscription_status, preferred_unit, is_vrat_mode')
+      .select('id, family_size, subscription_status, preferred_unit, is_vrat_mode')
       .eq('clerk_user_id', userId)
       .single()
     user = data
+
+    if (user) {
+      const { data: history } = await supabase
+        .from('cooking_history')
+        .select('id')
+        .eq('recipe_id', id)
+        .eq('user_id', user.id)
+        .limit(1)
+      hasCookedBefore = !!history?.length
+    }
   }
 
   return (
@@ -48,6 +59,7 @@ export default async function RecipeDetailPage({ params }: Props) {
       recipe={recipe}
       user={user}
       isAuthenticated={!!userId}
+      hasCookedBefore={hasCookedBefore}
     />
   )
 }

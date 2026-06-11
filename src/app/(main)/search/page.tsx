@@ -8,7 +8,6 @@ import BackButton from '@/components/BackButton/BackButton';
 import RecipeGridSkeleton from '@/components/Skeletons/RecipeGridSkeleton';
 import PullToRefresh from '@/components/PullToRefresh/PullToRefresh';
 import { RECIPE_COLLECTIONS } from '@/lib/collections';
-import { buildHinglishQuery } from '@/lib/ingredient-map';
 import { Recipe } from '@/types/index';
 
 const CATEGORY_CHIPS = [
@@ -79,10 +78,9 @@ export default function SearchPage() {
     setLoading(true);
     setActiveSource({ type: 'search', term: searchTerm });
     try {
-      // Translate English terms to Hinglish equivalents for better embedding match
-      const words = searchTerm.split(/[,\s]+/).filter(Boolean);
-      const translatedQuery = buildHinglishQuery(words);
-      const data = await fetchSearch(translatedQuery);
+      // Raw query — the API does direct name/tag match first, then translates
+      // ingredient words to Hinglish only for the vector-search fallback.
+      const data = await fetchSearch(searchTerm.trim());
       setResults(data);
     } catch {
       setResults([]);

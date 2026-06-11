@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useEffect } from 'react';
+import { speakText, stopSpeaking, isTTSSupported } from '@/lib/tts';
 
 interface TTSButtonProps {
   text: string;
@@ -8,24 +9,26 @@ interface TTSButtonProps {
 
 export default function TTSButton({ text }: TTSButtonProps) {
   const [speaking, setSpeaking] = useState(false);
-  const utterRef = useRef<SpeechSynthesisUtterance | null>(null);
+  // Render the button on both server and client (avoids hydration mismatch);
+  // hide it after mount only if the browser truly lacks speechSynthesis.
+  const [supported, setSupported] = useState(true);
 
-  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return null;
+  useEffect(() => {
+    setSupported(isTTSSupported());
+  }, []);
+
+  if (!supported) return null;
 
   function handleToggle() {
     if (speaking) {
-      window.speechSynthesis.cancel();
+      stopSpeaking();
       setSpeaking(false);
       return;
     }
-
-    const utter = new SpeechSynthesisUtterance(text);
-    utter.lang = 'hi-IN';
-    utter.rate = 0.9;
-    utter.onend = () => setSpeaking(false);
-    utter.onerror = () => setSpeaking(false);
-    utterRef.current = utter;
-    window.speechSynthesis.speak(utter);
+    speakText(text, {
+      onend: () => setSpeaking(false),
+      onerror: () => setSpeaking(false),
+    });
     setSpeaking(true);
   }
 
