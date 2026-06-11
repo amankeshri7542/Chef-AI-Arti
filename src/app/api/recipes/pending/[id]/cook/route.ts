@@ -33,7 +33,7 @@ export async function POST(
   const { data: row } = await supabase
     .from('recipes_pending')
     .select(
-      'id, generated_recipe, status, cooked_count, reported_count, shown_to_user_ids',
+      'id, generated_recipe, status, cooked_count, reported_count, shown_to_user_ids, youtube_video_id, youtube_video_url, youtube_channel_name',
     )
     .eq('id', id)
     .single<
@@ -45,6 +45,9 @@ export async function POST(
         | 'cooked_count'
         | 'reported_count'
         | 'shown_to_user_ids'
+        | 'youtube_video_id'
+        | 'youtube_video_url'
+        | 'youtube_channel_name'
       >
     >();
 
@@ -117,6 +120,9 @@ export async function POST(
         thumbnail_source: 'none',
         category: 'sabzi', // safe default — generated recipes lack category
         diet_type: 'veg', // default
+        youtube_video_id: row.youtube_video_id ?? null,
+        youtube_video_url: row.youtube_video_url ?? null,
+        youtube_channel_name: row.youtube_channel_name ?? null,
       })
       .select('id')
       .single<{ id: string }>();

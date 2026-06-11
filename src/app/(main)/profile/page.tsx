@@ -15,9 +15,9 @@ export default async function ProfilePage() {
 
   const { data: user } = await supabase
     .from('users')
-    .select('subscription_status, subscription_ends_at, diet_type, family_size, preferred_unit')
+    .select('subscription_status, subscription_ends_at, diet_type, family_size, preferred_unit, preferred_region, spice_preference, cooking_skill, time_preference, kitchen_setup')
     .eq('clerk_user_id', userId)
-    .single<Pick<User, 'subscription_status' | 'subscription_ends_at' | 'diet_type' | 'family_size' | 'preferred_unit'>>();
+    .single<Pick<User, 'subscription_status' | 'subscription_ends_at' | 'diet_type' | 'family_size' | 'preferred_unit' | 'preferred_region' | 'spice_preference' | 'cooking_skill' | 'time_preference' | 'kitchen_setup'>>();
 
   // Fallback defaults if user row not found
   const name = clerkUser?.fullName ?? clerkUser?.firstName ?? null;
@@ -36,6 +36,11 @@ export default async function ProfilePage() {
         dietType={user?.diet_type ?? 'veg'}
         familySize={user?.family_size ?? 4}
         preferredUnit={user?.preferred_unit ?? 'desi'}
+        preferredRegion={user?.preferred_region ?? null}
+        spicePreference={user?.spice_preference ?? 'medium'}
+        cookingSkill={user?.cooking_skill ?? null}
+        timePreference={user?.time_preference ?? null}
+        kitchenSetup={user?.kitchen_setup ?? []}
       />
     </div>
   );

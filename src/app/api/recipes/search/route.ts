@@ -47,7 +47,7 @@ async function handleSearch(params: SearchParams, userId: string | null) {
     const { data: user } = await supabase
       .from('users')
       .select(
-        'diet_type, is_vrat_mode, restrictions, family_size, spice_preference, preferred_region, disliked_ingredients, subscription_status',
+        'diet_type, is_vrat_mode, restrictions, family_size, spice_preference, preferred_region, disliked_ingredients, time_preference, cooking_skill, kitchen_setup, subscription_status',
       )
       .eq('clerk_user_id', userId)
       .single();

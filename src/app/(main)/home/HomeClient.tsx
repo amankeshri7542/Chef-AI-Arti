@@ -100,6 +100,13 @@ function FeaturedCard({ recipe, onClick, index }: { recipe: Recipe; onClick: () 
   );
 }
 
+// Local mirror of the API shape — do NOT add to types/index.ts
+interface RecommendationGroup {
+  reason: string;
+  based_on_recipe: string;
+  recipes: Recipe[];
+}
+
 interface FeatureCardDef {
   emoji: string;
   title: string;
@@ -128,6 +135,29 @@ export default function HomeClient({
   useEffect(() => {
     setSubtitle(timeSubtitle());
   }, []);
+
+  // "Banaya tha, toh yeh try karein" — personalized rows (auth + 1+ cook only)
+  const [recGroups, setRecGroups] = useState<RecommendationGroup[]>([]);
+  useEffect(() => {
+    if (!isAuthenticated || cookedCount < 1) return;
+    let cancelled = false;
+    fetch('/api/recipes/recommendations')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: { groups?: RecommendationGroup[] } | null) => {
+        if (cancelled || !data?.groups) return;
+        // Skip the synthetic "popular" group — only genuine "banaya tha" rows
+        const genuine = data.groups.filter(
+          (g) => g.based_on_recipe && g.recipes.length > 0,
+        );
+        setRecGroups(genuine.slice(0, 2));
+      })
+      .catch(() => {
+        /* silent — section simply doesn't render */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated, cookedCount]);
 
   const firstName = userName ? userName.split(' ')[0] : '';
 
@@ -277,6 +307,25 @@ export default function HomeClient({
           </div>
         )}
       </section>
+
+      {/* "Banaya tha, toh yeh try karein" — personalized recommendation rows */}
+      {recGroups.map((group) => (
+        <section key={group.based_on_recipe} className="mb-6">
+          <p className="px-4 italic" style={{ fontSize: 12, color: 'var(--muted)' }}>
+            {group.reason}
+          </p>
+          <div className="mt-3 flex gap-3 overflow-x-auto px-4 pb-1 scrollbar-hide">
+            {group.recipes.map((r, i) => (
+              <FeaturedCard
+                key={r.id}
+                recipe={r}
+                index={i}
+                onClick={() => router.push('/recipe/' + r.id)}
+              />
+            ))}
+          </div>
+        </section>
+      ))}
 
       {/* Naye Recipes explore teaser */}
       {showExploreTeaser && (

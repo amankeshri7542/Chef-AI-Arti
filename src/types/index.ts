@@ -5,7 +5,13 @@
 // Top-level enums (string literal unions)
 // ─────────────────────────────────────
 
-export type DietType = 'veg' | 'non-veg' | 'eggetarian';
+export type DietType = 'veg' | 'non-veg' | 'eggetarian' | 'vegan' | 'jain';
+
+export type CookingFor = 'alone' | 'couple' | 'family' | 'pg';
+
+export type CookingSkill = 'beginner' | 'intermediate' | 'expert';
+
+export type TimePreference = '15min' | '30min' | 'any';
 
 export type UnitPreference = 'desi' | 'metric';
 
@@ -174,8 +180,17 @@ export interface User {
   spice_preference: SpiceLevel;
   /** Ingredient tokens the user dislikes (e.g. ['karela','baingan']). Filtered at SQL level. */
   disliked_ingredients: string[];
-  /** Preferred regional cuisine for ranking boost. Null = no preference. */
-  preferred_region: RegionOrigin | null;
+  /** Preferred regional cuisine for ranking boost. Null = no preference.
+   *  Onboarding v2 may also store non-North values ('south-indian','bengali',
+   *  'gujarati','maharashtrian','any') — RAG skips region filter for those. */
+  preferred_region: RegionOrigin | string | null;
+  /** Onboarding v2 personalisation */
+  cooking_for: CookingFor;
+  cooking_skill: CookingSkill;
+  time_preference: TimePreference;
+  /** Equipment slugs, e.g. ['gas-stove','pressure-cooker']. Empty = unknown. */
+  kitchen_setup: string[];
+  onboarding_v2_done: boolean;
   created_at: string;
 }
 
@@ -222,6 +237,10 @@ export interface Recipe {
   embedding: number[] | null;
   /** Provenance — 'curated' seed, 'ai' generated, 'user' submitted. Default 'curated'. */
   source: RecipeSource;
+  /** YouTube source video (CASE 2 pipeline). Null for curated recipes. */
+  youtube_video_id?: string | null;
+  youtube_video_url?: string | null;
+  youtube_channel_name?: string | null;
   /** GPT-estimated macros per serving (base_family_size servings). Scale at display time. */
   nutrition?: {
     per_serving: {
@@ -295,5 +314,9 @@ export interface RecipePending {
   reported_count: number;
   shown_to_user_ids: string[];
   promoted_at: string | null;
+  /** YouTube source video when the recipe came from the YouTube pipeline. */
+  youtube_video_id?: string | null;
+  youtube_video_url?: string | null;
+  youtube_channel_name?: string | null;
   created_at: string;
 }

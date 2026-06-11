@@ -3,7 +3,7 @@ import * as Sentry from '@sentry/nextjs';
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
 import { checkRateLimit } from '@/lib/redis';
-import { generateRecipe } from '@/lib/generate-recipe';
+import { generateRecipeViaYouTube } from '@/lib/generate-recipe';
 import type { SubscriptionStatus } from '@/types/index';
 
 export async function POST(req: NextRequest) {
@@ -18,9 +18,14 @@ export async function POST(req: NextRequest) {
   // 2. Resolve internal user (UUID + tier)
   const { data: user } = await supabase
     .from('users')
-    .select('id, subscription_status')
+    .select('id, subscription_status, family_size, diet_type')
     .eq('clerk_user_id', userId)
-    .single<{ id: string; subscription_status: SubscriptionStatus }>();
+    .single<{
+      id: string;
+      subscription_status: SubscriptionStatus;
+      family_size: number | null;
+      diet_type: string | null;
+    }>();
 
   if (!user) {
     return NextResponse.json({ error: 'User not found' }, { status: 404 });
@@ -43,7 +48,43 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Kuch ingredients bhejo' }, { status: 400 });
   }
 
-  // 4. Dedup check BEFORE rate limit — so we don't burn a token on a no-op.
+  // 4a. Dish-name dedup BEFORE the per-user dedup — "save once, serve many".
+  // If ANY user already generated this dish in the last 30 days, reuse it:
+  // append this user to shown_to_user_ids and return the existing pending recipe.
+  const dishName = query?.trim();
+  if (dishName) {
+    const cutoff30d = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    const { data: dishMatch } = await supabase
+      .from('recipes_pending')
+      .select('id, generated_recipe, shown_to_user_ids')
+      .ilike('generated_recipe->>name_hinglish', `%${dishName}%`)
+      .gte('created_at', cutoff30d)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle<{
+        id: string;
+        generated_recipe: unknown;
+        shown_to_user_ids: string[] | null;
+      }>();
+
+    if (dishMatch) {
+      const shownTo = dishMatch.shown_to_user_ids ?? [];
+      if (!shownTo.includes(user.id)) {
+        await supabase
+          .from('recipes_pending')
+          .update({ shown_to_user_ids: [...shownTo, user.id] })
+          .eq('id', dishMatch.id);
+      }
+      console.log(`[yt-pipeline] dish-name dedup hit: "${dishName}" → ${dishMatch.id}`);
+      return NextResponse.json({
+        pendingId: dishMatch.id,
+        recipe: dishMatch.generated_recipe,
+        isGenerated: true,
+      });
+    }
+  }
+
+  // 4b. Per-user dedup BEFORE rate limit — so we don't burn a token on a no-op.
   // If this user already generated a pending recipe in the last 24h, return it.
   const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
   const { data: existing } = await supabase
@@ -72,10 +113,14 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // 6. Generate via GPT
+  // 6. Generate — YouTube transcript pipeline first, GPT fallback inside
   let recipe;
+  let video;
   try {
-    recipe = await generateRecipe(ingredients, query);
+    ({ recipe, video } = await generateRecipeViaYouTube(ingredients, query, {
+      familySize: user.family_size ?? 4,
+      dietType: user.diet_type ?? 'veg',
+    }));
   } catch (err) {
     Sentry.captureException(err);
     return NextResponse.json(
@@ -93,6 +138,9 @@ export async function POST(req: NextRequest) {
       generated_recipe: recipe,
       status: 'pending',
       shown_to_user_ids: [user.id],
+      youtube_video_id: video?.videoId ?? null,
+      youtube_video_url: video?.url ?? null,
+      youtube_channel_name: video?.channelName ?? null,
     })
     .select('id')
     .single<{ id: string }>();

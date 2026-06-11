@@ -176,7 +176,8 @@ type UserContext = Pick<
   | 'spice_preference'
   | 'preferred_region'
   | 'disliked_ingredients'
->;
+> &
+  Partial<Pick<User, 'time_preference' | 'cooking_skill' | 'kitchen_setup'>>;
 
 /**
  * Full RAG pipeline for recipe search.
@@ -229,9 +230,36 @@ export async function searchRecipes(
   const scored = rows.map((row) => {
     let score = row.similarity;
 
+    // Region boost — onboarding-v2 values ('south-indian','any',…) never match
+    // region_origin, so the boost simply doesn't fire for them (no filtering).
     if (user.preferred_region && row.region_origin === user.preferred_region) score += 0.1;
     if (row.spice_level === user.spice_preference) score += 0.05;
     if (recentIds.has(row.id)) score -= 0.2;
+
+    // Time preference — soft boost/penalty only; never excludes
+    const totalTime = row.cook_time_minutes + row.prep_time_minutes;
+    if (user.time_preference === '15min') {
+      if (totalTime <= 15) score += 0.08;
+      else if (totalTime > 30) score -= 0.05;
+    } else if (user.time_preference === '30min') {
+      if (totalTime <= 30) score += 0.05;
+      else if (totalTime > 60) score -= 0.05;
+    }
+
+    // Skill — beginners get simpler dishes nudged up, technique-heavy down
+    if (user.cooking_skill === 'beginner') {
+      if (row.vibes.includes('jaldi-bane') || row.vibes.includes('one-pot')) score += 0.05;
+      if (row.cooking_style === 'dum') score -= 0.08;
+    }
+
+    // Kitchen setup — penalize (not exclude) only when we KNOW the setup
+    // lacks a pressure cooker AND the dish clearly needs one
+    const setup = user.kitchen_setup ?? [];
+    if (setup.length > 0 && !setup.includes('pressure-cooker')) {
+      const needsPressure =
+        row.cooking_style === 'dum' || row.tags.includes('pressure-cooker');
+      if (needsPressure) score -= 0.1;
+    }
 
     const qualityBonus =
       (row.cooked_count * 3 + row.like_count * 2 + row.saved_count) / 100;

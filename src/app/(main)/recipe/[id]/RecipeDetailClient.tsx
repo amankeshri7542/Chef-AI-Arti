@@ -16,6 +16,8 @@ import LoginPromptModal from '@/components/LoginPromptModal/LoginPromptModal';
 import NutritionDisplay from '@/components/NutritionDisplay/NutritionDisplay';
 import { StarRatingInteractive, StarRatingDisplay } from '@/components/StarRating/StarRating';
 import CommunityPhotos from '@/components/CommunityPhotos/CommunityPhotos';
+import YouTubeEmbed from '@/components/YouTubeEmbed/YouTubeEmbed';
+import PostCookSuggestions from '@/components/PostCookSuggestions/PostCookSuggestions';
 import { toast } from '@/lib/toast';
 import { haptic } from '@/lib/haptics';
 
@@ -561,6 +563,15 @@ export default function RecipeDetailClient({
           </p>
         )}
 
+        {/* YouTube source video — only for YouTube-pipeline recipes */}
+        {recipe.youtube_video_id && (
+          <YouTubeEmbed
+            videoId={recipe.youtube_video_id}
+            channelName={recipe.youtube_channel_name ?? null}
+            title={recipe.name_hinglish}
+          />
+        )}
+
         {/* Collapsible Nutrition */}
         {recipe.nutrition && (
           <div>
@@ -662,6 +673,11 @@ export default function RecipeDetailClient({
               </>
             )}
           </div>
+        )}
+
+        {/* Similar recipes after cooking */}
+        {cooked && (
+          <PostCookSuggestions recipeId={recipe.id} recipeName={recipe.name_hinglish} />
         )}
       </div>
 

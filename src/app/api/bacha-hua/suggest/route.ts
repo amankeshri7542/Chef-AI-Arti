@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
 import { searchRecipes } from '@/lib/rag';
 import { buildHinglishQuery } from '@/lib/ingredient-map';
-import { generateRecipe } from '@/lib/generate-recipe';
+import { generateRecipeViaYouTube } from '@/lib/generate-recipe';
 import type { User } from '@/types/index';
 
 type UserCtx = Pick<
@@ -15,7 +15,8 @@ type UserCtx = Pick<
   | 'spice_preference'
   | 'preferred_region'
   | 'disliked_ingredients'
->;
+> &
+  Partial<Pick<User, 'time_preference' | 'cooking_skill' | 'kitchen_setup'>>;
 
 export async function POST(request: NextRequest) {
   // 1 — auth
@@ -30,7 +31,7 @@ export async function POST(request: NextRequest) {
   const { data: user } = await supabase
     .from('users')
     .select(
-      'id, diet_type, is_vrat_mode, restrictions, family_size, spice_preference, preferred_region, disliked_ingredients, subscription_status',
+      'id, diet_type, is_vrat_mode, restrictions, family_size, spice_preference, preferred_region, disliked_ingredients, time_preference, cooking_skill, kitchen_setup, subscription_status',
     )
     .eq('clerk_user_id', userId)
     .single();
@@ -76,6 +77,9 @@ export async function POST(request: NextRequest) {
     spice_preference: (user as UserCtx).spice_preference,
     preferred_region: (user as UserCtx).preferred_region,
     disliked_ingredients: (user as UserCtx).disliked_ingredients,
+    time_preference: (user as UserCtx).time_preference,
+    cooking_skill: (user as UserCtx).cooking_skill,
+    kitchen_setup: (user as UserCtx).kitchen_setup,
   };
 
   // 5 — retrieval-first
@@ -99,9 +103,16 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ recipes: result.recipes });
   }
 
-  // 7 — CASE 2: generate a fresh recipe
+  // 7 — CASE 2: generate a fresh recipe (YouTube pipeline → GPT fallback)
   try {
-    const generated = await generateRecipe(ingredients);
+    const { recipe: generated, video } = await generateRecipeViaYouTube(
+      ingredients,
+      undefined,
+      {
+        familySize: userCtx.family_size ?? 4,
+        dietType: userCtx.diet_type ?? 'veg',
+      },
+    );
 
     const { data: inserted, error: insertErr } = await supabase
       .from('recipes_pending')
@@ -111,6 +122,9 @@ export async function POST(request: NextRequest) {
         generated_recipe: generated,
         status: 'pending',
         shown_to_user_ids: [(user as { id: string }).id],
+        youtube_video_id: video?.videoId ?? null,
+        youtube_video_url: video?.url ?? null,
+        youtube_channel_name: video?.channelName ?? null,
       })
       .select('id')
       .single();
