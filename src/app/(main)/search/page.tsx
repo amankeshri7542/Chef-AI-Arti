@@ -53,6 +53,39 @@ async function fetchSearch(query: string): Promise<Recipe[]> {
   return data.recipes ?? [];
 }
 
+function GenerateButtons({
+  isSignedIn,
+  generating,
+  onGenerate,
+  onLogin,
+}: {
+  isSignedIn: boolean;
+  generating: boolean;
+  onGenerate: () => void;
+  onLogin: () => void;
+}) {
+  return isSignedIn ? (
+    <button
+      type="button"
+      disabled={generating}
+      onClick={onGenerate}
+      className="tap-spring flex items-center gap-2 rounded-xl bg-[#E8640C] px-6 py-3 text-white font-medium disabled:opacity-60"
+      style={{ fontSize: 13, minHeight: 48 }}
+    >
+      {generating ? '✨ Arti bana rahi hai...' : '🎬 YouTube se dhundho aur banao'}
+    </button>
+  ) : (
+    <button
+      type="button"
+      onClick={onLogin}
+      className="tap-spring rounded-xl border border-[#E8640C] px-6 py-3 text-[#E8640C] font-medium"
+      style={{ fontSize: 13, minHeight: 48 }}
+    >
+      Login karke try karein →
+    </button>
+  );
+}
+
 export default function SearchPage() {
   const router = useRouter();
   const { isSignedIn } = useUser();
@@ -338,26 +371,31 @@ export default function SearchPage() {
             <p className="text-[#8B6B4A]" style={{ fontSize: 12 }}>
               Kya Arti aapke liye yeh recipe banaye?
             </p>
-            {isSignedIn ? (
-              <button
-                type="button"
-                disabled={generating}
-                onClick={() => handleGenerateRecipe(activeSource.term)}
-                className="tap-spring flex items-center gap-2 rounded-xl bg-[#E8640C] px-6 py-3 text-white font-medium disabled:opacity-60"
-                style={{ fontSize: 13, minHeight: 48 }}
-              >
-                {generating ? '✨ Arti bana rahi hai...' : '🎬 YouTube se dhundho aur banao'}
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => router.push('/sign-in')}
-                className="tap-spring rounded-xl border border-[#E8640C] px-6 py-3 text-[#E8640C] font-medium"
-                style={{ fontSize: 13, minHeight: 48 }}
-              >
-                Login karke try karein →
-              </button>
-            )}
+            <GenerateButtons
+              isSignedIn={!!isSignedIn}
+              generating={generating}
+              onGenerate={() => handleGenerateRecipe(activeSource.term)}
+              onLogin={() => router.push('/sign-in')}
+            />
+          </div>
+        )}
+
+        {/* Below search results — vector search always returns *something*,
+            so the generate CTA must also show alongside weak matches */}
+        {!loading && results.length > 0 && activeSource.type === 'search' && (
+          <div className="mb-24 -mt-16 flex flex-col items-center gap-3 rounded-2xl border border-[#E8D5C0] bg-[#FFF8F0] px-4 py-5 text-center">
+            <p className="font-semibold text-[#2C1810]" style={{ fontSize: 13 }}>
+              Jo dhundh rahe the woh nahi mila? 🤔
+            </p>
+            <p className="text-[#8B6B4A]" style={{ fontSize: 12 }}>
+              Arti &quot;{activeSource.term}&quot; ki recipe YouTube se dhundh ke bana sakti hai
+            </p>
+            <GenerateButtons
+              isSignedIn={!!isSignedIn}
+              generating={generating}
+              onGenerate={() => handleGenerateRecipe(activeSource.term)}
+              onLogin={() => router.push('/sign-in')}
+            />
           </div>
         )}
 
