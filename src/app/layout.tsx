@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Poppins, Noto_Sans_Devanagari, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import SWUpdater from "@/components/SWUpdater/SWUpdater";
+import PHProvider from "@/components/PHProvider/PHProvider";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -46,8 +47,10 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col bg-[#FFFDF9] text-[#1A1A1A]">
         <ClerkProvider>
-          <SWUpdater />
-          {children}
+          <PHProvider>
+            <SWUpdater />
+            {children}
+          </PHProvider>
         </ClerkProvider>
       </body>
     </html>

@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import withPWAInit from "@ducanh2912/next-pwa";
+import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
   images: {
@@ -11,6 +12,12 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'chief-arti-fridge-scans.s3.ap-south-1.amazonaws.com',
+      },
+      {
+        // CloudFront CDN for thumbnails (docs/cloudfront-setup.md). Falls back
+        // to the raw S3 hostname until CLOUDFRONT_DOMAIN is configured.
+        protocol: 'https',
+        hostname: process.env.CLOUDFRONT_DOMAIN ?? 'chief-arti-fridge-scans.s3.ap-south-1.amazonaws.com',
       },
     ],
   },
@@ -68,4 +75,9 @@ const withPWA = withPWAInit({
   },
 });
 
-export default withPWA(nextConfig);
+export default withSentryConfig(withPWA(nextConfig), {
+  silent: true,
+  // Source-map upload only when a token is configured; otherwise build runs untouched
+  sourcemaps: { disable: !process.env.SENTRY_AUTH_TOKEN },
+  telemetry: false,
+});

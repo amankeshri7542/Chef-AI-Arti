@@ -1,4 +1,5 @@
 import { auth } from '@clerk/nextjs/server';
+import * as Sentry from '@sentry/nextjs';
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
 import { checkRateLimit } from '@/lib/redis';
@@ -75,7 +76,8 @@ export async function POST(req: NextRequest) {
   let recipe;
   try {
     recipe = await generateRecipe(ingredients, query);
-  } catch {
+  } catch (err) {
+    Sentry.captureException(err);
     return NextResponse.json(
       { error: 'Arti abhi soch nahi paa rahi, thodi der mein try karein' },
       { status: 500 },

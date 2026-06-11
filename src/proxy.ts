@@ -9,12 +9,16 @@ const isPublicPage = createRouteMatcher([
   '/sign-in(.*)',
   '/sign-up(.*)',
   '/sso-callback(.*)',
+  // Admin panel — NOT Clerk-protected; pages/APIs do their own
+  // httpOnly-cookie check (see src/lib/admin-auth.ts).
+  '/admin(.*)',
 ]);
 
 const isPublicApi = createRouteMatcher([
   '/api/recipes/search',
   '/api/recipes/browse',
   '/api/recipes/(.*)',
+  '/api/admin/(.*)',
   '/api/webhooks/(.*)',
   '/api/cron/(.*)',
   '/api/push/send',
@@ -26,6 +30,15 @@ const isPublicApi = createRouteMatcher([
 
 export default clerkMiddleware(async (auth, req) => {
   const { userId } = await auth();
+
+  // Admin panel + admin APIs — bypass Clerk entirely (cookie auth inside),
+  // and mark noindex so search engines never index the admin surface.
+  const pathname = req.nextUrl.pathname;
+  if (pathname.startsWith('/admin') || pathname.startsWith('/api/admin')) {
+    const res = NextResponse.next();
+    res.headers.set('X-Robots-Tag', 'noindex, nofollow');
+    return res;
+  }
 
   // Public pages and APIs — allow through
   if (isPublicPage(req) || isPublicApi(req)) {

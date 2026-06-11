@@ -1,4 +1,5 @@
 import { auth } from '@clerk/nextjs/server';
+import * as Sentry from '@sentry/nextjs';
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
 import { searchRecipes } from '@/lib/rag';
@@ -98,9 +99,10 @@ async function handleSearch(params: SearchParams, userId: string | null) {
         ...(remaining !== undefined ? { remaining } : {}),
       });
     } catch (err) {
+      Sentry.captureException(err);
       const msg = err instanceof Error ? err.message : String(err);
       console.error('[search] filter error:', msg);
-      return NextResponse.json({ error: msg }, { status: 500 });
+      return NextResponse.json({ error: 'Kuch gadbad ho gayi 😅' }, { status: 500 });
     }
   }
 
@@ -193,9 +195,10 @@ async function handleSearch(params: SearchParams, userId: string | null) {
     const result = await runVectorSearch(raw, userContext, userId);
     return NextResponse.json({ ...result, ...(remaining !== undefined ? { remaining } : {}) });
   } catch (err) {
+    Sentry.captureException(err);
     const msg = err instanceof Error ? err.message : String(err);
     console.error('[search] RAG error:', msg);
-    return NextResponse.json({ error: msg }, { status: 500 });
+    return NextResponse.json({ error: 'Kuch gadbad ho gayi 😅' }, { status: 500 });
   }
 }
 
