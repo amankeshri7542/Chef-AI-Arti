@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useUser } from '@clerk/nextjs';
+import { toast } from '@/lib/toast';
 import RecipeCardCompact from '@/components/RecipeCard/RecipeCardCompact';
 import CollectionCard from '@/components/CollectionCard/CollectionCard';
 import BackButton from '@/components/BackButton/BackButton';
@@ -53,9 +55,11 @@ async function fetchSearch(query: string): Promise<Recipe[]> {
 
 export default function SearchPage() {
   const router = useRouter();
+  const { isSignedIn } = useUser();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(false);
+  const [generating, setGenerating] = useState(false);
   const [activeSource, setActiveSource] = useState<ActiveSource>({ type: 'none' });
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -139,6 +143,25 @@ export default function SearchPage() {
 
   const handleClear = () => {
     setQuery('');
+  };
+
+  const handleGenerateRecipe = async (searchQuery: string) => {
+    if (generating) return;
+    setGenerating(true);
+    try {
+      const res = await fetch('/api/recipes/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: searchQuery, ingredients: [searchQuery] }),
+      });
+      if (!res.ok) throw new Error(`generate failed: ${res.status}`);
+      const data = await res.json();
+      if (!data.pendingId) throw new Error('no pendingId');
+      router.push(`/recipe/pending/${data.pendingId}`);
+    } catch {
+      toast.error('Abhi nahi bana saki, baad mein try karo');
+      setGenerating(false);
+    }
   };
 
   const handleRefresh = useCallback(async () => {
@@ -305,8 +328,41 @@ export default function SearchPage() {
           </div>
         )}
 
-        {/* Empty state */}
-        {!loading && results.length === 0 && activeSource.type !== 'none' && (
+        {/* Empty state — search miss offers AI generation */}
+        {!loading && results.length === 0 && activeSource.type === 'search' && (
+          <div className="animate-fade-in-up flex flex-col items-center gap-4 py-8 text-center px-4">
+            <span className="text-4xl">🔍</span>
+            <p className="font-semibold text-[#2C1810]" style={{ fontSize: 14 }}>
+              &quot;{activeSource.term}&quot; ke liye koi recipe nahi mili
+            </p>
+            <p className="text-[#8B6B4A]" style={{ fontSize: 12 }}>
+              Kya Arti aapke liye yeh recipe banaye?
+            </p>
+            {isSignedIn ? (
+              <button
+                type="button"
+                disabled={generating}
+                onClick={() => handleGenerateRecipe(activeSource.term)}
+                className="tap-spring flex items-center gap-2 rounded-xl bg-[#E8640C] px-6 py-3 text-white font-medium disabled:opacity-60"
+                style={{ fontSize: 13, minHeight: 48 }}
+              >
+                {generating ? '✨ Arti bana rahi hai...' : '🎬 YouTube se dhundho aur banao'}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => router.push('/sign-in')}
+                className="tap-spring rounded-xl border border-[#E8640C] px-6 py-3 text-[#E8640C] font-medium"
+                style={{ fontSize: 13, minHeight: 48 }}
+              >
+                Login karke try karein →
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Empty state — chip/collection filters with no recipes */}
+        {!loading && results.length === 0 && (activeSource.type === 'chip' || activeSource.type === 'collection') && (
           <div className="animate-fade-in-up flex flex-col items-center justify-center py-16 text-center gap-3">
             <p className="text-4xl">🍲</p>
             <p className="font-semibold text-[#1A1A1A]" style={{ fontSize: 15 }}>

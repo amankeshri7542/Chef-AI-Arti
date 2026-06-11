@@ -1,12 +1,15 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { SignOutButton } from '@clerk/nextjs';
 import UpgradeModal from '@/components/UpgradeModal/UpgradeModal';
 import PWAInstallButton from '@/components/PWAInstallButton/PWAInstallButton';
 import PushNotificationButton from '@/components/PushNotificationButton/PushNotificationButton';
 import BackButton from '@/components/BackButton/BackButton';
+import RecipeCardCompact from '@/components/RecipeCard/RecipeCardCompact';
 import type {
+  Recipe,
   SubscriptionStatus,
   UnitPreference,
   DietType,
@@ -27,6 +30,7 @@ interface ProfileClientProps {
   cookingSkill: CookingSkill | null;
   timePreference: TimePreference | null;
   kitchenSetup: string[];
+  savedRecipes: Recipe[];
 }
 
 // ───────── Preference option data (mirrors onboarding) ─────────
@@ -110,7 +114,9 @@ export default function ProfileClient({
   cookingSkill: initialSkill,
   timePreference: initialTime,
   kitchenSetup: initialKitchen,
+  savedRecipes,
 }: ProfileClientProps) {
+  const router = useRouter();
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [unit, setUnit] = useState<UnitPreference>(initialUnit);
   const [unitLoading, setUnitLoading] = useState(false);
@@ -296,6 +302,24 @@ export default function ProfileClient({
             Premium lo 🚀
           </button>
         </div>
+      )}
+
+      {/* Saved recipes */}
+      {savedRecipes.length > 0 && (
+        <section>
+          <h2 className="pb-2 text-[14px] font-semibold text-[#2C1810]">
+            ❤️ Saved Recipes
+          </h2>
+          <div className="grid grid-cols-2 gap-3">
+            {savedRecipes.map((recipe) => (
+              <RecipeCardCompact
+                key={recipe.id}
+                recipe={recipe}
+                onClick={() => router.push('/recipe/' + recipe.id)}
+              />
+            ))}
+          </div>
+        </section>
       )}
 
       {/* PWA install */}

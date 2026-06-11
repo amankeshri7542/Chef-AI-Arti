@@ -2,7 +2,7 @@ import { auth, currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { createServerClient } from '@/lib/supabase';
 import ProfileClient from './ProfileClient';
-import type { User } from '@/types/index';
+import type { Recipe, User } from '@/types/index';
 
 export default async function ProfilePage() {
   const { userId } = await auth();
@@ -21,6 +21,18 @@ export default async function ProfilePage() {
 
   // Fallback defaults if user row not found
   const name = clerkUser?.fullName ?? clerkUser?.firstName ?? null;
+
+  // Saved recipes (heart button) — same query as GET /api/recipes/saved
+  const { data: savedRows } = await supabase
+    .from('recipe_saves')
+    .select('recipes(*)')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(20);
+
+  const savedRecipes = (savedRows ?? [])
+    .map((row: { recipes: unknown }) => row.recipes as Recipe)
+    .filter(Boolean);
 
   return (
     <div className="min-h-screen bg-[#FFFDF9]">
@@ -41,6 +53,7 @@ export default async function ProfilePage() {
         cookingSkill={user?.cooking_skill ?? null}
         timePreference={user?.time_preference ?? null}
         kitchenSetup={user?.kitchen_setup ?? []}
+        savedRecipes={savedRecipes}
       />
     </div>
   );

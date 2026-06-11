@@ -6,6 +6,7 @@ import * as dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' });
 
 import OpenAI from 'openai';
+import sharp from 'sharp';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { createClient } from '@supabase/supabase-js';
 
@@ -58,19 +59,25 @@ async function generateAndUpload(recipeId: string, nameHinglish: string): Promis
     buf = Buffer.from(await r.arrayBuffer());
     console.log(`    Used dall-e-3`);
   }
-  const key = `thumbnails/${recipeId}.png`;
+  const webpBuf = await sharp(buf)
+    .resize(800, 800, { fit: 'cover' })
+    .webp({ quality: 82 })
+    .toBuffer();
+  const key = `thumbnails/${recipeId}.webp`;
 
   await s3.send(new PutObjectCommand({
     Bucket: BUCKET,
     Key: key,
-    Body: buf,
-    ContentType: 'image/png',
+    Body: webpBuf,
+    ContentType: 'image/webp',
     // ACL removed — bucket uses BucketOwnerEnforced (ACLs disabled).
     // Public read is granted via the bucket policy instead.
   }));
 
   const region = process.env.AWS_REGION ?? 'ap-south-1';
-  const url = `https://${BUCKET}.s3.${region}.amazonaws.com/${key}`;
+  const url = process.env.CLOUDFRONT_DOMAIN
+    ? `https://${process.env.CLOUDFRONT_DOMAIN}/${key}`
+    : `https://${BUCKET}.s3.${region}.amazonaws.com/${key}`;
   console.log(`  Uploaded: ${url}`);
   return url;
 }

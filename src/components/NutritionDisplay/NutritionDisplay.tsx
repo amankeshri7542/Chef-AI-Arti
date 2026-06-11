@@ -19,7 +19,10 @@ const MACRO_COLORS = {
 export default function NutritionDisplay({ nutrition, currentServings, baseServings }: Props) {
   if (!nutrition) return null;
 
-  const ratio = currentServings / baseServings;
+  // per_serving is already ONE person's macros — total for N people is × N.
+  // (Old `currentServings / baseServings` divided by base a second time,
+  // showing Chicken Biryani as 6.3g protein instead of 25g.)
+  const ratio = currentServings;
 
   const scaled = {
     calories: Math.round(nutrition.per_serving.calories * ratio),

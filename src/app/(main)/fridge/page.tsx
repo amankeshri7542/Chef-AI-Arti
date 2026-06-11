@@ -35,7 +35,10 @@ export default function FridgePage() {
       const res = await fetch('/api/recipes/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ingredients: chips.map((c) => c.name) }),
+        body: JSON.stringify({
+          ingredients: chips.map((c) => c.name),
+          query: chips.map((c) => c.name).join(', '),
+        }),
       });
 
       if (res.status === 429) {
@@ -306,13 +309,14 @@ export default function FridgePage() {
               <p className="text-[15px] font-bold text-[#1A1A1A]">
                 Koi recipe nahi mili — Arti banayegi? ✨
               </p>
+              <p className="text-[12px] text-[#8B6B4A]">Ya Arti YouTube se dhundhe?</p>
               <button
                 type="button"
                 onClick={handleGenerate}
                 className="tap-spring flex h-14 w-full items-center justify-center rounded-2xl text-[15px] font-bold text-white"
                 style={{ background: '#E8640C' }}
               >
-                Haan, Arti se banwao!
+                🎬 YouTube Recipe Banao
               </button>
               {genError && (
                 <p className="text-[13px] text-[#BF4E06]">{genError}</p>
