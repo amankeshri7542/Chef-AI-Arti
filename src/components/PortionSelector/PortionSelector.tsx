@@ -66,12 +66,10 @@ export default function PortionSelector({
 
       {/* Bottom sheet overlay */}
       {isOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-end justify-center"
-          onClick={(e) => { if (e.target === e.currentTarget) setIsOpen(false); }}
-        >
-          {/* Backdrop */}
-          <div className="absolute inset-0 bg-black/40" />
+        <div className="fixed inset-0 z-50 flex items-end justify-center">
+          {/* Backdrop — taps here close the sheet (the old container-level
+              check never matched because this child captured the click) */}
+          <div className="absolute inset-0 bg-black/40" onClick={() => setIsOpen(false)} />
 
           {/* Panel */}
           <div className="animate-sheet-spring relative w-full max-w-md rounded-t-2xl bg-white px-5 pb-6 pt-5">
