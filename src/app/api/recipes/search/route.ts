@@ -3,7 +3,7 @@ import * as Sentry from '@sentry/nextjs';
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
 import { searchRecipes } from '@/lib/rag';
-import { buildHinglishQuery } from '@/lib/ingredient-map';
+import { buildHinglishQuery, INGREDIENT_EN_TO_HI } from '@/lib/ingredient-map';
 import { checkRateLimit, getRateLimitRemaining, RATE_LIMITS } from '@/lib/redis';
 import type { Recipe, User } from '@/types/index';
 
@@ -112,7 +112,16 @@ async function handleSearch(params: SearchParams, userId: string | null) {
   try {
     const supabase = createServerClient();
     const raw = query!.trim();
-    const likeTerm = `%${raw.replace(/[%_]/g, '')}%`;
+    // Sanitize for PostgREST .or() syntax (commas/parens are separators)
+    const rawClean = raw.replace(/[%_,()]/g, '').trim();
+    const words = rawClean.toLowerCase().split(/\s+/).filter(Boolean);
+    // English→Hinglish so "rice" also direct-matches "Chawal" names/tags
+    const hinglishWords = words
+      .map((w) => INGREDIENT_EN_TO_HI[w])
+      .filter((w): w is string => !!w);
+    const nameTerms = [...new Set([rawClean, ...hinglishWords])].filter(Boolean);
+    const tagTerms = [...new Set([rawClean.toLowerCase(), ...words, ...hinglishWords])];
+    const nameOrExpr = nameTerms.map((t) => `name_hinglish.ilike.%${t}%`).join(',');
 
     const applyUserFilters = <T extends { eq: Function; in: Function }>(q: T): T => {
       let out = q;
@@ -128,7 +137,7 @@ async function handleSearch(params: SearchParams, userId: string | null) {
         supabase
           .from('recipes')
           .select('*')
-          .ilike('name_hinglish', likeTerm)
+          .or(nameOrExpr)
           .eq('source', 'curated')
           .eq('reported_count', 0),
       )
@@ -138,7 +147,7 @@ async function handleSearch(params: SearchParams, userId: string | null) {
         supabase
           .from('recipes')
           .select('*')
-          .contains('tags', [raw.toLowerCase()])
+          .overlaps('tags', tagTerms)
           .eq('source', 'curated')
           .eq('reported_count', 0),
       )
@@ -169,7 +178,7 @@ async function handleSearch(params: SearchParams, userId: string | null) {
       }
 
       // Fill with vector results only when direct matches are sparse
-      if (combined.length < 3) {
+      if (combined.length < 6) {
         try {
           const vectorResult = await runVectorSearch(raw, userContext, userId);
           for (const r of vectorResult.recipes) {

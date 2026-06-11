@@ -15,11 +15,17 @@ export default async function AdminPhotosPage() {
   await requireAdmin();
   const supabase = createServerClient();
 
-  const { data } = await supabase
-    .from('recipe_photos')
-    .select('id, s3_url, created_at, recipes(name_hinglish)')
-    .order('created_at', { ascending: false })
-    .limit(100);
+  const [{ data }, { data: recipeRows }] = await Promise.all([
+    supabase
+      .from('recipe_photos')
+      .select('id, s3_url, created_at, recipes(name_hinglish)')
+      .order('created_at', { ascending: false })
+      .limit(100),
+    supabase
+      .from('recipes')
+      .select('id, name_hinglish')
+      .order('name_hinglish', { ascending: true }),
+  ]);
 
   const photos: AdminPhotoRow[] = ((data ?? []) as unknown as PhotoRowRaw[]).map(
     (p) => ({
@@ -30,5 +36,10 @@ export default async function AdminPhotosPage() {
     }),
   );
 
-  return <PhotosGrid initialPhotos={photos} />;
+  return (
+    <PhotosGrid
+      initialPhotos={photos}
+      recipes={(recipeRows ?? []) as { id: string; name_hinglish: string }[]}
+    />
+  );
 }

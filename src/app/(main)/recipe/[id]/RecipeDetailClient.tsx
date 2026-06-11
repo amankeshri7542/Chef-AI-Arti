@@ -67,11 +67,6 @@ export default function RecipeDetailClient({
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [loginPromptOpen, setLoginPromptOpen] = useState(false);
   const [loginPromptFeature, setLoginPromptFeature] = useState('');
-  const [showPhotoPrompt, setShowPhotoPrompt] = useState(false);
-  const [uploadingPhoto, setUploadingPhoto] = useState(false);
-  const [thumbnailUploaded, setThumbnailUploaded] = useState(false);
-  const photoInputRef = useRef<HTMLInputElement>(null);
-
   const [userRating, setUserRating] = useState(0);
   const [ratingSubmitted, setRatingSubmitted] = useState(false);
   const [ratingLoading, setRatingLoading] = useState(false);
@@ -223,7 +218,6 @@ export default function RecipeDetailClient({
     setCookedLoading(false);
     setCooked(true);
     haptic('success');
-    setShowPhotoPrompt(true);
   }
 
   function startCooking() {
@@ -248,36 +242,6 @@ export default function RecipeDetailClient({
     if (activeStep > 0) {
       haptic('tap');
       setActiveStep(activeStep - 1);
-    }
-  }
-
-  async function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploadingPhoto(true);
-    try {
-      // Use browser-image-compression if available; fallback to raw file
-      let compressed: File | Blob = file;
-      try {
-        const imageCompression = (await import('browser-image-compression')).default;
-        compressed = await imageCompression(file, { maxWidthOrHeight: 800, useWebWorker: true });
-      } catch {
-        // skip compression if library not available
-      }
-      const fd = new FormData();
-      fd.append('image', compressed, file.name);
-      const res = await fetch(`/api/recipes/${recipe.id}/thumbnail`, { method: 'POST', body: fd });
-      if (res.ok) {
-        setThumbnailUploaded(true);
-        setShowPhotoPrompt(false);
-        toast.success('Photo save ho gayi! Shukriya 🙏');
-      } else {
-        toast.error('Upload nahi hua. Dobara try karein.');
-      }
-    } catch {
-      toast.error('Upload nahi hua. Dobara try karein.');
-    } finally {
-      setUploadingPhoto(false);
     }
   }
 
@@ -650,11 +614,7 @@ export default function RecipeDetailClient({
             style={{ maxHeight: photosOpen ? 500 : 0, opacity: photosOpen ? 1 : 0 }}
           >
             <div className="pt-2">
-              <CommunityPhotos
-                recipeId={recipe.id}
-                isAuthenticated={isAuthenticated}
-                hasCooked={cooked}
-              />
+              <CommunityPhotos recipeId={recipe.id} />
             </div>
           </div>
         </div>
@@ -669,47 +629,6 @@ export default function RecipeDetailClient({
         >
           {cookedLoading ? 'Save ho raha hai...' : cooked ? '✅ Bana liya! Shukriya!' : '✅ Bana liya!'}
         </button>
-
-        {/* Photo upload prompt after cooking */}
-        {showPhotoPrompt && !thumbnailUploaded && (
-          <div className="animate-fade-in-up mt-3 rounded-xl border border-[#F5A55B] bg-[#FFF7F0] p-4">
-            <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>
-              Wah! 🎉 Kya aapka dish acha bana?
-            </p>
-            <p className="mt-1 text-xs" style={{ color: 'var(--muted)' }}>
-              Apne pakaye khane ki photo upload karein! Aapki photo recipe card pe dikhegi ❤️
-            </p>
-            <div className="mt-3 flex gap-2">
-              <button
-                onClick={() => photoInputRef.current?.click()}
-                disabled={uploadingPhoto}
-                className="tap-spring flex-1 rounded-lg bg-[#E8640C] py-2 text-sm font-medium text-white disabled:opacity-60"
-                style={{ minHeight: 44 }}
-              >
-                {uploadingPhoto ? 'Upload ho rahi hai...' : '📸 Photo upload karo'}
-              </button>
-              <button
-                onClick={() => setShowPhotoPrompt(false)}
-                className="px-3 text-xs"
-                style={{ color: 'var(--muted)', minHeight: 44 }}
-              >
-                Abhi nahi
-              </button>
-            </div>
-            <input
-              ref={photoInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handlePhotoUpload}
-            />
-          </div>
-        )}
-        {thumbnailUploaded && (
-          <p className="mt-2 text-center text-xs" style={{ color: 'var(--green)' }}>
-            Shukriya! Aapki photo save ho gayi 🙏
-          </p>
-        )}
 
         {/* Rating section — after cooking now OR on revisit if cooked before */}
         {isAuthenticated && (cooked || hasCookedBefore) && (
