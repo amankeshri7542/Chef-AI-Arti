@@ -38,8 +38,19 @@ interface YTVideoStatsItem {
 export async function searchYouTubeRecipe(
   dishName: string,
 ): Promise<YouTubeVideo | null> {
+  const candidates = await searchYouTubeRecipeCandidates(dishName);
+  return candidates[0] ?? null;
+}
+
+/**
+ * Same search, but returns ALL >10k-view candidates sorted by views — callers
+ * (batch seeding) can walk the list when the top video has transcripts disabled.
+ */
+export async function searchYouTubeRecipeCandidates(
+  dishName: string,
+): Promise<YouTubeVideo[]> {
   const apiKey = process.env.YOUTUBE_DATA_API;
-  if (!apiKey || !dishName.trim()) return null;
+  if (!apiKey || !dishName.trim()) return [];
 
   try {
     // 1 — search.list: top 5 relevant Hindi recipe videos
@@ -57,13 +68,13 @@ export async function searchYouTubeRecipe(
     const searchRes = await fetch(`${YT_API_BASE}/search?${searchParams}`);
     if (!searchRes.ok) {
       console.error('[youtube] search.list failed:', searchRes.status);
-      return null;
+      return [];
     }
     const searchJson = (await searchRes.json()) as { items?: YTSearchItem[] };
     const items = (searchJson.items ?? []).filter(
       (it) => it.id?.videoId && it.snippet,
     );
-    if (items.length === 0) return null;
+    if (items.length === 0) return [];
 
     // 2 — videos.list: statistics for the candidate ids
     const ids = items.map((it) => it.id!.videoId!).join(',');
@@ -75,7 +86,7 @@ export async function searchYouTubeRecipe(
     const statsRes = await fetch(`${YT_API_BASE}/videos?${statsParams}`);
     if (!statsRes.ok) {
       console.error('[youtube] videos.list failed:', statsRes.status);
-      return null;
+      return [];
     }
     const statsJson = (await statsRes.json()) as { items?: YTVideoStatsItem[] };
 
@@ -99,13 +110,13 @@ export async function searchYouTubeRecipe(
       .filter((v) => v.viewCount > MIN_VIEW_COUNT)
       .sort((a, b) => b.viewCount - a.viewCount);
 
-    return candidates[0] ?? null;
+    return candidates;
   } catch (err) {
     console.error(
       '[youtube] searchYouTubeRecipe error:',
       err instanceof Error ? err.message : String(err),
     );
-    return null;
+    return [];
   }
 }
 

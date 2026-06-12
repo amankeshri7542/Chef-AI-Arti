@@ -19,7 +19,7 @@ export type SubscriptionStatus = 'free' | 'paid';
 
 export type ScaleType = 'linear' | 'salt' | 'spice' | 'oil' | 'water' | 'fixed';
 
-export type RateLimitAction = 'chat' | 'scan' | 'recipes' | 'ai-gen';
+export type RateLimitAction = 'chat' | 'scan' | 'recipes' | 'ai-gen' | 'validate' | 'guest-search';
 
 export type RecipeCategory =
   | 'sabzi'
@@ -57,7 +57,13 @@ export type RegionOrigin =
   | 'MP'
   | 'Bengal'
   | 'Uttarakhand'
-  | 'pan-north-indian';
+  | 'pan-north-indian'
+  // Session-33: pan-Indian regions matching onboarding preferred_region slugs,
+  // so the rag.ts region boost (exact equality) fires for these users too.
+  | 'south-indian'
+  | 'bengali'
+  | 'gujarati'
+  | 'maharashtrian';
 
 export type Heaviness = 'halka' | 'medium' | 'bhaari';
 

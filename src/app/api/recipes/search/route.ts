@@ -29,7 +29,7 @@ interface SearchParams {
   limit?: number;
 }
 
-async function handleSearch(params: SearchParams, userId: string | null) {
+async function handleSearch(params: SearchParams, userId: string | null, ip: string) {
   const { query, orderBy, category, tag, is_vrat_friendly, vibe, limit } = params;
 
   const hasQuery = !!query?.trim();
@@ -37,6 +37,19 @@ async function handleSearch(params: SearchParams, userId: string | null) {
 
   if (!hasQuery && !hasFilters) {
     return NextResponse.json({ error: 'Query ya filter chahiye' }, { status: 400 });
+  }
+
+  // Guest text search hits the embedding API (real cost on a public route) —
+  // cap per IP per day so an unauthenticated flood can't burn OpenAI credits.
+  // Filter-only browsing (no query) stays uncapped: it's pure SQL.
+  if (!userId && hasQuery) {
+    const allowed = await checkRateLimit(`ip:${ip}`, 'guest-search', 'free');
+    if (!allowed) {
+      return NextResponse.json(
+        { error: 'Aaj ke liye search ho gayi! Login karke aur dhundein 😊' },
+        { status: 429 },
+      );
+    }
   }
 
   let userContext = GUEST_USER_CONTEXT;
@@ -253,7 +266,7 @@ export async function GET(request: NextRequest) {
     limit: sp.get('limit') ? parseInt(sp.get('limit')!, 10) : undefined,
   };
 
-  return handleSearch(params, userId);
+  return handleSearch(params, userId, clientIp(request.headers));
 }
 
 // ─── POST — kept for backward compat (fridge scan, collection browse) ────────
@@ -263,5 +276,9 @@ interface SearchBody extends SearchParams {}
 export async function POST(request: Request) {
   const { userId } = await auth();
   const body: SearchBody = await request.json();
-  return handleSearch(body, userId);
+  return handleSearch(body, userId, clientIp(request.headers));
+}
+
+function clientIp(headers: Headers): string {
+  return headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown';
 }

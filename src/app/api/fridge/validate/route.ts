@@ -2,7 +2,7 @@ import { auth } from '@clerk/nextjs/server';
 import * as Sentry from '@sentry/nextjs';
 import { NextRequest, NextResponse } from 'next/server';
 import { validateImage } from '@/lib/openai';
-import { getRateLimitRemaining, RATE_LIMITS } from '@/lib/redis';
+import { checkRateLimit, getRateLimitRemaining, RATE_LIMITS } from '@/lib/redis';
 import { createServerClient } from '@/lib/supabase';
 
 export async function POST(req: NextRequest) {
@@ -26,6 +26,17 @@ export async function POST(req: NextRequest) {
       const limit = RATE_LIMITS[subStatus].scan;
       return NextResponse.json(
         { error: `Aaj ${limit} scans ho gaye! Kal phir aana 📸`, hinglish: true },
+        { status: 429 },
+      );
+    }
+
+    // Validate is itself a vision call — meter it with its own counter so
+    // repeated retries can't run an unmetered OpenAI bill (scan token is
+    // only consumed later, on successful extraction).
+    const validateAllowed = await checkRateLimit(userId, 'validate', subStatus);
+    if (!validateAllowed) {
+      return NextResponse.json(
+        { error: 'Aaj ke liye photo checks ho gaye! Kal phir try karein 📸', hinglish: true },
         { status: 429 },
       );
     }

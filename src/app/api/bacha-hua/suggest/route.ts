@@ -4,6 +4,7 @@ import { createServerClient } from '@/lib/supabase';
 import { searchRecipes } from '@/lib/rag';
 import { buildHinglishQuery } from '@/lib/ingredient-map';
 import { generateRecipeViaYouTube } from '@/lib/generate-recipe';
+import { checkRateLimit, RATE_LIMITS } from '@/lib/redis';
 import type { User } from '@/types/index';
 
 type UserCtx = Pick<
@@ -103,7 +104,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ recipes: result.recipes });
   }
 
-  // 7 — CASE 2: generate a fresh recipe (YouTube pipeline → GPT fallback)
+  // 7 — CASE 2: generate a fresh recipe (YouTube pipeline → GPT fallback).
+  // Consumes the same daily 'ai-gen' bucket as /api/recipes/generate so this
+  // route can't be used to bypass the generation rate limit.
+  const genAllowed = await checkRateLimit(userId, 'ai-gen', 'paid');
+  if (!genAllowed) {
+    return NextResponse.json(
+      { error: `Aaj ke ${RATE_LIMITS.paid['ai-gen']} naye recipes ban gaye! Kal phir try karein 😊` },
+      { status: 429 },
+    );
+  }
+
   try {
     const { recipe: generated, video } = await generateRecipeViaYouTube(
       ingredients,
