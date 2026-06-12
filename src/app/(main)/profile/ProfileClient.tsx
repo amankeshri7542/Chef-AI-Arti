@@ -289,11 +289,11 @@ export default function ProfileClient({
         <div className="flex-1 min-w-0">
           <p className="text-[16px] font-bold text-[#1A1A1A] truncate">{displayName}</p>
           {isPaid ? (
-            <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-[11px] font-semibold text-green-700">
+            <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-[12px] font-semibold text-green-700">
               💎 Premium
             </span>
           ) : (
-            <span className="inline-flex items-center rounded-full bg-orange-100 px-2 py-0.5 text-[11px] font-semibold text-[#E8640C]">
+            <span className="inline-flex items-center rounded-full bg-orange-100 px-2 py-0.5 text-[12px] font-semibold text-[#BF4E06]">
               🆓 Free Plan
             </span>
           )}
@@ -305,16 +305,16 @@ export default function ProfileClient({
         <div className="rounded-2xl border-2 border-green-400 bg-green-50 px-4 py-4">
           <p className="text-[15px] font-bold text-green-800">💎 Premium Member</p>
           {endsAtFormatted && (
-            <p className="mt-1 text-[12px] text-green-700">Active till {endsAtFormatted}</p>
+            <p className="mt-1 text-[13px] text-green-700">Active till {endsAtFormatted}</p>
           )}
-          <p className="mt-2 text-[12px] text-green-600">
+          <p className="mt-2 text-[13px] text-green-700">
             Unlimited chat, fridge scan, aur WhatsApp share — sab enjoy karein! 🎉
           </p>
         </div>
       ) : (
         <div className="rounded-2xl border-2 border-[#E8640C] bg-[#FFF0E6] px-4 py-4">
           <p className="text-[15px] font-bold text-[#1A1A1A]">🆓 Free Plan</p>
-          <p className="mt-1 text-[12px] text-[#8B7355]">
+          <p className="mt-1 text-[13px] text-[#806244]">
             Sirf 3 chat messages/din. Unlimited ke liye upgrade karein!
           </p>
           <p className="mt-1 text-[13px] font-semibold text-[#E8640C]">₹150/mahine mein sab kuch pao</p>
@@ -375,7 +375,7 @@ export default function ProfileClient({
                 <span className="flex-1 text-[13px] font-medium text-[#1A1A1A] line-clamp-2">
                   {g.name}
                 </span>
-                <span className="pr-1 text-[#C4A584]">›</span>
+                <span className="pr-1 text-[#806244]">›</span>
               </button>
             ))}
           </div>
@@ -393,7 +393,7 @@ export default function ProfileClient({
       {/* Meri Preferences */}
       <div className="rounded-2xl border border-[#E8DDD0] bg-white px-4 py-4">
         <p className="mb-1 text-[13px] font-semibold text-[#1A1A1A]">⚙️ Meri Preferences</p>
-        <p className="mb-2 text-[11px] text-[#8B7355]">Badalne ke liye tap karein</p>
+        <p className="mb-2 text-[12px] text-[#806244]">Badalne ke liye tap karein</p>
         <div className="flex flex-col divide-y divide-[#F3EADF]">
           {prefRows.map((row) => (
             <button
@@ -402,18 +402,18 @@ export default function ProfileClient({
               onClick={() => openPref(row.key)}
               className="flex min-h-[48px] items-center justify-between gap-3 py-2 text-left"
             >
-              <p className="flex-shrink-0 text-[13px] text-[#8B7355]">{row.title}</p>
+              <p className="flex-shrink-0 text-[13px] text-[#806244]">{row.title}</p>
               <p className="flex items-center gap-1 text-right text-[13px] font-medium text-[#1A1A1A]">
                 <span className="truncate" style={{ maxWidth: 180 }}>{row.value}</span>
-                <span className="text-[#C4A584]">›</span>
+                <span className="text-[#806244]">›</span>
               </p>
             </button>
           ))}
         </div>
         <div className="mt-2 flex items-center justify-between border-t border-[#F3EADF] pt-3">
           <div>
-            <p className="text-[13px] text-[#8B7355]">Parivar</p>
-            <p className="text-[11px] text-[#C4A584]">Kitne log khaate hain?</p>
+            <p className="text-[13px] text-[#806244]">Parivar</p>
+            <p className="text-[12px] text-[#806244]">Kitne log khaate hain?</p>
           </div>
           <div className="flex items-center gap-3">
             <button
@@ -421,7 +421,7 @@ export default function ProfileClient({
               aria-label="Kam karein"
               disabled={peopleSaving || people <= 1}
               onClick={() => changePeople(-1)}
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-[#E8DDD0] bg-[#FFF0E6] text-[18px] font-bold text-[#E8640C] disabled:opacity-40"
+              className="flex h-12 w-12 items-center justify-center rounded-full border border-[#E8DDD0] bg-[#FFF0E6] text-[20px] font-bold text-[#BF4E06] disabled:opacity-40"
             >
               −
             </button>
@@ -433,7 +433,7 @@ export default function ProfileClient({
               aria-label="Zyada karein"
               disabled={peopleSaving || people >= 15}
               onClick={() => changePeople(1)}
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-[#E8DDD0] bg-[#FFF0E6] text-[18px] font-bold text-[#E8640C] disabled:opacity-40"
+              className="flex h-12 w-12 items-center justify-center rounded-full border border-[#E8DDD0] bg-[#FFF0E6] text-[20px] font-bold text-[#BF4E06] disabled:opacity-40"
             >
               +
             </button>
@@ -453,9 +453,9 @@ export default function ProfileClient({
               type="button"
               disabled={unitLoading}
               onClick={() => toggleUnit('desi')}
-              className={`min-h-[40px] rounded-full px-4 text-[12px] font-semibold transition-colors ${unit === 'desi'
-                  ? 'bg-[#E8640C] text-white'
-                  : 'text-[#8B7355]'
+              className={`min-h-[48px] rounded-full px-4 text-[14px] font-semibold transition-colors ${unit === 'desi'
+                  ? 'bg-[#BF4E06] text-white'
+                  : 'text-[#806244]'
                 }`}
             >
               Desi
@@ -464,9 +464,9 @@ export default function ProfileClient({
               type="button"
               disabled={unitLoading}
               onClick={() => toggleUnit('metric')}
-              className={`min-h-[40px] rounded-full px-4 text-[12px] font-semibold transition-colors ${unit === 'metric'
-                  ? 'bg-[#E8640C] text-white'
-                  : 'text-[#8B7355]'
+              className={`min-h-[48px] rounded-full px-4 text-[14px] font-semibold transition-colors ${unit === 'metric'
+                  ? 'bg-[#BF4E06] text-white'
+                  : 'text-[#806244]'
                 }`}
             >
               Metric

@@ -50,11 +50,11 @@ export default function PWAInstallButton() {
       <span className="text-xl">📲</span>
       <div className="flex flex-col items-start">
         <span className="text-[13px] font-semibold text-[#1A1A1A]">App install karo</span>
-        <span className="text-[11px] text-[#8B7355]">
+        <span className="text-[13px] text-[#806244]">
           Phone pe save karein — bina browser ke khole
         </span>
       </div>
-      <span className="ml-auto text-xs font-semibold text-[#E8640C]">Install →</span>
+      <span className="ml-auto text-[13px] font-semibold text-[#BF4E06]">Install →</span>
     </button>
   );
 }

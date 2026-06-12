@@ -72,7 +72,7 @@ export default function ThaliClient({ userId }: { userId: string }) {
         <BackButton fallback="/home" className="bg-[#FFF0E6] text-[#5C3D1E]" />
         <div>
           <p className="text-[15px] font-bold text-[#1A1A1A]">🍱 Aaj ki Thali</p>
-          <p className="text-[11px] text-[#8B7355]">Aaj ke teeno waqt ka khaana</p>
+          <p className="text-[13px] text-[#806244]">Aaj ke teeno waqt ka khaana</p>
         </div>
       </div>
 
@@ -87,7 +87,7 @@ export default function ThaliClient({ userId }: { userId: string }) {
                 <section key={slot.key}>
                   <div className="flex items-center gap-2 mb-3">
                     <span className="text-[14px] font-bold text-[#C4621E]">{slot.label}</span>
-                    <span className="text-[11px] text-[#8B7355]">{slot.time}</span>
+                    <span className="text-[12px] text-[#806244]">{slot.time}</span>
                   </div>
                   {recipe ? (
                     <RecipeCardCompact
@@ -96,13 +96,13 @@ export default function ThaliClient({ userId }: { userId: string }) {
                     />
                   ) : (
                     <div className="rounded-xl border border-dashed border-[#E8DDD0] bg-[#FFF8F0] px-4 py-6 text-center">
-                      <p className="text-[13px] text-[#8B7355]">
+                      <p className="text-[13px] text-[#806244]">
                         Koi recipe nahi mili — khud choose karein →
                       </p>
                       <button
                         type="button"
                         onClick={() => router.push('/search')}
-                        className="tap-spring mt-2 rounded-full bg-[#E8640C] px-4 py-2 text-[12px] font-semibold text-white"
+                        className="tap-spring mt-2 min-h-[48px] rounded-full bg-[#BF4E06] px-4 py-2 text-[14px] font-semibold text-white"
                         style={{ minHeight: 40 }}
                       >
                         Browse karein
@@ -120,13 +120,13 @@ export default function ThaliClient({ userId }: { userId: string }) {
                   <p className="text-[14px] font-bold text-[#2D6A4F]">
                     ✓ Aaj ki thali set hai!
                   </p>
-                  <p className="mt-1 text-[12px] text-[#5C8A72]">
+                  <p className="mt-1 text-[13px] text-[#2D6A4F]">
                     Aaj ka khaana plan ho gaya. Mazze se banao 💛
                   </p>
                   <button
                     type="button"
                     onClick={resetThali}
-                    className="mt-3 rounded-full px-4 py-2 text-[12px] font-semibold text-[#2D6A4F] underline"
+                    className="mt-3 min-h-[48px] rounded-full px-4 py-2 text-[13px] font-semibold text-[#2D6A4F] underline"
                     style={{ minHeight: 40 }}
                   >
                     Badalna hai? Reset karo

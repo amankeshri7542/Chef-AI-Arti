@@ -204,13 +204,13 @@ export default function FridgePage() {
           <BackButton fallback="/home" className="bg-[#FFF0E6] text-[#5C3D1E]" />
           <div>
             <h1 className="text-[16px] font-bold text-[#1A1A1A]">📷 Fridge Scan</h1>
-            <p className="text-[12px] text-[#8B7355]">
+            <p className="text-[13px] text-[#806244]">
               Fridge ki photo lo, hum dhundh lenge kya banao!
             </p>
             {remaining > 0 ? (
-              <p className="text-[10px] text-[#8B7355]">{remaining}/2 scans aaj baaki</p>
+              <p className="text-[13px] text-[#806244]">{remaining}/2 scans aaj baaki</p>
             ) : (
-              <p className="text-[10px] font-medium text-[#E8640C]">
+              <p className="text-[12px] font-medium text-[#BF4E06]">
                 Aaj ke scans ho gaye! Kal phir aana
               </p>
             )}
@@ -225,8 +225,8 @@ export default function FridgePage() {
           style={{ borderColor: '#F5A55B', background: '#FFF0E6', minHeight: 120 }}
         >
           <span className="text-[28px]" style={{ color: '#E8640C' }}>📷</span>
-          <span className="text-[11px] text-[#1A1A1A]">Fridge ki photo lo</span>
-          <span className="text-[9px] text-[#8B7355]">ya gallery se upload karo</span>
+          <span className="text-[14px] text-[#1A1A1A]">Fridge ki photo lo</span>
+          <span className="text-[13px] text-[#806244]">ya gallery se upload karo</span>
         </button>
 
         <div className="mt-4 flex gap-3">
@@ -267,7 +267,7 @@ export default function FridgePage() {
           <BackButton fallback="/home" onClick={() => setState('capture')} className="bg-[#FFF0E6] text-[#5C3D1E]" />
           <div>
             <h1 className="text-[16px] font-bold text-[#1A1A1A]">Kya kya mila? 🔍</h1>
-            <p className="text-[12px] text-[#8B7355]">
+            <p className="text-[13px] text-[#806244]">
               Galat ho toh hatao, jo chhoot gaya wo add karo
             </p>
           </div>
@@ -309,7 +309,7 @@ export default function FridgePage() {
               <p className="text-[15px] font-bold text-[#1A1A1A]">
                 Koi recipe nahi mili — Arti banayegi? ✨
               </p>
-              <p className="text-[12px] text-[#8B6B4A]">Ya Arti YouTube se dhundhe?</p>
+              <p className="text-[13px] text-[#806244]">Ya Arti YouTube se dhundhe?</p>
               <button
                 type="button"
                 onClick={handleGenerate}
@@ -334,7 +334,7 @@ export default function FridgePage() {
       ) : (
         <>
           {isEmptyStateFallback && (
-            <p className="mt-3 text-[12px] text-[#8B7355]">
+            <p className="mt-3 text-[13px] text-[#806244]">
               Yeh combo nahi mila — par yeh popular recipes try karo!
             </p>
           )}

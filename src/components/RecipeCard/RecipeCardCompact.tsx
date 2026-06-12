@@ -68,7 +68,7 @@ export default function RecipeCardCompact({ recipe, saved, onClick }: Props) {
       {saved && (
         <span
           className="absolute left-2 top-2 rounded-full leading-none px-1 py-0.5"
-          style={{ background: 'rgba(255,255,255,0.85)', fontSize: 10 }}
+          style={{ background: 'rgba(255,255,255,0.85)', fontSize: 12 }}
         >
           ❤️
         </span>
@@ -77,7 +77,7 @@ export default function RecipeCardCompact({ recipe, saved, onClick }: Props) {
       {/* Vrat dot */}
       {recipe.is_vrat_friendly && (
         <span
-          className="absolute right-2 top-2 rounded-full text-[8px] leading-none px-1 py-0.5 font-semibold"
+          className="absolute right-2 top-2 rounded-full text-[10px] leading-none px-1 py-0.5 font-semibold"
           style={{ background: 'rgba(255,255,255,0.85)', color: '#2D6A4F' }}
         >
           🕉️
@@ -88,14 +88,14 @@ export default function RecipeCardCompact({ recipe, saved, onClick }: Props) {
       <div className="absolute bottom-0 left-0 right-0 px-2 pb-2">
         <p
           className="font-semibold text-white leading-tight"
-          style={{ fontSize: 11, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
+          style={{ fontSize: 14, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
         >
           {recipe.name_hinglish}
         </p>
         <div className="flex items-center gap-2 mt-0.5">
-          <p className="text-white/70" style={{ fontSize: 9 }}>{totalMin} min</p>
+          <p className="text-white/90" style={{ fontSize: 12 }}>{totalMin} min</p>
           {recipe.rating_count >= 1 && recipe.avg_rating > 0 && (
-            <span className="text-yellow-300" style={{ fontSize: 9 }}>
+            <span className="text-yellow-300" style={{ fontSize: 12 }}>
               ⭐ {recipe.avg_rating.toFixed(1)}
             </span>
           )}

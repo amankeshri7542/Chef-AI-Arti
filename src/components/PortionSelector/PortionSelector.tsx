@@ -51,7 +51,7 @@ export default function PortionSelector({
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="flex items-center gap-2 rounded-full px-4 text-[13px] font-semibold transition-colors active:scale-95"
+        className="flex min-h-[48px] items-center gap-2 rounded-full px-4 text-[14px] font-semibold transition-colors active:scale-95"
         style={{
           height: 44,
           background: '#FFFFFF',
@@ -113,7 +113,7 @@ export default function PortionSelector({
                           ? '2px solid #E8640C'
                           : '2px solid #E8640C',
                       color: isLocked
-                        ? '#8B7355'
+                        ? '#806244'
                         : isSelected
                           ? '#FFFFFF'
                           : '#E8640C',
@@ -129,7 +129,7 @@ export default function PortionSelector({
             </div>
 
             {/* Live label */}
-            <p className="text-center text-[12px] text-[#8B7355] mb-4">
+            <p className="text-center text-[13px] text-[#806244] mb-4">
               <AnimatedNumber value={currentSize} className="font-semibold text-[#E8640C]" /> logon ke liye ingredients calculate ho rahe hain
             </p>
 
@@ -147,7 +147,7 @@ export default function PortionSelector({
               <button
                 type="button"
                 onClick={onUpgradeClick}
-                className="mt-2 w-full text-center text-[11px] font-medium text-[#E8640C]"
+                className="mt-2 min-h-[44px] w-full text-center text-[13px] font-medium text-[#BF4E06]"
                 style={{ minHeight: 40 }}
               >
                 15 logon tak ke liye Premium lo! ₹150/mahine →

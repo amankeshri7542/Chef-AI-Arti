@@ -8,7 +8,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       <main className="flex-1 pb-[72px]">
         <PageTransition>{children}</PageTransition>
         <div className="bg-[#FFF8F0] border-t border-[#E8D5C0] py-2 px-4 text-center">
-          <p className="text-[10px] text-[#8B6B4A]">
+          <p className="text-[10px] text-[#806244]">
             Built with <span className="text-[#E8640C]">❤️</span> by{' '}
             <a
               href="https://amankeshri.com"

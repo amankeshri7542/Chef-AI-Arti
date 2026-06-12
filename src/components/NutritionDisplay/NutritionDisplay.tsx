@@ -105,7 +105,7 @@ export default function NutritionDisplay({ nutrition, currentServings, baseServi
           {/* Center text */}
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             <AnimatedNumber value={scaled.calories} className="text-[16px] font-bold text-[#1A1A1A]" />
-            <span className="text-[9px] text-[#8B7355]">kcal</span>
+            <span className="text-[11px] text-[#806244]">kcal</span>
           </div>
         </div>
 
@@ -117,10 +117,10 @@ export default function NutritionDisplay({ nutrition, currentServings, baseServi
                 className="flex-shrink-0 rounded-full"
                 style={{ width: 8, height: 8, background: m.color }}
               />
-              <span className="text-[11px] text-[#5C3D1E]">
+              <span className="text-[13px] text-[#5C3D1E]">
                 {m.emoji} {m.label}:
               </span>
-              <span className="text-[11px] font-semibold text-[#1A1A1A] ml-auto">
+              <span className="text-[13px] font-semibold text-[#1A1A1A] ml-auto">
                 <AnimatedNumber value={m.value} decimals={1} />{m.unit}
               </span>
             </div>
@@ -130,13 +130,13 @@ export default function NutritionDisplay({ nutrition, currentServings, baseServi
 
       {/* Bottom row */}
       <div className="flex items-center justify-between mt-3 pt-2" style={{ borderTop: '1px solid #E8DDD0' }}>
-        <span className="text-[11px] font-semibold text-[#1A1A1A]">{heavinessLabel}</span>
-        <span className="text-[10px] text-[#8B7355]">{currentServings} logon ke liye total</span>
+        <span className="text-[13px] font-semibold text-[#1A1A1A]">{heavinessLabel}</span>
+        <span className="text-[12px] text-[#806244]">{currentServings} logon ke liye total</span>
       </div>
 
       {/* Low confidence disclaimer */}
       {nutrition.confidence === 'low' && (
-        <p className="mt-1 text-[9px] text-[#8B7355] italic">
+        <p className="mt-1 text-[11px] text-[#806244] italic">
           ~Anumaan hai, exact nahi
         </p>
       )}

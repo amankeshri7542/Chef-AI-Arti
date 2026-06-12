@@ -24,7 +24,7 @@ export default async function RecipeDetailPage({ params }: Props) {
       <div className="flex min-h-screen items-center justify-center flex-col gap-3 text-center px-6">
         <span className="text-4xl">🙁</span>
         <p className="text-[16px] font-semibold text-[#1A1A1A]">Yeh recipe nahi mili</p>
-        <p className="text-[13px] text-[#8B7355]">Shayad delete ho gayi. Ghar wapas jaao.</p>
+        <p className="text-[13px] text-[#806244]">Shayad delete ho gayi. Ghar wapas jaao.</p>
         <a href="/home" className="mt-2 rounded-xl bg-[#E8640C] px-6 py-3 text-white text-[14px] font-semibold">
           Ghar jaao →
         </a>

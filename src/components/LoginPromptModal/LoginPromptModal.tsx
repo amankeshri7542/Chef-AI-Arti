@@ -25,7 +25,7 @@ export default function LoginPromptModal({ isOpen, onClose, feature }: Props) {
         <div className="flex flex-col items-center gap-3 text-center">
           <span className="text-4xl">🍳</span>
           <p className="text-[16px] font-bold text-[#1A1A1A]">Login karein!</p>
-          <p className="text-[13px] text-[#8B7355]">
+          <p className="text-[13px] text-[#806244]">
             {feature} ke liye login zaroori hai
             <br />
             Google se ek click mein login ho jaao
@@ -38,7 +38,7 @@ export default function LoginPromptModal({ isOpen, onClose, feature }: Props) {
           </button>
           <button
             onClick={onClose}
-            className="text-[13px] text-[#8B7355] underline"
+            className="text-[13px] text-[#806244] underline"
           >
             Abhi nahi
           </button>

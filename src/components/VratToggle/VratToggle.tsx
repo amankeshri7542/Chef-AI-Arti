@@ -16,7 +16,7 @@ export default function VratToggle({ isVrat, onToggle, loading = false }: VratTo
       style={{
         minHeight: '48px',
         backgroundColor: isVrat ? '#2D6A4F' : '#E8DDD0',
-        color: isVrat ? '#FFFFFF' : '#8B7355',
+        color: isVrat ? '#FFFFFF' : '#806244',
       }}
     >
       {loading ? (
@@ -26,7 +26,7 @@ export default function VratToggle({ isVrat, onToggle, loading = false }: VratTo
             width: 14,
             height: 14,
             borderColor: isVrat ? 'rgba(255,255,255,0.3)' : 'rgba(139,115,85,0.3)',
-            borderTopColor: isVrat ? '#FFFFFF' : '#8B7355',
+            borderTopColor: isVrat ? '#FFFFFF' : '#806244',
           }}
         />
       ) : (

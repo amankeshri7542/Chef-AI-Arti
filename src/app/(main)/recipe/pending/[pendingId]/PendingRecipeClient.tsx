@@ -58,7 +58,7 @@ export default function PendingRecipeClient({ pendingId, recipe, youtubeVideoId 
         style={{ background: '#FEF3C7', borderColor: '#FBBF24' }}
       >
         <p className="text-[15px] font-bold text-[#1A1A1A]">✨ Naya Recipe</p>
-        <p className="mt-0.5 text-[12px] text-[#8B7355]">
+        <p className="mt-0.5 text-[13px] text-[#806244]">
           Arti ne yeh aapke liye banaya — try karke batao!
         </p>
       </div>
@@ -72,7 +72,7 @@ export default function PendingRecipeClient({ pendingId, recipe, youtubeVideoId 
             alt={recipe.name_hinglish}
             className="h-[180px] w-full rounded-2xl object-cover"
           />
-          <p className="mt-1 text-right text-[#8B7355]" style={{ fontSize: 9 }}>
+          <p className="mt-1 text-right text-[#806244]" style={{ fontSize: 11 }}>
             📺 Source: YouTube
           </p>
         </div>
@@ -83,7 +83,7 @@ export default function PendingRecipeClient({ pendingId, recipe, youtubeVideoId 
         {recipe.name_hinglish}
       </h1>
       {recipe.description && (
-        <p className="mt-1.5 text-[13px] text-[#8B7355]">{recipe.description}</p>
+        <p className="mt-1.5 text-[13px] text-[#806244]">{recipe.description}</p>
       )}
 
       {recipe.cook_time_minutes > 0 && (
@@ -102,7 +102,7 @@ export default function PendingRecipeClient({ pendingId, recipe, youtubeVideoId 
               className="flex items-center justify-between rounded-xl border border-[#E8DDD0] bg-white px-3 py-2.5"
             >
               <span className="text-[14px] text-[#1A1A1A]">{ing.name}</span>
-              <span className="text-[13px] text-[#8B7355]">{ing.qty_desi}</span>
+              <span className="text-[13px] text-[#806244]">{ing.qty_desi}</span>
             </li>
           ))}
         </ul>
@@ -130,7 +130,7 @@ export default function PendingRecipeClient({ pendingId, recipe, youtubeVideoId 
                     {s.instruction}
                   </p>
                   {s.time_minutes > 0 && (
-                    <p className="mt-1 text-[11px] text-[#8B7355]">{s.time_minutes} min</p>
+                    <p className="mt-1 text-[12px] text-[#806244]">{s.time_minutes} min</p>
                   )}
                 </div>
               </li>

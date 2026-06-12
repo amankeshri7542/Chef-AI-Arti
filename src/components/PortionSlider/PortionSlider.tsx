@@ -71,7 +71,7 @@ export default function PortionSlider({
       </div>
 
       {showWarning && (
-        <p className="mt-2 text-[11px] text-[#8B7355]">
+        <p className="mt-2 text-[11px] text-[#806244]">
           ⚠️ Namak thoda thoda milao — ek baar mein mat daal dena.
         </p>
       )}

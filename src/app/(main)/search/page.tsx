@@ -74,8 +74,8 @@ function GenerateButtons({
       type="button"
       disabled={generating}
       onClick={onGenerate}
-      className="tap-spring flex items-center gap-2 rounded-xl bg-[#E8640C] px-6 py-3 text-white font-medium disabled:opacity-60"
-      style={{ fontSize: 13, minHeight: 48 }}
+      className="tap-spring flex items-center gap-2 rounded-xl bg-[#BF4E06] px-6 py-3 text-white font-medium disabled:opacity-60"
+      style={{ fontSize: 14, minHeight: 48 }}
     >
       {generating ? '✨ Arti bana rahi hai...' : '🎬 YouTube se dhundho aur banao'}
     </button>
@@ -83,8 +83,8 @@ function GenerateButtons({
     <button
       type="button"
       onClick={onLogin}
-      className="tap-spring rounded-xl border border-[#E8640C] px-6 py-3 text-[#E8640C] font-medium"
-      style={{ fontSize: 13, minHeight: 48 }}
+      className="tap-spring rounded-xl border border-[#BF4E06] px-6 py-3 text-[#BF4E06] font-medium"
+      style={{ fontSize: 14, minHeight: 48 }}
     >
       Login karke try karein →
     </button>
@@ -256,7 +256,7 @@ export default function SearchPage() {
             <p className="font-bold text-[#1A1A1A]" style={{ fontSize: 16 }}>
               🔍 Recipe Dhundho
             </p>
-            <p className="text-[#8B7355]" style={{ fontSize: 11 }}>
+            <p className="text-[#806244]" style={{ fontSize: 12 }}>
               Kuch bhi likho — aloo, dal, biryani...
             </p>
           </div>
@@ -264,7 +264,7 @@ export default function SearchPage() {
 
         {/* Search input */}
         <div className="relative mb-1">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8B7355] text-sm select-none">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#806244] text-sm select-none">
             🔍
           </span>
           <input
@@ -280,7 +280,7 @@ export default function SearchPage() {
               }
             }}
             placeholder="Aloo gobhi, moong dal..."
-            className="w-full rounded-full px-4 pl-9 py-2.5 text-sm text-[#1A1A1A] outline-none"
+            className="w-full rounded-full px-4 pl-9 pr-12 py-3 text-sm text-[#1A1A1A] outline-none"
             style={{
               background: '#FFF0E6',
               border: '1px solid #E8DDD0',
@@ -291,7 +291,7 @@ export default function SearchPage() {
             <button
               type="button"
               onClick={handleClear}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8B7355] text-sm leading-none"
+              className="absolute right-1 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full text-[#806244] text-sm leading-none"
               aria-label="Clear search"
             >
               ✕
@@ -310,12 +310,12 @@ export default function SearchPage() {
                 onClick={() => handleChipClick(chip)}
                 className="tap-spring flex-shrink-0 rounded-full font-medium"
                 style={{
-                  background: isActive ? 'var(--saffron)' : '#FFFFFF',
-                  border: isActive ? '1px solid var(--saffron)' : '1px solid var(--border)',
+                  background: isActive ? 'var(--saffron-dk)' : '#FFFFFF',
+                  border: isActive ? '1px solid var(--saffron-dk)' : '1px solid var(--border)',
                   color: isActive ? '#fff' : 'var(--text)',
-                  fontSize: 13,
-                  padding: '10px 16px',
-                  minHeight: 40,
+                  fontSize: 14,
+                  padding: '12px 16px',
+                  minHeight: 48,
                   transform: isActive ? 'scale(1.02)' : 'scale(1)',
                   transition: 'all 200ms ease',
                 }}
@@ -332,7 +332,7 @@ export default function SearchPage() {
         {/* Food Library */}
         {activeSource.type !== 'search' && (
           <div className="mb-6">
-            <p className="font-semibold text-[#1A1A1A] mb-3" style={{ fontSize: 13 }}>
+            <p className="font-semibold text-[#1A1A1A] mb-3" style={{ fontSize: 15 }}>
               📚 Food Library
             </p>
             <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-none">
@@ -352,7 +352,7 @@ export default function SearchPage() {
             library, so showing its count ("24 recipes") falsely implies that's
             all there is — drop the count there; show it only for real searches. */}
         {resultsHeading && !loading && (
-          <p className="text-[#8B7355] mb-3" style={{ fontSize: 12 }}>
+          <p className="text-[#806244] mb-3" style={{ fontSize: 13 }}>
             {resultsHeading}
             {results.length > 0 && activeSource.type !== 'none' &&
               ` — ${results.length} recipes mili`}
@@ -388,7 +388,7 @@ export default function SearchPage() {
             <p className="font-semibold text-[#2C1810]" style={{ fontSize: 14 }}>
               &quot;{activeSource.term}&quot; ke liye koi recipe nahi mili
             </p>
-            <p className="text-[#8B6B4A]" style={{ fontSize: 12 }}>
+            <p className="text-[#806244]" style={{ fontSize: 13 }}>
               Kya Arti aapke liye yeh recipe banaye?
             </p>
             <GenerateButtons
@@ -407,7 +407,7 @@ export default function SearchPage() {
             <p className="font-semibold text-[#2C1810]" style={{ fontSize: 13 }}>
               Jo dhundh rahe the woh nahi mila? 🤔
             </p>
-            <p className="text-[#8B6B4A]" style={{ fontSize: 12 }}>
+            <p className="text-[#806244]" style={{ fontSize: 13 }}>
               Arti &quot;{activeSource.term}&quot; ki recipe YouTube se dhundh ke bana sakti hai
             </p>
             <GenerateButtons
@@ -426,14 +426,14 @@ export default function SearchPage() {
             <p className="font-semibold text-[#1A1A1A]" style={{ fontSize: 15 }}>
               Arre, yeh recipe abhi nahi mili!
             </p>
-            <p className="text-[#8B7355]" style={{ fontSize: 13 }}>
+            <p className="text-[#806244]" style={{ fontSize: 13 }}>
               Koi baat nahi — kuch aur likh ke dekho, ya fridge ki photo se recipe banwao 🥕
             </p>
             <button
               type="button"
               onClick={() => router.push('/fridge')}
               className="tap-spring mt-2 px-6 py-3 rounded-full font-semibold text-white"
-              style={{ background: 'var(--saffron)', fontSize: 14, minHeight: 52 }}
+              style={{ background: 'var(--saffron-dk)', fontSize: 14, minHeight: 52 }}
             >
               📷 Fridge Scan karo
             </button>

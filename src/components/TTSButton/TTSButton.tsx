@@ -36,7 +36,7 @@ export default function TTSButton({ text }: TTSButtonProps) {
     <button
       type="button"
       onClick={handleToggle}
-      className="flex h-10 items-center gap-2 rounded-full border border-[#E8DDD0] bg-white px-4 text-[13px] font-medium text-[#1A1A1A] active:bg-[#FFF0E6]"
+      className="flex h-12 items-center gap-2 rounded-full border border-[#E8DDD0] bg-white px-4 text-[13px] font-medium text-[#1A1A1A] active:bg-[#FFF0E6]"
     >
       {speaking ? '⏹ Band karo' : '🔊 Suno'}
     </button>

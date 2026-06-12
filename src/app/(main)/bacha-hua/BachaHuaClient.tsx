@@ -61,7 +61,7 @@ export default function BachaHuaClient({ isPaid }: Props) {
             🍱
           </div>
           <h2 className="text-[16px] font-bold text-[#1A1A1A]">Bacha Hua Mode</h2>
-          <p className="mt-2 text-[13px] text-[#8B7355]">
+          <p className="mt-2 text-[13px] text-[#806244]">
             Bachi roti, thanda chawal, aadhi dal — sab kuch naye dish mein badlo!
           </p>
           <button
@@ -186,10 +186,10 @@ function BachaHuaPaid({
       {stage === 'select' && (
         <div className="px-4 pb-24 pt-2">
           <h2 className="text-[14px] font-bold text-[#1A1A1A]">Kya bacha hai? 🍱</h2>
-          <p className="mt-0.5 text-[11px] text-[#8B7355]">Ek ya zyada select karo</p>
+          <p className="mt-0.5 text-[13px] text-[#806244]">Ek ya zyada select karo</p>
 
           {error && (
-            <p className="mt-3 text-[12px] font-medium text-[#BF4E06]">{error}</p>
+            <p className="mt-3 text-[13px] font-medium text-[#BF4E06]">{error}</p>
           )}
 
           <div className="mt-4 flex flex-wrap gap-2">
@@ -284,7 +284,7 @@ function BachaHuaPaid({
               }}
             >
               <span
-                className="inline-block rounded-full px-2 py-0.5 text-[10px] font-bold text-white"
+                className="inline-block rounded-full px-2 py-0.5 text-[11px] font-bold text-white"
                 style={{ background: '#E8640C' }}
               >
                 Naya recipe ✨
@@ -292,12 +292,12 @@ function BachaHuaPaid({
               <p className="mt-2 text-[15px] font-bold text-[#1A1A1A]">
                 {generated.recipe.name_hinglish}
               </p>
-              <p className="mt-0.5 text-[12px] text-[#8B7355]">Arti ka naya idea</p>
+              <p className="mt-0.5 text-[13px] text-[#806244]">Arti ka naya idea</p>
             </button>
           )}
 
           {recipes.length === 0 && !generated && (
-            <p className="mt-6 text-[13px] text-[#8B7355]">
+            <p className="mt-6 text-[13px] text-[#806244]">
               Kuch nahi mila. Dobara koshish karein.
             </p>
           )}

@@ -60,11 +60,11 @@ export default function RecipeCard({ recipe, onClick }: RecipeCardProps) {
         <div className="flex flex-1 flex-col justify-center gap-1 p-2">
           <p
             className="line-clamp-2 font-semibold"
-            style={{ fontSize: 12, color: '#1A1A1A' }}
+            style={{ fontSize: 14, color: '#1A1A1A' }}
           >
             {recipe.name_hinglish}
           </p>
-          <p style={{ fontSize: 10, color: '#8B7355' }}>
+          <p style={{ fontSize: 12, color: '#806244' }}>
             ⏱ {recipe.cook_time_minutes} min · {recipe.meal_type[0]}
           </p>
           <VibeBadges vibes={recipe.vibes} />

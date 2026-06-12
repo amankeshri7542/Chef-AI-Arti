@@ -128,7 +128,7 @@ export default function ChatWindow({ isOpen, onClose, recipeId, recipeName, subs
           <button
             type="button"
             onClick={onClose}
-            className="flex h-11 w-11 items-center justify-center rounded-full text-[18px] text-[#8B7355] active:bg-[#FFF0E6]"
+            className="flex h-11 w-11 items-center justify-center rounded-full text-[18px] text-[#806244] active:bg-[#FFF0E6]"
             aria-label="Band karo"
           >
             ✕
@@ -156,17 +156,17 @@ export default function ChatWindow({ isOpen, onClose, recipeId, recipeName, subs
             </div>
 
             <p className="mt-2 text-[13px]">
-              <span className="font-bold" style={{ color: 'var(--saffron)' }}>Sirf ₹150/mahine </span>
+              <span className="font-bold" style={{ color: 'var(--saffron-dk)' }}>Sirf ₹150/mahine </span>
               <span className="italic" style={{ color: 'var(--muted)' }}>= less than chai ka ek cup roz ☕</span>
             </p>
 
             <button
               type="button"
               onClick={() => setUpgradeOpen(true)}
-              className="mt-3 flex w-full items-center justify-center rounded-[12px] text-[13px] font-semibold text-white"
+              className="mt-3 flex w-full items-center justify-center rounded-[12px] text-[14px] font-semibold text-white"
               style={{
                 height: 52,
-                background: 'linear-gradient(135deg, #E8640C, #C4621E)',
+                background: 'linear-gradient(160deg, #E8640C, #BF4E06)',
                 boxShadow: '0 4px 16px rgba(180,80,20,0.25)',
               }}
             >
@@ -197,7 +197,7 @@ export default function ChatWindow({ isOpen, onClose, recipeId, recipeName, subs
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FFF0E6] text-xl">
                 🍳
               </div>
-              <p className="text-[13px] text-[#8B7355]">
+              <p className="text-[13px] text-[#806244]">
                 Namaskar! Khaana pakane mein koi sawaal?
               </p>
             </div>
@@ -262,13 +262,13 @@ export default function ChatWindow({ isOpen, onClose, recipeId, recipeName, subs
             onKeyDown={handleKeyDown}
             placeholder="Poochho kuch bhi..."
             disabled={remaining <= 0 || loading}
-            className="flex-1 rounded-full bg-[#FFF0E6] px-4 py-2 text-[14px] text-[#1A1A1A] outline-none placeholder:text-[#8B7355] disabled:opacity-50"
+            className="flex-1 rounded-full bg-[#FFF0E6] px-4 py-2 text-[14px] text-[#1A1A1A] outline-none placeholder:text-[#806244] disabled:opacity-50"
           />
           <button
             type="button"
             onClick={sendMessage}
             disabled={!input.trim() || loading || remaining <= 0}
-            className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-white disabled:opacity-40"
+            className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full text-white disabled:opacity-40"
             style={{ background: '#E8640C' }}
             aria-label="Bhejo"
           >

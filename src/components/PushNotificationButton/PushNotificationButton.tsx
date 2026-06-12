@@ -100,12 +100,12 @@ export default function PushNotificationButton() {
         {status === 'loading' ? 'Chalu kar rahe hain...' : '🔔 Notifications chalao'}
       </button>
       {status === 'denied' && (
-        <p className="mt-2 text-[12px] text-[#BF4E06]">
+        <p className="mt-2 text-[13px] text-[#BF4E06]">
           Notifications band hain — phone settings se allow karein.
         </p>
       )}
       {status === 'error' && (
-        <p className="mt-2 text-[12px] text-[#BF4E06]">Kuch gadbad ho gayi, dobara try karein.</p>
+        <p className="mt-2 text-[13px] text-[#BF4E06]">Kuch gadbad ho gayi, dobara try karein.</p>
       )}
     </div>
   );

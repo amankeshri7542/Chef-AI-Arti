@@ -25,7 +25,7 @@ export default function YouTubeEmbed({
           📺 Video Dekho
         </span>
         {channelName && (
-          <span style={{ fontSize: '10px', color: '#8B6B4A' }}>
+          <span style={{ fontSize: '10px', color: '#806244' }}>
             Credit: {channelName}
           </span>
         )}

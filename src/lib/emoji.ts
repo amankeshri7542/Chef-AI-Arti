@@ -46,7 +46,7 @@ const EMOJI_MAP: Array<[string[], string]> = [
   // Masale / pantry
   [['tel', 'oil'], '🫙'],
   [['namak', 'salt', 'sendha'], '🧂'],
-  [['haldi', 'turmeric'], '⭐'],
+  [['haldi', 'turmeric'], '🟡'],
   [['dhaniya', 'dhania', 'coriander', 'cilantro', 'pudina', 'mint', 'kadhi patta', 'curry leaf', 'curry leaves', 'tulsi'], '🌿'],
   [['jeera', 'cumin', 'rai', 'sarso', 'mustard seed', 'hing', 'asafoetida', 'ajwain', 'saunf', 'fennel', 'methi dana', 'kalonji'], '✨'],
   [['mirch', 'mirchi', 'chilli', 'chili', 'pepper', 'lal mirch', 'kali mirch'], '🌶️'],

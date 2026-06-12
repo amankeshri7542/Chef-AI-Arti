@@ -49,7 +49,7 @@ export default function SignInPage() {
             else router.push('/home');
           }}
           aria-label="Band karo"
-          className="absolute right-4 top-4 flex h-12 w-12 items-center justify-center rounded-full text-[18px] text-[#8B7355] transition-opacity active:opacity-70"
+          className="absolute right-4 top-4 flex h-12 w-12 items-center justify-center rounded-full text-[18px] text-[#806244] transition-opacity active:opacity-70"
           style={{ background: '#FFF0E6' }}
         >
           ✕
@@ -58,7 +58,7 @@ export default function SignInPage() {
       <div className="w-full max-w-sm text-center">
         <p className="text-5xl">🍳</p>
         <h1 className="mt-3 text-2xl font-semibold text-[#1A1A1A]">Chief-AI-Arti</h1>
-        <p className="mt-1 text-base text-[#8B7355]">Aaj kya banao?</p>
+        <p className="mt-1 text-base text-[#806244]">Aaj kya banao?</p>
 
         <button
           onClick={googleLogin}

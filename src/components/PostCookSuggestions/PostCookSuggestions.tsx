@@ -104,7 +104,7 @@ export default function PostCookSuggestions({ recipeId }: Props) {
               <p
                 className="mt-1.5 font-semibold leading-tight"
                 style={{
-                  fontSize: 11,
+                  fontSize: 13,
                   color: 'var(--text)',
                   display: '-webkit-box',
                   WebkitLineClamp: 2,

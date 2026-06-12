@@ -22,7 +22,7 @@ export default function ArtiLoader({
       <span className="animate-pot-stir" style={{ fontSize: size, lineHeight: 1 }}>
         🍲
       </span>
-      <p className="flex items-center gap-1 text-[12px] font-medium text-[#8B7355]">
+      <p className="flex items-center gap-1 text-[13px] font-medium text-[#806244]">
         {message}
         <span className="flex gap-[3px]">
           {[0, 1, 2].map((i) => (

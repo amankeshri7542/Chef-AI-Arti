@@ -18,8 +18,8 @@ export function StarRatingInteractive({
   disabled = false,
 }: InteractiveProps) {
   const [hovered, setHovered] = useState(0);
-  const tapSize = size === 'lg' ? 44 : size === 'md' ? 28 : 20;
-  const starSize = size === 'lg' ? 36 : size === 'md' ? 20 : 14;
+  const tapSize = size === 'lg' ? 48 : size === 'md' ? 44 : 36;
+  const starSize = size === 'lg' ? 36 : size === 'md' ? 24 : 18;
   const active = hovered || value;
 
   return (
@@ -62,8 +62,8 @@ interface DisplayProps {
 export function StarRatingDisplay({ avg_rating, rating_count, size = 'md' }: DisplayProps) {
   if (rating_count === 0) return null;
 
-  const starSize = size === 'md' ? 14 : 10;
-  const textSize = size === 'md' ? 12 : 9;
+  const starSize = size === 'md' ? 16 : 12;
+  const textSize = size === 'md' ? 13 : 11;
   const filled = Math.round(avg_rating * 2) / 2; // round to nearest 0.5
 
   return (
@@ -82,7 +82,7 @@ export function StarRatingDisplay({ avg_rating, rating_count, size = 'md' }: Dis
           </span>
         ))}
       </div>
-      <span style={{ fontSize: textSize, color: '#8B7355' }}>
+      <span style={{ fontSize: textSize, color: '#806244' }}>
         {avg_rating.toFixed(1)} ({rating_count})
       </span>
     </div>

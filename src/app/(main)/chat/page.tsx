@@ -29,7 +29,7 @@ export default async function ChatPage() {
         <p className="mt-3 text-[15px] font-semibold text-[#1A1A1A]">
           Kisi bhi recipe pe jao aur 💬 button tap karo
         </p>
-        <p className="mt-1 text-[12px] text-[#8B7355]">
+        <p className="mt-1 text-[13px] text-[#806244]">
           Chef Arti se baat karne ke liye — kitne log, kya bacha hai, kaise banaye.
         </p>
         <a

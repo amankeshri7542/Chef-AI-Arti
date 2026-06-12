@@ -6,7 +6,7 @@
   --color-primary: #E8640C;
   --color-primary-light: #FFF0E6;
   --color-border: #E8DDD0;
-  --color-muted: #8B7355;
+  --color-muted: #806244;
   --font-sans: var(--font-poppins);
   --font-devanagari: var(--font-devanagari);
   --font-display: var(--font-playfair);
@@ -21,7 +21,9 @@
   --terracotta: #C4621E;
   --green: #2D6A4F;
   --text: #2C1810;
-  --muted: #8B6B4A;
+  /* #806244 (was #8B6B4A/#8B7355): darkened so muted text passes WCAG AA
+     (4.5:1) on --saffron-lt, the app's most common tinted background. */
+  --muted: #806244;
   --border: #E8D5C0;
   --shadow: rgba(180, 80, 20, 0.12);
 }

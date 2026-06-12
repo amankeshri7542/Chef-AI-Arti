@@ -31,7 +31,7 @@ export default function CommunityPhotos({ recipeId }: Props) {
   return (
     <>
       <section>
-        <p className="mb-2 text-[12px] font-medium text-[#8B7355]">
+        <p className="mb-2 text-[13px] font-medium text-[#806244]">
           Logon ne banaya ❤️ <span className="ml-1">({photos.length})</span>
         </p>
 

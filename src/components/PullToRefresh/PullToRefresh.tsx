@@ -85,7 +85,7 @@ export default function PullToRefresh({ onRefresh, children }: PullToRefreshProp
           🍲
         </span>
         {ready && !refreshing && (
-          <span className="ml-2 text-[11px] font-medium text-[#8B7355]">Chhodo refresh ke liye</span>
+          <span className="ml-2 text-[12px] font-medium text-[#806244]">Chhodo refresh ke liye</span>
         )}
       </div>
 

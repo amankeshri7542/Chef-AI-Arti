@@ -10,7 +10,7 @@ export default function VibeBadges({ vibes }: VibeBadgesProps) {
       {displayVibes.map((vibe) => (
         <span
           key={vibe}
-          className="rounded-full px-2 py-0.5 text-[8px]"
+          className="rounded-full px-2 py-0.5 text-[11px]"
           style={{ backgroundColor: '#FDE8D8', color: '#BF4E06' }}
         >
           {vibe}

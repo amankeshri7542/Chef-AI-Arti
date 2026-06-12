@@ -43,7 +43,7 @@ export default function IngredientChips({ chips, onChange }: IngredientChipsProp
       {/* Chip list */}
       <div className="flex flex-wrap gap-2">
         {chips.length === 0 && !addingNew && (
-          <p className="w-full py-4 text-center text-[13px] text-[#8B7355]">
+          <p className="w-full py-4 text-center text-[13px] text-[#806244]">
             Koi ingredient nahi! &apos;+ Aur add karo&apos; se daalo 🥕
           </p>
         )}
@@ -65,7 +65,7 @@ export default function IngredientChips({ chips, onChange }: IngredientChipsProp
               <button
                 type="button"
                 onClick={() => removeChip(i)}
-                className="ml-0.5 flex h-4 w-4 items-center justify-center rounded-full text-[11px] opacity-60 hover:opacity-100"
+                className="ml-0.5 -my-1 flex h-7 w-7 items-center justify-center rounded-full text-[14px] opacity-70 hover:opacity-100"
                 aria-label={`${chip.name} hatao`}
               >
                 ✕
@@ -84,13 +84,13 @@ export default function IngredientChips({ chips, onChange }: IngredientChipsProp
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Ingredient likho..."
-              className="w-28 bg-transparent text-[13px] text-[#1A1A1A] outline-none placeholder:text-[#8B7355]"
+              className="w-28 bg-transparent text-[13px] text-[#1A1A1A] outline-none placeholder:text-[#806244]"
               autoFocus
             />
             <button
               type="button"
               onClick={commitAdd}
-              className="text-[13px] text-[#E8640C] font-bold"
+              className="text-[13px] text-[#BF4E06] font-bold"
               aria-label="Add karein"
             >
               ✓
@@ -107,7 +107,7 @@ export default function IngredientChips({ chips, onChange }: IngredientChipsProp
             setAddingNew(true);
             setTimeout(() => inputRef.current?.focus(), 50);
           }}
-          className="mt-3 flex h-9 items-center gap-1.5 rounded-full border border-dashed border-[#E8640C] px-3 text-[13px] font-medium text-[#E8640C]"
+          className="mt-3 flex h-12 items-center gap-1.5 rounded-full border border-dashed border-[#BF4E06] px-4 text-[13px] font-medium text-[#BF4E06]"
         >
           + Aur add karo
         </button>
@@ -115,7 +115,7 @@ export default function IngredientChips({ chips, onChange }: IngredientChipsProp
 
       {/* Unconfirmed hint */}
       {hasUnconfirmed && (
-        <p className="mt-3 text-[11px] text-[#8B7355]">
+        <p className="mt-3 text-[12px] text-[#806244]">
           ❓ wale items check karein — hum sure nahi hain
         </p>
       )}
