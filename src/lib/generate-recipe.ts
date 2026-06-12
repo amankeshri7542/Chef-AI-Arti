@@ -105,7 +105,7 @@ function parseAndValidateRecipe(raw: string): GeneratedRecipe | null {
 }
 
 /** Transcript extraction model — gpt-5-mini (allowed in the OpenAI project since session-33). */
-const TRANSCRIPT_MODEL = process.env.OPENAI_TRANSCRIPT_MODEL ?? 'gpt-5-mini';
+const TRANSCRIPT_MODEL = process.env.OPENAI_TRANSCRIPT_MODEL || 'gpt-5-mini';
 
 const TRANSCRIPT_SYSTEM_PROMPT = `You are Chef Arti, a North Indian home cooking expert.
 You will be given a (possibly noisy, auto-generated) YouTube recipe video transcript.

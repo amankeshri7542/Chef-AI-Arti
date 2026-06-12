@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
+import { claimWebhookEvent } from '@/lib/redis';
 
 // This route is intentionally public — no Clerk auth.
 // It's in the public routes list in proxy.ts.
@@ -16,6 +17,15 @@ export async function POST(req: NextRequest) {
 
   if (signature !== expectedSig) {
     return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+  }
+
+  // 2. Idempotency — a captured-and-replayed valid payload (or a legitimate
+  // Razorpay retry) must not re-extend subscription_ends_at or re-run inserts.
+  // Dedup on the event id; fall back to the signature when the header is absent.
+  const eventId = req.headers.get('x-razorpay-event-id') ?? expectedSig;
+  const isNew = await claimWebhookEvent(eventId);
+  if (!isNew) {
+    return NextResponse.json({ received: true, duplicate: true });
   }
 
   const event = JSON.parse(body) as {

@@ -237,6 +237,7 @@ CREATE TABLE recipes_pending (
   reported_count        INTEGER DEFAULT 0,
   shown_to_user_ids     UUID[] DEFAULT '{}',
   promoted_at           TIMESTAMPTZ,
+  promoted_recipe_id    UUID REFERENCES recipes(id) ON DELETE SET NULL,
   created_at            TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -260,3 +261,19 @@ CREATE INDEX recipes_pending_reported_count_idx ON recipes_pending (reported_cou
 -- Redis auto-expires keys — no cleanup cron, no duplicate storage in Postgres.
 -- See: lib/memory.ts (to be implemented) and sysdesign-v2.md §Redis Architecture.
 -- ─────────────────────────────────────
+
+-- ─────────────────────────────────────
+-- ROW LEVEL SECURITY (session-31 security audit)
+-- The whole app accesses Postgres via the SERVICE ROLE key (createServerClient),
+-- which bypasses RLS. The public anon key ships in the browser, so every table
+-- it can touch must be locked down. Enabling RLS with NO policies denies all
+-- anon/authenticated access while leaving the service role unaffected.
+-- recipes + recipes_pending previously had RLS OFF *and* anon write grants —
+-- anyone could TRUNCATE the recipe library via the public REST endpoint (P0).
+-- ─────────────────────────────────────
+ALTER TABLE recipes          ENABLE ROW LEVEL SECURITY;
+ALTER TABLE recipes_pending  ENABLE ROW LEVEL SECURITY;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON recipes         FROM anon, authenticated;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON recipes_pending FROM anon, authenticated;
+-- Already ON (no policies, service-role-only): users, cooking_history,
+-- subscriptions, recipe_ratings, recipe_saves, recipe_photos, push_subscriptions.

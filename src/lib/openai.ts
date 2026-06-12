@@ -1,9 +1,10 @@
 import OpenAI from 'openai';
 
-export const VISION_MODEL    = process.env.OPENAI_VISION_MODEL    ?? 'gpt-4o-mini';
-export const CHAT_MODEL      = process.env.OPENAI_CHAT_MODEL      ?? 'gpt-4o';
-export const SUMMARY_MODEL   = process.env.OPENAI_SUMMARY_MODEL   ?? 'gpt-4o-mini';
-export const EMBEDDING_MODEL = process.env.OPENAI_EMBEDDING_MODEL ?? 'text-embedding-3-small';
+// `||` not `??` — an env var set to '' must still fall back to a real model name.
+export const VISION_MODEL    = process.env.OPENAI_VISION_MODEL    || 'gpt-4o-mini';
+export const CHAT_MODEL      = process.env.OPENAI_CHAT_MODEL      || 'gpt-5-mini';
+export const SUMMARY_MODEL   = process.env.OPENAI_SUMMARY_MODEL   || 'gpt-4o-mini';
+export const EMBEDDING_MODEL = process.env.OPENAI_EMBEDDING_MODEL || 'text-embedding-3-small';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 

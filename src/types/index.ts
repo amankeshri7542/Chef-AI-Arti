@@ -320,6 +320,8 @@ export interface RecipePending {
   reported_count: number;
   shown_to_user_ids: string[];
   promoted_at: string | null;
+  /** Set when status='promoted' — the recipes row this pending recipe became. */
+  promoted_recipe_id?: string | null;
   /** YouTube source video when the recipe came from the YouTube pipeline. */
   youtube_video_id?: string | null;
   youtube_video_url?: string | null;

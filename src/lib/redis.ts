@@ -54,6 +54,41 @@ export async function getRateLimitRemaining(
   return Math.max(0, RATE_LIMITS[subscriptionStatus][action] - count);
 }
 
+/**
+ * Webhook idempotency — record an event id the first time it's seen.
+ * Returns true if this id is NEW (caller should process it), false if it was
+ * already processed (caller must skip). Uses SET NX so the check + claim is
+ * atomic across concurrent retries. Kept 7 days — longer than any Razorpay
+ * retry window.
+ */
+export async function claimWebhookEvent(eventId: string): Promise<boolean> {
+  const res = await redis.set(`webhook:razorpay:${eventId}`, '1', {
+    nx: true,
+    ex: 7 * 24 * 60 * 60,
+  });
+  return res === 'OK';
+}
+
+/**
+ * Brute-force lockout for the admin login. Increments a per-IP counter with a
+ * rolling 15-minute window. Returns true when the IP is still allowed (under
+ * the cap), false when it should be locked out. Call BEFORE checking the
+ * password so wrong guesses are what accrue.
+ */
+export async function checkAdminLoginAllowed(ip: string): Promise<boolean> {
+  const key = `adminlogin:${ip}`;
+  const count = await redis.incr(key);
+  if (count === 1) {
+    await redis.expire(key, 15 * 60);
+  }
+  return count <= 5;
+}
+
+/** Clear the admin-login attempt counter for an IP (call on success). */
+export async function resetAdminLoginAttempts(ip: string): Promise<void> {
+  await redis.del(`adminlogin:${ip}`);
+}
+
 // ─────────────────────────────────────
 // Chat session memory (ephemeral — Redis only, no Supabase)
 // ─────────────────────────────────────

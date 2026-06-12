@@ -133,7 +133,7 @@ export async function POST(
     if (!promoteErr && promoted) {
       await supabase
         .from('recipes_pending')
-        .update({ status: 'promoted', promoted_at: new Date().toISOString() })
+        .update({ status: 'promoted', promoted_at: new Date().toISOString(), promoted_recipe_id: promoted.id })
         .eq('id', id);
 
       // Best-effort AI thumbnail — promotion already succeeded; failures
