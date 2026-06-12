@@ -44,13 +44,18 @@ async function fetchBrowse(filter: Record<string, unknown>): Promise<Recipe[]> {
 }
 
 /** RAG search — uses embedding + vector similarity. Only for text queries. */
-async function fetchSearch(query: string): Promise<Recipe[]> {
+async function fetchSearch(
+  query: string,
+): Promise<{ recipes: Recipe[]; miss: boolean }> {
   const params = new URLSearchParams();
   params.set('q', query);
   const res = await fetch(`/api/recipes/search?${params.toString()}`);
-  if (!res.ok) return [];
+  if (!res.ok) return { recipes: [], miss: true };
   const data = await res.json();
-  return data.recipes ?? [];
+  // A fallback result is the top-popular list dressed up as a match — treat it
+  // as "nothing found" so the UI shows the generate CTA, not random recipes.
+  const miss = !!(data.isEmptyStateFallback || data.triggerCase2);
+  return { recipes: miss ? [] : data.recipes ?? [], miss };
 }
 
 function GenerateButtons({
@@ -94,7 +99,21 @@ export default function SearchPage() {
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [activeSource, setActiveSource] = useState<ActiveSource>({ type: 'none' });
+  const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Saved recipes — so cards can show a ❤️ for ones the user has saved.
+  useEffect(() => {
+    if (!isSignedIn) return;
+    let cancelled = false;
+    fetch('/api/recipes/saved')
+      .then((r) => (r.ok ? r.json() : { recipes: [] }))
+      .then((d: { recipes?: Recipe[] }) => {
+        if (!cancelled) setSavedIds(new Set((d.recipes ?? []).map((r) => r.id)));
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [isSignedIn]);
 
   // Default: load top recipes on mount (fast browse, no vector search)
   useEffect(() => {
@@ -117,8 +136,8 @@ export default function SearchPage() {
     try {
       // Raw query — the API does direct name/tag match first, then translates
       // ingredient words to Hinglish only for the vector-search fallback.
-      const data = await fetchSearch(searchTerm.trim());
-      setResults(data);
+      const { recipes } = await fetchSearch(searchTerm.trim());
+      setResults(recipes);
     } catch {
       setResults([]);
     } finally {
@@ -220,7 +239,7 @@ export default function SearchPage() {
     if (activeSource.type === 'search') return `"${activeSource.term}" ke results`;
     if (activeSource.type === 'chip') return `${activeSource.label} recipes`;
     if (activeSource.type === 'collection') return `${activeSource.emoji} ${activeSource.label}`;
-    return '📋 Sab Recipes';
+    return '🔥 Popular Recipes';
   })();
 
   return (
@@ -329,14 +348,14 @@ export default function SearchPage() {
           </div>
         )}
 
-        {/* Results heading + count */}
+        {/* Results heading + count. Default browse loads only a slice of the
+            library, so showing its count ("24 recipes") falsely implies that's
+            all there is — drop the count there; show it only for real searches. */}
         {resultsHeading && !loading && (
           <p className="text-[#8B7355] mb-3" style={{ fontSize: 12 }}>
             {resultsHeading}
-            {results.length > 0 &&
-              (activeSource.type === 'none'
-                ? ` — ${results.length} recipes`
-                : ` — ${results.length} recipes mili`)}
+            {results.length > 0 && activeSource.type !== 'none' &&
+              ` — ${results.length} recipes mili`}
           </p>
         )}
 
@@ -354,6 +373,7 @@ export default function SearchPage() {
               >
                 <RecipeCardCompact
                   recipe={recipe}
+                  saved={savedIds.has(recipe.id)}
                   onClick={() => router.push(`/recipe/${recipe.id}`)}
                 />
               </div>

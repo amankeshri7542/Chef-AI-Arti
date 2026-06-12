@@ -212,8 +212,12 @@ export async function searchRecipes(
   if (error) throw new Error(`match_recipes RPC failed: ${error.message}`);
 
   // Relevance floor — nearest-neighbour search always returns *something*,
-  // even for nonsense queries (noise sits ≈0.13, weak real matches ≥0.26).
-  const SIMILARITY_FLOOR = 0.25;
+  // even for nonsense queries (noise ≈0.13). Raised 0.25→0.30: cross-cuisine
+  // accidents (e.g. "Manchurian" matching Bengali Khichuri ≈0.26) were slipping
+  // through and shown as confident hits. Real dish/ingredient queries get a
+  // direct name/tag match in the search route and never reach this floor, so
+  // bumping it mainly pushes truly-absent dishes to the CASE-2 generate CTA.
+  const SIMILARITY_FLOOR = 0.30;
   const rows = ((rpcRows ?? []) as RpcRecipeRow[]).filter(
     (r) => r.similarity >= SIMILARITY_FLOOR,
   );

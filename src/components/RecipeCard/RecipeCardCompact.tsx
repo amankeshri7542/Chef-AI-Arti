@@ -5,6 +5,7 @@ import { Recipe } from '@/types/index';
 
 interface Props {
   recipe: Recipe;
+  saved?: boolean;
   onClick?: () => void;
 }
 
@@ -23,7 +24,7 @@ const CATEGORY_BG: Record<string, string> = {
   default: 'linear-gradient(135deg,#FDDBC2,#FBC08A)',
 };
 
-export default function RecipeCardCompact({ recipe, onClick }: Props) {
+export default function RecipeCardCompact({ recipe, saved, onClick }: Props) {
   const router = useRouter();
   const handleClick = onClick ?? (() => router.push('/recipe/' + recipe.id));
 
@@ -63,6 +64,16 @@ export default function RecipeCardCompact({ recipe, onClick }: Props) {
         </span>
       )}
 
+      {/* Saved heart — top-left so it never collides with the vrat dot */}
+      {saved && (
+        <span
+          className="absolute left-2 top-2 rounded-full leading-none px-1 py-0.5"
+          style={{ background: 'rgba(255,255,255,0.85)', fontSize: 10 }}
+        >
+          ❤️
+        </span>
+      )}
+
       {/* Vrat dot */}
       {recipe.is_vrat_friendly && (
         <span
@@ -83,7 +94,7 @@ export default function RecipeCardCompact({ recipe, onClick }: Props) {
         </p>
         <div className="flex items-center gap-2 mt-0.5">
           <p className="text-white/70" style={{ fontSize: 9 }}>{totalMin} min</p>
-          {recipe.rating_count >= 3 && (
+          {recipe.rating_count >= 1 && recipe.avg_rating > 0 && (
             <span className="text-yellow-300" style={{ fontSize: 9 }}>
               ⭐ {recipe.avg_rating.toFixed(1)}
             </span>
