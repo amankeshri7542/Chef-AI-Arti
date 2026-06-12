@@ -3,6 +3,85 @@
 **Tagline:** "Aaj kya banao?"
 Hinglish-first AI recipe PWA for North Indian homemakers.
 
+---
+
+# 📍 CURRENT STATE — READ THIS FIRST (As-Built)
+
+> Authoritative technical snapshot. On any conflict, **this section overrides** the
+> chronological `## Build Status` session log and the older "What's NOT Built" lists
+> further down (many of those are stale — the features were since built). Last
+> updated: **session-35b, commit `65e9a1c`**, deployed prod, branch `main`.
+
+## What it is
+A mobile-first **PWA** (installable, offline-aware) that helps North Indian homemakers
+decide and cook everyday meals. Warm "mummy/didi" Hinglish persona ("aap", never "tu").
+Retrieval-first recipe engine over a curated library, with AI generation only on a miss.
+**Phase 1**: ~15 users, ₹150/mo paid tier, free tier capped (3 chat msgs/day). Profitable from user 1.
+
+## Live metrics (verify with SQL before trusting — these drift)
+- **198** curated recipes (0 missing nutrition, 0 missing thumbnails), **146** knowledge docs.
+- **5** users (2 paid), 10 cooks logged, a handful of ratings. Tiny dataset — design for that.
+- Prod: `https://arti.amankeshri.com` (also `chief-ai-arti.vercel.app`).
+
+## Stack (versions matter)
+- **Next.js 16.2.6** App Router + TypeScript + Tailwind v4 (config in `globals.css @theme`, no tailwind.config.js).
+- **Clerk v7** — Google login ONLY (phone OTP disabled; unreliable for +91). Middleware is `src/app/proxy.ts` (Next 16 renamed `middleware.ts`→`proxy.ts`).
+- **Supabase** Postgres + pgvector. ALL app DB access via `createServerClient()` (service role, server-only). `createBrowserClient()` exists but is UNUSED.
+- **Upstash Redis** — rate limits + chat session memory (3hr TTL) + webhook idempotency + admin lockout. NO `chat_sessions` table.
+- **OpenAI** — see Model strategy below. **No Claude API anywhere** (hard rule).
+- **Razorpay** subscriptions, **AWS S3** (ap-south-1, `chief-arti-fridge-scans`) + **CloudFront** CDN (WebP thumbnails).
+- Monitoring: Sentry + PostHog (Sentry SDK config is outdated — see Open Tasks).
+
+## Model strategy (`src/lib/openai.ts`, all `|| env` overridable)
+- `CHAT_MODEL` = **gpt-5-mini** (chat + the GPT recipe-generation fallback). `OPENAI_TRANSCRIPT_MODEL` = gpt-5-mini.
+- `VISION_MODEL` / `SUMMARY_MODEL` = **gpt-4o-mini** (fridge scan vision — do NOT change to gpt-5).
+- `EMBEDDING_MODEL` = text-embedding-3-small.
+
+## Architecture & core flows
+- **Retrieval-first** (`lib/rag.ts` recipes, `lib/knowledge.ts` tips — kept as SEPARATE ranked sets, never merged):
+  embed query → `match_recipes`/`match_knowledge_docs` RPC (pgvector, ivfflat probes=10) → `SIMILARITY_FLOOR=0.30` → soft re-rank (region/spice/time/skill/kitchen boosts, recency penalty) → top 3.
+- **CASE 1** (retrieval hit): refine the curated recipe for the user (family_size, spice, diet, vrat). Never silently rewrite ingredients/steps.
+- **CASE 2** (miss → `triggerCase2`): generate via **YouTube pipeline** (`lib/youtube.ts` → transcript → gpt-5-mini extraction) with a plain-GPT fallback. Result saved to `recipes_pending` (NOT `recipes`), shown only to the requester (`shown_to_user_ids`). **Promotion** to canonical `recipes` needs `cooked_count>=3 AND reported_count=0`, OR admin approval — never auto-promoted on first cook. On promote, `promoted_recipe_id` is set and the pending page redirects there.
+- **Search** (`api/recipes/search`): direct SQL name/tag match FIRST, vector only to fill. Honors `isEmptyStateFallback`/`triggerCase2` → shows the generate CTA, not popular recipes.
+- **Fridge** (`api/fridge/validate` → `scan`): vision → ingredient chips → recipes (CASE 2 if miss).
+- **Chat** (`api/chat/message`): rate-limit → RAG context → Redis session → gpt-5-mini → save session.
+- **41 API routes**; all are auth'd (Clerk), self-guarded (CRON_SECRET / webhook HMAC), or admin-cookie-gated.
+
+## Key data model (see `scripts/schema.sql` — source of truth)
+- `recipes` (curated; `source` in 'curated'|'ai', `nutrition` JSONB, `avg_rating`/`rating_count`, `embedding`, `youtube_*`, `thumbnail_url`).
+- `recipes_pending` (CASE 2 staging; `shown_to_user_ids` UUID[], `status` pending|promoted|rejected, `promoted_recipe_id`, `youtube_*`). **IDs here are `users.id` UUIDs, NOT clerk ids.**
+- `users` (clerk_user_id, diet_type, family_size, spice_preference, cooking_for/skill, time_preference, kitchen_setup[], subscription_status, preferred_region/unit).
+- `cooking_history`, `recipe_ratings`, `recipe_saves` (**user_id = clerk id here**), `recipe_photos`, `knowledge_docs`, `subscriptions`, `push_subscriptions`, `push_logs`.
+
+## Security posture (hardened sessions 34–35 — DON'T regress)
+- **RLS ON** for users, cooking_history, subscriptions, recipe_ratings, recipe_saves, recipe_photos, push_subscriptions, **recipes, recipes_pending**. The latter two were a P0 (anon had write/TRUNCATE grants) — RLS enabled + grants revoked. Service role bypasses RLS; no public policies. `knowledge_docs`/`push_logs` RLS off (read-only/service-only, accepted).
+- **Rate limits** (`lib/rate-limits.ts`, Redis) on every OpenAI-spending route: chat, scan, validate, recipes(search), ai-gen, guest-search (per-IP). Free vs paid tiers.
+- **Razorpay webhook**: HMAC verify + Redis idempotency on `x-razorpay-event-id` (no replay re-extension).
+- **Admin**: cookie auth (`lib/admin-auth.ts`, timing-safe), 5/15min/IP Redis login lockout. `subscription_status` writable ONLY by admin route + webhook.
+
+## Conventions / practices (follow these)
+- **All visible UI text Hinglish** — no "Submit/Next/Continue". Min tap target 48×48px.
+- `createServerClient()` only in API routes / server components, NEVER client.
+- Build with **`next build --webpack`** (Turbopack breaks next-pwa's SW generation). `npm run dev` fails on Next 16 → use `npx next dev --webpack`.
+- Ship loop: `tsc --noEmit` → `next build --webpack` → commit `session-NN: …` (Co-Authored-By Claude) → `vercel --prod` → `git push`. Update this file's Build Status after.
+- Aman runs DB migrations himself OR they're applied via the Supabase MCP (`apply_migration`). Keep `scripts/schema.sql` in lockstep with live DB.
+- Vrat mode filters the feed instantly client-side (no reload). AI recipes never auto-promoted without the gate/moderation.
+- **NOT phone-tested** is the recurring gap — desktop-browser verification only across most sessions. Flag UI changes as needing real-device testing.
+
+## Open tasks / what's next (priority order)
+1. **Real Android device test** — the #1 risk for a mobile-only app for non-technical users (golden path + cooking mode + payment).
+2. **Vercel BotID/Firewall** on `/api/recipes/search` + `/generate` — IP rotation evades the app-layer guest cap (the real DDoS backstop).
+3. **Sentry SDK config** is outdated (build warns: missing `onRequestError` hook, move `sentry.client.config.ts`→`instrumentation-client.ts`) — errors may be under-reported.
+4. **Generation quality** — CASE 2 drifts ("Manchurian"→"Manchurian Fried Rice bacha hua"); pin the generated dish to the canonical name in the prompt.
+5. **Personalization** — refine-in-place chips (kam tel / aur teekha / jain), learn ranking from actual cooks+ratings (not just onboarding), "why this recipe" reason line.
+6. **Saved/rating badges on home featured cards** (search grid + profile done; home uses an inline FeaturedCard not yet wired).
+7. **CLAUDE.md hygiene** — the chronological log below is history; trust THIS section. Consider pruning stale "What's NOT Built" lists.
+
+## Source-of-truth docs
+- This file (auto-loaded) · `AGENTS.md` (Next 16 conventions) · `../chief-ai-arti-PRD-v2.md` + `../chief-ai-arti-sysdesign-v2.md` (both have v3 "As-Built" sections) · `scripts/schema.sql` (DB).
+
+---
+
 ## Stack
 - Next.js 16.2.6 (App Router) + TypeScript + Tailwind v4
 - Clerk v7 (auth — Google login only)
