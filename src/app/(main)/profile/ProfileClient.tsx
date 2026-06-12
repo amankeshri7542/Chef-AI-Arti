@@ -8,6 +8,7 @@ import PWAInstallButton from '@/components/PWAInstallButton/PWAInstallButton';
 import PushNotificationButton from '@/components/PushNotificationButton/PushNotificationButton';
 import BackButton from '@/components/BackButton/BackButton';
 import RecipeCardCompact from '@/components/RecipeCard/RecipeCardCompact';
+import { IOSInstallProfileSection } from '@/components/IOSInstallPrompt/IOSInstallPrompt';
 import type {
   Recipe,
   SubscriptionStatus,
@@ -382,9 +383,10 @@ export default function ProfileClient({
         </section>
       )}
 
-      {/* PWA install */}
-      <div className="mt-0">
+      {/* PWA install (Android) + iOS install instructions */}
+      <div className="mt-0 flex flex-col gap-2">
         <PWAInstallButton />
+        <IOSInstallProfileSection />
       </div>
 
       {/* Push notifications */}

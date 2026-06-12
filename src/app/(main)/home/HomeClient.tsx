@@ -7,6 +7,7 @@ import { Recipe, DietType } from '@/types/index';
 import VratToggle from '@/components/VratToggle/VratToggle';
 import FloatingChatButton from '@/components/FloatingChatButton/FloatingChatButton';
 import PullToRefresh from '@/components/PullToRefresh/PullToRefresh';
+import { IOSInstallBanner } from '@/components/IOSInstallPrompt/IOSInstallPrompt';
 
 interface HomeClientProps {
   initialRecipes: Recipe[];
@@ -247,6 +248,9 @@ export default function HomeClient({
           <span className="text-[14px]" style={{ color: 'var(--muted)' }}>🔍 Kuch bhi dhundho...</span>
         </button>
       </div>
+
+      {/* iOS Safari install banner — first visit only */}
+      <IOSInstallBanner />
 
       {/* Greeting card */}
       <div
