@@ -52,6 +52,7 @@ interface PreferencesBody {
   cooking_skill?: CookingSkill;
   time_preference?: TimePreference;
   kitchen_setup?: string[];
+  family_size?: number;
 }
 
 export async function PATCH(req: NextRequest) {
@@ -99,7 +100,18 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid cooking_for' }, { status: 400 });
     }
     update.cooking_for = body.cooking_for;
-    update.family_size = FAMILY_SIZE_BY_COOKING_FOR[body.cooking_for];
+    // Only derive family_size from cooking_for when the caller didn't set an
+    // explicit count — users can pick an exact household size in profile, and
+    // that must not be silently overwritten back to the bucket default.
+    if (body.family_size === undefined) {
+      update.family_size = FAMILY_SIZE_BY_COOKING_FOR[body.cooking_for];
+    }
+  }
+  if (body.family_size !== undefined) {
+    if (!Number.isInteger(body.family_size) || body.family_size < 1 || body.family_size > 15) {
+      return NextResponse.json({ error: 'Invalid family_size' }, { status: 400 });
+    }
+    update.family_size = body.family_size;
   }
   if (body.cooking_skill !== undefined) {
     if (!SKILLS.includes(body.cooking_skill)) {

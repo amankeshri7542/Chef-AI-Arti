@@ -15,12 +15,34 @@ export default async function ProfilePage() {
 
   const { data: user } = await supabase
     .from('users')
-    .select('subscription_status, subscription_ends_at, diet_type, family_size, preferred_unit, preferred_region, spice_preference, cooking_skill, time_preference, kitchen_setup')
+    .select('id, subscription_status, subscription_ends_at, diet_type, family_size, preferred_unit, preferred_region, spice_preference, cooking_skill, time_preference, kitchen_setup')
     .eq('clerk_user_id', userId)
-    .single<Pick<User, 'subscription_status' | 'subscription_ends_at' | 'diet_type' | 'family_size' | 'preferred_unit' | 'preferred_region' | 'spice_preference' | 'cooking_skill' | 'time_preference' | 'kitchen_setup'>>();
+    .single<Pick<User, 'id' | 'subscription_status' | 'subscription_ends_at' | 'diet_type' | 'family_size' | 'preferred_unit' | 'preferred_region' | 'spice_preference' | 'cooking_skill' | 'time_preference' | 'kitchen_setup'>>();
 
   // Fallback defaults if user row not found
   const name = clerkUser?.fullName ?? clerkUser?.firstName ?? null;
+
+  // Recipes Arti generated for this user (CASE 2) — pending, owned by them.
+  // These live only in recipes_pending and have no other entry point, so
+  // without this list they vanish after the one post-generate view.
+  let generatedRecipes: { id: string; name: string; youtubeVideoId: string | null }[] = [];
+  if (user?.id) {
+    const { data: pendingRows } = await supabase
+      .from('recipes_pending')
+      .select('id, generated_recipe, youtube_video_id, created_at')
+      .contains('shown_to_user_ids', [user.id])
+      .eq('status', 'pending')
+      .order('created_at', { ascending: false })
+      .limit(10);
+
+    generatedRecipes = (pendingRows ?? []).map(
+      (row: { id: string; generated_recipe: { name_hinglish?: string } | null; youtube_video_id: string | null }) => ({
+        id: row.id,
+        name: row.generated_recipe?.name_hinglish ?? 'Arti ki recipe',
+        youtubeVideoId: row.youtube_video_id ?? null,
+      }),
+    );
+  }
 
   // Saved recipes (heart button) — same query as GET /api/recipes/saved
   const { data: savedRows } = await supabase
@@ -54,6 +76,7 @@ export default async function ProfilePage() {
         timePreference={user?.time_preference ?? null}
         kitchenSetup={user?.kitchen_setup ?? []}
         savedRecipes={savedRecipes}
+        generatedRecipes={generatedRecipes}
       />
     </div>
   );

@@ -31,6 +31,7 @@ interface ProfileClientProps {
   timePreference: TimePreference | null;
   kitchenSetup: string[];
   savedRecipes: Recipe[];
+  generatedRecipes: { id: string; name: string; youtubeVideoId: string | null }[];
 }
 
 // ───────── Preference option data (mirrors onboarding) ─────────
@@ -115,11 +116,16 @@ export default function ProfileClient({
   timePreference: initialTime,
   kitchenSetup: initialKitchen,
   savedRecipes,
+  generatedRecipes,
 }: ProfileClientProps) {
   const router = useRouter();
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [unit, setUnit] = useState<UnitPreference>(initialUnit);
   const [unitLoading, setUnitLoading] = useState(false);
+
+  // Household size — editable stepper (was a fixed display before).
+  const [people, setPeople] = useState(familySize);
+  const [peopleSaving, setPeopleSaving] = useState(false);
 
   // Preferences state
   const [diet, setDiet] = useState<DietType>(dietType);
@@ -160,6 +166,24 @@ export default function ProfileClient({
       // Silent fail — unit stays the same
     } finally {
       setUnitLoading(false);
+    }
+  }
+
+  async function changePeople(delta: number) {
+    const next = Math.min(15, Math.max(1, people + delta));
+    if (next === people || peopleSaving) return;
+    setPeople(next);
+    setPeopleSaving(true);
+    try {
+      await fetch('/api/users/preferences', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ family_size: next }),
+      });
+    } catch {
+      setPeople(people); // revert on failure
+    } finally {
+      setPeopleSaving(false);
     }
   }
 
@@ -322,6 +346,42 @@ export default function ProfileClient({
         </section>
       )}
 
+      {/* Recipes Arti generated — only entry point back to pending recipes */}
+      {generatedRecipes.length > 0 && (
+        <section>
+          <h2 className="pb-2 text-[14px] font-semibold text-[#2C1810]">
+            ✨ Arti ne aapke liye banayi
+          </h2>
+          <div className="flex flex-col gap-2">
+            {generatedRecipes.map((g) => (
+              <button
+                key={g.id}
+                type="button"
+                onClick={() => router.push('/recipe/pending/' + g.id)}
+                className="tap-spring flex items-center gap-3 rounded-2xl border border-[#E8DDD0] bg-white p-2 text-left"
+              >
+                {g.youtubeVideoId ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={`https://img.youtube.com/vi/${g.youtubeVideoId}/default.jpg`}
+                    alt={g.name}
+                    className="h-12 w-16 flex-shrink-0 rounded-lg object-cover"
+                  />
+                ) : (
+                  <span className="flex h-12 w-16 flex-shrink-0 items-center justify-center rounded-lg bg-[#FFF0E6] text-xl">
+                    🍲
+                  </span>
+                )}
+                <span className="flex-1 text-[13px] font-medium text-[#1A1A1A] line-clamp-2">
+                  {g.name}
+                </span>
+                <span className="pr-1 text-[#C4A584]">›</span>
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* PWA install */}
       <div className="mt-0">
         <PWAInstallButton />
@@ -351,8 +411,33 @@ export default function ProfileClient({
           ))}
         </div>
         <div className="mt-2 flex items-center justify-between border-t border-[#F3EADF] pt-3">
-          <p className="text-[13px] text-[#8B7355]">Parivar</p>
-          <p className="text-[13px] font-medium text-[#1A1A1A]">{familySize} log</p>
+          <div>
+            <p className="text-[13px] text-[#8B7355]">Parivar</p>
+            <p className="text-[11px] text-[#C4A584]">Kitne log khaate hain?</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              aria-label="Kam karein"
+              disabled={peopleSaving || people <= 1}
+              onClick={() => changePeople(-1)}
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-[#E8DDD0] bg-[#FFF0E6] text-[18px] font-bold text-[#E8640C] disabled:opacity-40"
+            >
+              −
+            </button>
+            <span className="min-w-[44px] text-center text-[15px] font-bold text-[#1A1A1A]">
+              {people} log
+            </span>
+            <button
+              type="button"
+              aria-label="Zyada karein"
+              disabled={peopleSaving || people >= 15}
+              onClick={() => changePeople(1)}
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-[#E8DDD0] bg-[#FFF0E6] text-[18px] font-bold text-[#E8640C] disabled:opacity-40"
+            >
+              +
+            </button>
+          </div>
         </div>
       </div>
 
