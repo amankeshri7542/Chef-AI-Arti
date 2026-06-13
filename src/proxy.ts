@@ -22,6 +22,10 @@ const isPublicApi = createRouteMatcher([
   '/api/webhooks/(.*)',
   '/api/cron/(.*)',
   '/api/push/send',
+  // sync-redirect is called by sso-callback immediately after Google OAuth.
+  // Clerk's session cookie may not be readable by middleware on that first
+  // request (timing), so we let it pass — the route does its own auth() check.
+  '/api/users/sync-redirect',
   '/manifest.json',
   '/icon-(.*)',
   '/sw.js',

@@ -1,4 +1,5 @@
 import { auth } from '@clerk/nextjs/server';
+import { redirect } from 'next/navigation';
 import { createServerClient } from '@/lib/supabase';
 import HomeClient from './HomeClient';
 import { User, Recipe } from '@/types/index';
@@ -32,6 +33,13 @@ export default async function HomePage() {
       .eq('clerk_user_id', userId)
       .single<User>();
     user = data;
+
+    // Clerk session exists but no Supabase row — sync-redirect was missed
+    // (e.g. middleware returned 401 before the route ran). Re-run it now.
+    if (!user) {
+      console.log('[home] clerk user has no DB row, re-running sync:', userId);
+      redirect('/api/users/sync-redirect');
+    }
   }
 
   // Build diet allow-list so the global pool is already diet-correct.

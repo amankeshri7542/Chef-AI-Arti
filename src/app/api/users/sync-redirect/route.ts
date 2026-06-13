@@ -26,7 +26,7 @@ export async function GET() {
   const rawName = `${clerkUser?.firstName ?? ''} ${clerkUser?.lastName ?? ''}`.trim();
   const name = clerkUser?.fullName ?? (rawName || null);
 
-  await supabase.from('users').insert({
+  const { error: insertErr } = await supabase.from('users').insert({
     clerk_user_id: userId,
     name,
     phone: clerkUser?.phoneNumbers?.[0]?.phoneNumber ?? null,
@@ -41,6 +41,14 @@ export async function GET() {
     disliked_ingredients: [],
     preferred_region: null,
   });
+
+  if (insertErr) {
+    console.error('[sync-redirect] insert failed:', insertErr.message, '| clerk_user_id:', userId);
+    // Still redirect to onboarding — they'll see an incomplete profile, but
+    // won't be stuck. Next load will retry the insert.
+  } else {
+    console.log('[sync-redirect] new user created:', name, userId);
+  }
 
   redirect('/onboarding');
 }
