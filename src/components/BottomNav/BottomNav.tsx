@@ -58,7 +58,7 @@ export default function BottomNav() {
   );
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-20 h-[72px] border-t border-[#E8DDD0] bg-[#FFFDF9]">
+    <nav className="fixed bottom-0 left-0 right-0 z-20 h-[72px]" style={{ borderTop: '1px solid var(--border)', background: 'var(--card)' }}>
       <div className="relative mx-auto flex h-full max-w-md items-stretch">
         {/* Sliding active pill */}
         {activeIndex >= 0 && (
@@ -68,7 +68,7 @@ export default function BottomNav() {
             style={{
               width: `${100 / ITEMS.length}%`,
               left: `${(100 / ITEMS.length) * activeIndex}%`,
-              background: '#FFF0E6',
+              background: 'var(--hero-lt)',
               transitionTimingFunction: 'cubic-bezier(0.34, 1.4, 0.5, 1)',
             }}
           />
@@ -76,7 +76,7 @@ export default function BottomNav() {
 
         {ITEMS.map((it, i) => {
           const active = i === activeIndex;
-          const color = active ? '#E8640C' : '#806244';
+          const color = active ? 'var(--hero)' : 'var(--muted)';
           return (
             <Link
               key={it.href}
@@ -103,7 +103,7 @@ export default function BottomNav() {
               <span
                 aria-hidden
                 className="h-1 w-1 rounded-full transition-opacity duration-200"
-                style={{ background: '#E8640C', opacity: active ? 1 : 0 }}
+                style={{ background: 'var(--hero)', opacity: active ? 1 : 0 }}
               />
             </Link>
           );

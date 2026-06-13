@@ -5,10 +5,12 @@ import { useRouter } from 'next/navigation';
 import imageCompression from 'browser-image-compression';
 import type { IngredientChip, Recipe } from '@/types/index';
 import IngredientChips from '@/components/IngredientChips/IngredientChips';
-import RecipeCard from '@/components/RecipeCard/RecipeCard';
 import { buildHinglishQuery } from '@/lib/ingredient-map';
 import BackButton from '@/components/BackButton/BackButton';
 import ArtiLoader from '@/components/ArtiLoader/ArtiLoader';
+import Icon from '@/components/editorial/Icon';
+import { SectionHead } from '@/components/editorial/SectionHead';
+import { GridCard } from '@/components/editorial/RecipeCards';
 
 type PageState = 'capture' | 'review' | 'results';
 
@@ -180,81 +182,75 @@ export default function FridgePage() {
     setIsEmptyStateFallback(false);
   }
 
+  const hiddenInputs = (
+    <>
+      <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={onFileChange} />
+      <input ref={galleryInputRef} type="file" accept="image/*" className="hidden" onChange={onFileChange} />
+    </>
+  );
+
+  const renderHeader = (title: string, sub?: string, onBack?: () => void) => (
+    <header className="sticky top-0 z-10" style={{ background: 'var(--cream)', borderBottom: '1px solid var(--border)', padding: '12px 18px', display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+      <BackButton fallback="/home" onClick={onBack} className="bg-[var(--hero-lt)] text-[var(--hero-dk)]" />
+      <div style={{ paddingTop: 2 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+          <Icon name="fridge" size={17} color="var(--hero-dk)" />
+          <h1 className="t-display" style={{ fontSize: 20, margin: 0, color: 'var(--text)' }}>{title}</h1>
+        </div>
+        {sub && <p className="t-caption" style={{ margin: '2px 0 0' }}>{sub}</p>}
+      </div>
+    </header>
+  );
+
   // ─── STATE 1: Capture ────────────────────────────────────────
   if (state === 'capture') {
     return (
-      <div className="flex min-h-screen flex-col bg-[#FFFDF9] px-4 py-4">
-        <input
-          ref={cameraInputRef}
-          type="file"
-          accept="image/*"
-          capture="environment"
-          className="hidden"
-          onChange={onFileChange}
-        />
-        <input
-          ref={galleryInputRef}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={onFileChange}
-        />
+      <div style={{ background: 'var(--cream)', minHeight: '100%' }}>
+        {hiddenInputs}
+        {renderHeader('Fridge Scan', remaining > 0 ? `Fridge ki photo lo · ${remaining}/2 scans aaj baaki` : 'Aaj ke scans ho gaye! Kal phir aana')}
 
-        <div className="flex items-center gap-2 mb-3">
-          <BackButton fallback="/home" className="bg-[#FFF0E6] text-[#5C3D1E]" />
-          <div>
-            <h1 className="text-[16px] font-bold text-[#1A1A1A]">📷 Fridge Scan</h1>
-            <p className="text-[13px] text-[#806244]">
-              Fridge ki photo lo, hum dhundh lenge kya banao!
-            </p>
-            {remaining > 0 ? (
-              <p className="text-[13px] text-[#806244]">{remaining}/2 scans aaj baaki</p>
-            ) : (
-              <p className="text-[12px] font-medium text-[#BF4E06]">
-                Aaj ke scans ho gaye! Kal phir aana
-              </p>
-            )}
+        <div className="fade-in" style={{ padding: '20px 18px 0' }}>
+          <div style={{ borderRadius: 22, border: '2px dashed var(--hero)', background: 'var(--hero-lt)', padding: '40px 24px', textAlign: 'center' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}>
+              <span style={{ width: 78, height: 78, borderRadius: '50%', background: 'var(--card)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 6px 18px -6px var(--shadow)' }}>
+                <Icon name="camera" size={36} color="var(--hero)" sw={1.6} />
+              </span>
+            </div>
+            <h2 className="t-display" style={{ fontSize: 22, margin: '0 0 4px', color: 'var(--text)' }}>Fridge ki photo lo</h2>
+            <p style={{ margin: 0, color: 'var(--muted)', fontSize: 14 }}>Jo bhi rakha hai, Arti dekh ke recipe bata degi</p>
           </div>
-        </div>
 
-        <button
-          type="button"
-          disabled={remaining <= 0 || loading}
-          onClick={() => galleryInputRef.current?.click()}
-          className="tap-spring mt-6 flex flex-col items-center justify-center gap-2 rounded-[14px] border-2 border-dashed disabled:opacity-40"
-          style={{ borderColor: '#F5A55B', background: '#FFF0E6', minHeight: 120 }}
-        >
-          <span className="text-[28px]" style={{ color: '#E8640C' }}>📷</span>
-          <span className="text-[14px] text-[#1A1A1A]">Fridge ki photo lo</span>
-          <span className="text-[13px] text-[#806244]">ya gallery se upload karo</span>
-        </button>
-
-        <div className="mt-4 flex gap-3">
-          <button
-            type="button"
-            disabled={remaining <= 0 || loading}
-            onClick={() => cameraInputRef.current?.click()}
-            className="tap-spring flex h-12 flex-1 items-center justify-center gap-1.5 rounded-xl border border-[#E8DDD0] bg-white text-[13px] font-medium text-[#1A1A1A] disabled:opacity-40"
-          >
-            📷 Camera se lo
-          </button>
+          {/* big friendly shutter */}
+          <div style={{ display: 'flex', justifyContent: 'center', margin: '28px 0 18px' }}>
+            <button
+              type="button"
+              aria-label="Camera se photo lo"
+              disabled={remaining <= 0 || loading}
+              onClick={() => cameraInputRef.current?.click()}
+              className="tap-spring disabled:opacity-40"
+              style={{ width: 86, height: 86, borderRadius: '50%', background: 'var(--hero)', border: '5px solid var(--card)', boxShadow: '0 0 0 3px var(--hero), 0 12px 30px -8px rgba(180,80,20,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            >
+              <Icon name="camera" size={34} color="#fff" sw={1.8} />
+            </button>
+          </div>
           <button
             type="button"
             disabled={remaining <= 0 || loading}
             onClick={() => galleryInputRef.current?.click()}
-            className="tap-spring flex h-12 flex-1 items-center justify-center gap-1.5 rounded-xl border border-[#E8DDD0] bg-white text-[13px] font-medium text-[#1A1A1A] disabled:opacity-40"
+            className="r-cta ghost tap-spring disabled:opacity-40"
+            style={{ minHeight: 52 }}
           >
-            🖼️ Gallery se upload karo
+            <Icon name="gallery" size={19} color="var(--hero-dk)" /> Gallery se upload karo
           </button>
+
+          {loading && <ArtiLoader className="mt-6" message="Dekh rahi hoon 👀" />}
+
+          {error && !loading && (
+            <div className="r-card" style={{ marginTop: 16, padding: '12px 16px', background: 'var(--hero-lt)', borderColor: '#F5A55B' }}>
+              <p style={{ fontSize: 13, color: 'var(--hero-dk)', margin: 0 }}>⚠️ {error}</p>
+            </div>
+          )}
         </div>
-
-        {loading && <ArtiLoader className="mt-6" message="Dekh rahi hoon 👀" />}
-
-        {error && !loading && (
-          <div className="mt-4 rounded-xl border border-[#FBC08A] bg-[#FFF0E6] px-4 py-3">
-            <p className="text-[13px] text-[#BF4E06]">{error}</p>
-          </div>
-        )}
       </div>
     );
   }
@@ -262,30 +258,26 @@ export default function FridgePage() {
   // ─── STATE 2: Review ─────────────────────────────────────────
   if (state === 'review') {
     return (
-      <div className="flex min-h-screen flex-col bg-[#FFFDF9] px-4 py-4">
-        <div className="flex items-center gap-2 mb-3">
-          <BackButton fallback="/home" onClick={() => setState('capture')} className="bg-[#FFF0E6] text-[#5C3D1E]" />
-          <div>
-            <h1 className="text-[16px] font-bold text-[#1A1A1A]">Kya kya mila? 🔍</h1>
-            <p className="text-[13px] text-[#806244]">
-              Galat ho toh hatao, jo chhoot gaya wo add karo
-            </p>
+      <div style={{ background: 'var(--cream)', minHeight: '100%' }}>
+        {renderHeader('Yeh sab dikha', 'Galat ho toh hatao, jo chhoot gaya wo add karo', () => setState('capture'))}
+
+        <div className="fade-in" style={{ padding: '18px 18px 0' }}>
+          <div className="r-card" style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, background: 'var(--green-lt)', borderColor: 'var(--green)' }}>
+            <Icon name="check" size={20} color="var(--green)" sw={2.4} />
+            <span style={{ fontSize: 14, color: 'var(--green)' }}><strong>{chips.length} cheezein</strong> mili! Galat ho toh hata dein ya nayi jodein.</span>
           </div>
-        </div>
 
-        <div className="mt-5">
+          <SectionHead over="Aapke fridge mein" title="Kya kya mila" style={{ marginBottom: 14 }} />
           <IngredientChips chips={chips} onChange={setChips} />
-        </div>
 
-        <div className="mt-6">
           <button
             type="button"
             disabled={chips.length === 0 || loading}
             onClick={handleConfirm}
-            className="tap-spring flex h-14 w-full items-center justify-center rounded-2xl text-[15px] font-bold text-white disabled:opacity-40"
-            style={{ background: '#2D6A4F' }}
+            className="r-cta tap-spring disabled:opacity-40"
+            style={{ marginTop: 20, background: 'var(--green)' }}
           >
-            {loading ? 'Dhundh rahi hoon...' : 'Haan, yahi sahi hai ✓'}
+            <Icon name="sparkle" size={20} color="#fff" /> {loading ? 'Dhundh rahi hoon…' : `Recipe dhundho (${chips.length})`}
           </button>
         </div>
       </div>
@@ -294,69 +286,53 @@ export default function FridgePage() {
 
   // ─── STATE 3: Results ────────────────────────────────────────
   return (
-    <div className="flex min-h-screen flex-col bg-[#FFFDF9] px-4 py-4 pb-32">
-      <div className="flex items-center gap-2 mb-3">
-        <BackButton fallback="/home" onClick={() => setState('review')} className="bg-[#FFF0E6] text-[#5C3D1E]" />
-        <h1 className="text-[16px] font-bold text-[#1A1A1A]">Yeh bana sakte ho! 🍳</h1>
-      </div>
+    <div style={{ background: 'var(--cream)', minHeight: '100%', paddingBottom: 96 }}>
+      {renderHeader('Yeh ban sakta hai', 'Aapke fridge ki cheezon se', () => setState('review'))}
 
-      {triggerCase2 ? (
-        <div className="mt-6 flex flex-col items-center gap-4 text-center">
-          {generating ? (
-            <ArtiLoader message="Arti recipe bana rahi hai" />
-          ) : (
-            <>
-              <p className="text-[15px] font-bold text-[#1A1A1A]">
-                Koi recipe nahi mili — Arti banayegi? ✨
-              </p>
-              <p className="text-[13px] text-[#806244]">Ya Arti YouTube se dhundhe?</p>
-              <button
-                type="button"
-                onClick={handleGenerate}
-                className="tap-spring flex h-14 w-full items-center justify-center rounded-2xl text-[15px] font-bold text-white"
-                style={{ background: '#E8640C' }}
-              >
-                🎬 YouTube Recipe Banao
-              </button>
-              {genError && (
-                <p className="text-[13px] text-[#BF4E06]">{genError}</p>
-              )}
-              <button
-                type="button"
-                onClick={resetToCapture}
-                className="tap-spring flex h-12 items-center gap-2 rounded-xl border border-[#E8DDD0] bg-white px-6 text-[13px] font-medium text-[#1A1A1A]"
-              >
-                Fir se try karo
-              </button>
-            </>
-          )}
-        </div>
-      ) : (
-        <>
-          {isEmptyStateFallback && (
-            <p className="mt-3 text-[13px] text-[#806244]">
-              Yeh combo nahi mila — par yeh popular recipes try karo!
-            </p>
-          )}
-          <div className="mt-4 flex flex-col gap-2">
-            {recipes.map((recipe) => (
-              <RecipeCard
-                key={recipe.id}
-                recipe={recipe}
-                onClick={() => router.push('/recipe/' + recipe.id)}
-              />
-            ))}
+      <div style={{ padding: '18px 18px 0' }}>
+        {triggerCase2 ? (
+          <div className="r-card card-entry" style={{ padding: '26px 22px', textAlign: 'center' }}>
+            {generating ? (
+              <ArtiLoader message="Arti recipe bana rahi hai" />
+            ) : (
+              <>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}>
+                  <span style={{ width: 64, height: 64, borderRadius: '50%', background: 'var(--hero-lt)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Icon name="pot" size={30} color="var(--hero-dk)" sw={1.6} />
+                  </span>
+                </div>
+                <h3 className="t-display" style={{ fontSize: 20, margin: '0 0 6px', color: 'var(--text)' }}>Koi recipe nahi mili</h3>
+                <p style={{ margin: '0 0 16px', color: 'var(--muted)', fontSize: 14 }}>Koi baat nahi — Arti in cheezon se YouTube se dhundh ke bana degi ✨</p>
+                <button type="button" onClick={handleGenerate} className="r-cta tap-spring">
+                  <Icon name="sparkle" size={20} color="#fff" /> YouTube Recipe Banao
+                </button>
+                {genError && <p style={{ fontSize: 13, color: 'var(--hero-dk)', marginTop: 10 }}>{genError}</p>}
+              </>
+            )}
           </div>
-        </>
-      )}
+        ) : (
+          <>
+            {isEmptyStateFallback && (
+              <p className="t-caption" style={{ marginBottom: 12 }}>Yeh combo nahi mila — par yeh popular recipes try karo!</p>
+            )}
+            <SectionHead over="In samagri se" title="Yeh banayein" style={{ marginBottom: 14 }} />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              {recipes.map((recipe, i) => (
+                <GridCard key={recipe.id} recipe={recipe} idx={i % 6} onOpen={(id) => router.push('/recipe/' + id)} />
+              ))}
+            </div>
+          </>
+        )}
 
-      <button
-        type="button"
-        onClick={resetToCapture}
-        className="tap-spring mt-6 flex h-12 w-full items-center justify-center rounded-xl border border-[#E8DDD0] bg-white text-[13px] font-medium text-[#1A1A1A]"
-      >
-        📷 Fir se scan karo
-      </button>
+        <button
+          type="button"
+          onClick={resetToCapture}
+          className="r-cta ghost tap-spring"
+          style={{ margin: '18px 0', minHeight: 52 }}
+        >
+          <Icon name="camera" size={19} color="var(--hero-dk)" /> Fir se scan karo
+        </button>
+      </div>
     </div>
   );
 }

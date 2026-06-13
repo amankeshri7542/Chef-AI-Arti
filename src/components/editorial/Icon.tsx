@@ -38,6 +38,17 @@ const PATHS: Record<string, ReactNode> = {
   play: <g><path d="M8 5.5v13l11-6.5L8 5.5Z" /></g>,
   share: <g><circle cx="6.5" cy="12" r="2.5" /><circle cx="17.5" cy="6" r="2.5" /><circle cx="17.5" cy="18" r="2.5" /><path d="m8.8 10.8 6.4-3.6M8.8 13.2l6.4 3.6" /></g>,
   refresh: <g><path d="M19 12a7 7 0 1 1-2-4.9" /><path d="M19.5 3.5v4h-4" /></g>,
+  send: <g><path d="M3.5 11 20.5 4l-4 16.5-4.7-6.2L3.5 11Z" /><path d="m11.8 14.3 8.7-10.3" /></g>,
+  gallery: <g><rect x="3.5" y="5" width="17" height="14" rx="2.5" /><circle cx="9" cy="10" r="1.6" /><path d="m4.5 17 4.5-4 3.5 3 3-2.5 4.5 3.5" /></g>,
+  download: <g><path d="M12 4v10M7.5 10.5 12 15l4.5-4.5" /><path d="M5 18.5h14" /></g>,
+  lock: <g><rect x="5.5" y="10.5" width="13" height="9" rx="2" /><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5" /></g>,
+  pencil: <g><path d="m14.5 5.5 4 4L8 20l-4.5.5L4 16 14.5 5.5Z" /><path d="m13 7 4 4" /></g>,
+  rupee: <g><path d="M7 4h10M7 8.5h10M7 4c5 0 7 1.5 7 4.5S11 13 8.5 13L15 20" /></g>,
+  fridge: <g><rect x="6" y="3" width="12" height="18" rx="2" /><path d="M6 10h12M9 6.5v1M9 13v3" /></g>,
+  mic: <g><rect x="9" y="3.5" width="6" height="11" rx="3" /><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3" /></g>,
+  map: <g><path d="M9 5 4 7v12l5-2 6 2 5-2V5l-5 2-6-2Z" /><path d="M9 5v12M15 7v12" /></g>,
+  bell: <g><path d="M18 16H6c1.2-1.2 1.5-3 1.5-5.5C7.5 7 9.5 5 12 5s4.5 2 4.5 5.5c0 2.5.3 4.3 1.5 5.5Z" /><path d="M10 19a2 2 0 0 0 4 0" /></g>,
+  apple: <g><path d="M16 6.5c-1 .3-2.3.1-3.2-.7-.8-.7-1.3-1.9-1.1-3 1.1-.1 2.3.4 3 1.2.7.8 1.2 1.6 1.3 2.5ZM17.5 20c-1 1-2.4.8-3.4.3-.7-.3-1.5-.3-2.2 0-1 .5-2.4.7-3.4-.3-2.4-2.4-3.3-7.2-1-9.8 1-1.2 2.6-1.5 4-1 .7.3 1.5.3 2.2 0 1.4-.5 3-.2 4 1-2.7 2-2.3 5.8.7 7-.2 1-.5 2-.9 2.8Z" /></g>,
 };
 
 export type IconName = keyof typeof PATHS;

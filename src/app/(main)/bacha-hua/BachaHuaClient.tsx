@@ -3,11 +3,25 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import BackButton from '@/components/BackButton/BackButton';
-import RecipeCardCompact from '@/components/RecipeCard/RecipeCardCompact';
 import UpgradeModal from '@/components/UpgradeModal/UpgradeModal';
 import ArtiLoader from '@/components/ArtiLoader/ArtiLoader';
 import type { Recipe } from '@/types/index';
 import type { GeneratedRecipe } from '@/lib/generate-recipe';
+import Icon from '@/components/editorial/Icon';
+import { SectionHead } from '@/components/editorial/SectionHead';
+import { GridCard } from '@/components/editorial/RecipeCards';
+
+function BachaHeader() {
+  return (
+    <header className="sticky top-0 z-10" style={{ background: 'var(--cream)', borderBottom: '1px solid var(--border)', padding: '12px 18px', display: 'flex', alignItems: 'center', gap: 10 }}>
+      <BackButton fallback="/home" className="bg-[var(--hero-lt)] text-[var(--hero-dk)]" />
+      <div>
+        <div className="t-overline" style={{ color: 'var(--hero-dk)' }}>Leftovers → naya dish</div>
+        <h1 className="t-display" style={{ fontSize: 20, margin: 0, color: 'var(--text)' }}>Bacha Hua</h1>
+      </div>
+    </header>
+  );
+}
 
 interface Props {
   isPaid: boolean;
@@ -47,30 +61,20 @@ export default function BachaHuaClient({ isPaid }: Props) {
   // ─── Upgrade wall (free users) ────────────────────────────────────────────
   if (!isPaid) {
     return (
-      <div style={{ background: '#FFFDF9', minHeight: '100vh' }}>
-        <div className="flex items-center px-2 pt-2">
-          <BackButton fallback="/home" />
-          <h1 className="text-[16px] font-bold text-[#1A1A1A] ml-1">Bacha Hua</h1>
-        </div>
+      <div style={{ background: 'var(--cream)', minHeight: '100%' }}>
+        <BachaHeader />
 
-        <div className="flex flex-col items-center px-6 pt-16 text-center">
-          <div
-            className="mb-3 flex h-20 w-20 items-center justify-center rounded-2xl"
-            style={{ background: '#FFF0E6', fontSize: 40 }}
-          >
-            🍱
-          </div>
-          <h2 className="text-[16px] font-bold text-[#1A1A1A]">Bacha Hua Mode</h2>
-          <p className="mt-2 text-[13px] text-[#806244]">
+        <div className="flex flex-col items-center text-center" style={{ padding: '56px 24px' }}>
+          <span style={{ width: 80, height: 80, borderRadius: 22, background: 'var(--hero-lt)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Icon name="pot" size={40} color="var(--hero-dk)" sw={1.5} />
+          </span>
+          <div className="t-overline" style={{ color: 'var(--hero-dk)', marginTop: 16 }}>Premium feature</div>
+          <h2 className="t-display" style={{ fontSize: 23, margin: '4px 0 6px', color: 'var(--text)' }}>Bacha Hua Mode</h2>
+          <p style={{ fontSize: 14, color: 'var(--muted)', maxWidth: 280, lineHeight: 1.55 }}>
             Bachi roti, thanda chawal, aadhi dal — sab kuch naye dish mein badlo!
           </p>
-          <button
-            type="button"
-            onClick={() => setUpgradeOpen(true)}
-            className="tap-spring mt-6 flex items-center justify-center rounded-xl bg-[#E8640C] px-6 text-[15px] font-bold text-white"
-            style={{ minHeight: 48 }}
-          >
-            Premium lo — ₹150/mahine →
+          <button type="button" onClick={() => setUpgradeOpen(true)} className="r-cta tap-spring" style={{ marginTop: 22, maxWidth: 280 }}>
+            <Icon name="sparkle" size={20} color="#fff" /> Premium lein — ₹150/mahina
           </button>
         </div>
 
@@ -176,43 +180,23 @@ function BachaHuaPaid({
   }
 
   return (
-    <div style={{ background: '#FFFDF9', minHeight: '100vh' }}>
-      <div className="flex items-center px-2 pt-2">
-        <BackButton fallback="/home" />
-        <h1 className="text-[16px] font-bold text-[#1A1A1A] ml-1">Bacha Hua</h1>
-      </div>
+    <div style={{ background: 'var(--cream)', minHeight: '100%' }}>
+      <BachaHeader />
 
       {/* SELECT */}
       {stage === 'select' && (
-        <div className="px-4 pb-24 pt-2">
-          <h2 className="text-[14px] font-bold text-[#1A1A1A]">Kya bacha hai? 🍱</h2>
-          <p className="mt-0.5 text-[13px] text-[#806244]">Ek ya zyada select karo</p>
+        <div style={{ padding: '18px 18px 96px' }}>
+          <SectionHead over="Kya bacha hai?" title="Chunein jo bacha hai" />
+          <p className="t-caption" style={{ margin: '4px 0 0' }}>Ek ya zyada select karo</p>
 
-          {error && (
-            <p className="mt-3 text-[13px] font-medium text-[#BF4E06]">{error}</p>
-          )}
+          {error && <p style={{ marginTop: 12, fontSize: 13, fontWeight: 500, color: 'var(--hero-dk)' }}>{error}</p>}
 
-          <div className="mt-4 flex flex-wrap gap-2">
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 16 }}>
             {CHIPS.map((chip) => {
-              const isActive =
-                chip.label === CUSTOM_LABEL
-                  ? customActive
-                  : selected.includes(chip.label);
+              const isActive = chip.label === CUSTOM_LABEL ? customActive : selected.includes(chip.label);
               return (
-                <button
-                  key={chip.label}
-                  type="button"
-                  onClick={() => toggleChip(chip.label)}
-                  className="tap-spring flex items-center rounded-full px-3 text-[13px] font-medium"
-                  style={{
-                    minHeight: 48,
-                    background: isActive ? '#FFF0E6' : '#FFFFFF',
-                    border: isActive ? '2px solid #E8640C' : '1px solid #E8DDD0',
-                    color: isActive ? '#E8640C' : '#1A1A1A',
-                  }}
-                >
-                  <span className="mr-1.5">{chip.emoji}</span>
-                  {chip.label}
+                <button key={chip.label} type="button" onClick={() => toggleChip(chip.label)} className={`r-chip tap-spring ${isActive ? 'on' : ''}`}>
+                  <span>{chip.emoji}</span> {chip.label}
                 </button>
               );
             })}
@@ -224,49 +208,33 @@ function BachaHuaPaid({
               value={customText}
               onChange={(e) => setCustomText(e.target.value)}
               placeholder="Aur kya hai? (comma se alag karo)"
-              className="mt-4 w-full rounded-xl border border-[#E8DDD0] bg-white px-4 text-[14px] text-[#1A1A1A] outline-none focus:border-[#E8640C]"
-              style={{ minHeight: 48 }}
+              className="outline-none"
+              style={{ marginTop: 16, width: '100%', minHeight: 50, padding: '0 16px', borderRadius: 14, border: '1px solid var(--border)', background: 'var(--card)', fontSize: 14, color: 'var(--text)' }}
             />
           )}
 
-          <button
-            type="button"
-            onClick={handleSuggest}
-            disabled={!hasSelection}
-            className="tap-spring mt-6 flex w-full items-center justify-center rounded-xl text-[15px] font-bold text-white"
-            style={{
-              minHeight: 48,
-              background: hasSelection ? '#E8640C' : '#E8DDD0',
-              opacity: hasSelection ? 1 : 0.7,
-            }}
-          >
-            Suggest karo! →
+          <button type="button" onClick={handleSuggest} disabled={!hasSelection} className="r-cta tap-spring disabled:opacity-50" style={{ marginTop: 24 }}>
+            <Icon name="sparkle" size={20} color="#fff" /> Suggest karo!
           </button>
         </div>
       )}
 
       {/* LOADING */}
       {stage === 'loading' && (
-        <div className="flex flex-col items-center px-6 pt-24 text-center">
+        <div className="flex flex-col items-center text-center" style={{ padding: '80px 24px' }}>
           <ArtiLoader message="Arti soch rahi hai" />
         </div>
       )}
 
       {/* RESULTS */}
       {stage === 'results' && (
-        <div className="px-4 pb-24 pt-2">
-          <h2 className="text-[14px] font-bold text-[#1A1A1A]">
-            Yeh bana sakte ho! 🍳
-          </h2>
+        <div style={{ padding: '18px 18px 96px' }}>
+          <SectionHead over="In cheezon se" title="Yeh banayein" style={{ marginBottom: 14 }} />
 
           {recipes.length > 0 && (
-            <div className="mt-4 grid grid-cols-2 gap-2">
-              {recipes.map((r) => (
-                <RecipeCardCompact
-                  key={r.id}
-                  recipe={r}
-                  onClick={() => router.push('/recipe/' + r.id)}
-                />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              {recipes.map((r, i) => (
+                <GridCard key={r.id} recipe={r} idx={i % 6} onOpen={(id) => router.push('/recipe/' + id)} />
               ))}
             </div>
           )}
@@ -274,41 +242,24 @@ function BachaHuaPaid({
           {generated && (
             <button
               type="button"
-              onClick={() =>
-                router.push('/recipe/pending/' + generated.pendingId)
-              }
-              className="mt-4 w-full overflow-hidden rounded-2xl p-4 text-left transition-transform active:scale-[0.98]"
-              style={{
-                background: '#FFF0E6',
-                border: '1px solid #E8DDD0',
-              }}
+              onClick={() => router.push('/recipe/pending/' + generated.pendingId)}
+              className="r-card tap-spring"
+              style={{ marginTop: 14, width: '100%', padding: 16, textAlign: 'left', display: 'block' }}
             >
-              <span
-                className="inline-block rounded-full px-2 py-0.5 text-[11px] font-bold text-white"
-                style={{ background: '#E8640C' }}
-              >
-                Naya recipe ✨
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, borderRadius: 99, padding: '3px 10px', fontSize: 11, fontWeight: 700, color: '#fff', background: 'var(--hero)' }}>
+                <Icon name="sparkle" size={11} color="#fff" /> Naya recipe
               </span>
-              <p className="mt-2 text-[15px] font-bold text-[#1A1A1A]">
-                {generated.recipe.name_hinglish}
-              </p>
-              <p className="mt-0.5 text-[13px] text-[#806244]">Arti ka naya idea</p>
+              <p className="t-display" style={{ marginTop: 8, fontSize: 17, color: 'var(--text)' }}>{generated.recipe.name_hinglish}</p>
+              <p className="t-caption" style={{ marginTop: 2 }}>Arti ka naya idea — kholne ke liye tap karein</p>
             </button>
           )}
 
           {recipes.length === 0 && !generated && (
-            <p className="mt-6 text-[13px] text-[#806244]">
-              Kuch nahi mila. Dobara koshish karein.
-            </p>
+            <p className="t-caption" style={{ marginTop: 24 }}>Kuch nahi mila. Dobara koshish karein.</p>
           )}
 
-          <button
-            type="button"
-            onClick={reset}
-            className="tap-spring mt-6 flex w-full items-center justify-center rounded-xl border border-[#E8DDD0] bg-white text-[14px] font-medium text-[#1A1A1A]"
-            style={{ minHeight: 48 }}
-          >
-            Aur kuch try karo
+          <button type="button" onClick={reset} className="r-cta ghost tap-spring" style={{ marginTop: 18, minHeight: 52 }}>
+            <Icon name="refresh" size={19} color="var(--hero-dk)" /> Aur kuch try karo
           </button>
         </div>
       )}

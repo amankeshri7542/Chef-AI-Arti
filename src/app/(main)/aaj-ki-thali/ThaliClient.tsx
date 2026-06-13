@@ -3,9 +3,10 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Recipe } from '@/types/index';
-import RecipeCardCompact from '@/components/RecipeCard/RecipeCardCompact';
 import BackButton from '@/components/BackButton/BackButton';
 import ArtiLoader from '@/components/ArtiLoader/ArtiLoader';
+import Icon from '@/components/editorial/Icon';
+import DishImage from '@/components/editorial/DishArt';
 
 interface ThaliData {
   nashta: Recipe | null;
@@ -14,9 +15,9 @@ interface ThaliData {
 }
 
 const MEAL_SLOTS = [
-  { key: 'nashta' as const, label: '🌅 Nashta', time: 'Subah' },
-  { key: 'dopahar' as const, label: '☀️ Dopahar', time: 'Lunch' },
-  { key: 'raat' as const, label: '🌙 Raat', time: 'Dinner' },
+  { key: 'nashta' as const, label: 'Nashta', time: 'Subah · 8:30 baje' },
+  { key: 'dopahar' as const, label: 'Dopahar', time: 'Lunch · 1:00 baje' },
+  { key: 'raat' as const, label: 'Raat', time: 'Dinner · 8:00 baje' },
 ];
 
 function todayKey(userId: string): string {
@@ -66,89 +67,73 @@ export default function ThaliClient({ userId }: { userId: string }) {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#FFFDF9] pb-24">
+    <div style={{ background: 'var(--cream)', minHeight: '100%', paddingBottom: 96 }}>
       {/* Header */}
-      <div className="sticky top-0 z-10 flex items-center gap-2 border-b border-[#E8DDD0] bg-white px-4 py-3">
-        <BackButton fallback="/home" className="bg-[#FFF0E6] text-[#5C3D1E]" />
+      <header className="sticky top-0 z-10" style={{ background: 'var(--cream)', borderBottom: '1px solid var(--border)', padding: '12px 18px', display: 'flex', alignItems: 'center', gap: 10 }}>
+        <BackButton fallback="/home" className="bg-[var(--hero-lt)] text-[var(--hero-dk)]" />
         <div>
-          <p className="text-[15px] font-bold text-[#1A1A1A]">🍱 Aaj ki Thali</p>
-          <p className="text-[13px] text-[#806244]">Aaj ke teeno waqt ka khaana</p>
+          <div className="t-overline" style={{ color: 'var(--hero-dk)' }}>Teen waqt ka plan</div>
+          <h1 className="t-display" style={{ fontSize: 20, margin: 0, color: 'var(--text)' }}>Aaj ki Thali</h1>
         </div>
+      </header>
+
+      <div style={{ padding: '14px 18px 0' }}>
+        <p style={{ margin: 0, color: 'var(--muted)', fontSize: 14 }}>Arti ne aaj ke teeno waqt ka khaana chuna hai. Jo pasand na aaye, phir se suggest karwa lein!</p>
       </div>
 
-      <div className="px-4 py-4 flex flex-col gap-6">
+      <div style={{ padding: '16px 18px 0' }}>
         {loading ? (
           <ArtiLoader className="py-16" message="Aaj ki thali soch rahi hai" />
         ) : (
-          <div className="animate-content-fade flex flex-col gap-6">
-            {MEAL_SLOTS.map((slot) => {
+          <div className="animate-content-fade flex flex-col" style={{ gap: 14 }}>
+            {MEAL_SLOTS.map((slot, i) => {
               const recipe = thali?.[slot.key] ?? null;
               return (
-                <section key={slot.key}>
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-[14px] font-bold text-[#C4621E]">{slot.label}</span>
-                    <span className="text-[12px] text-[#806244]">{slot.time}</span>
+                <div key={slot.key} className={`r-card card-entry stg-${i + 1}`} style={{ padding: 14 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 10 }}>
+                    <span className="t-overline" style={{ color: 'var(--hero-dk)' }}>{slot.label}</span>
+                    <span className="t-caption">{slot.time}</span>
                   </div>
                   {recipe ? (
-                    <RecipeCardCompact
-                      recipe={recipe}
-                      onClick={() => router.push(`/recipe/${recipe.id}`)}
-                    />
+                    <button type="button" onClick={() => router.push(`/recipe/${recipe.id}`)} className="tap-spring" style={{ display: 'flex', gap: 12, width: '100%', alignItems: 'center', textAlign: 'left' }}>
+                      <DishImage recipe={recipe} sizes="64px" style={{ width: 64, height: 64, borderRadius: 14, flexShrink: 0 }} />
+                      <span style={{ flex: 1, minWidth: 0 }}>
+                        <span className="t-display" style={{ display: 'block', fontSize: 17, color: 'var(--text)' }}>{recipe.name_hinglish}</span>
+                        <span className="t-caption" style={{ display: 'block', marginTop: 2 }}>{recipe.cook_time_minutes + recipe.prep_time_minutes} min · {recipe.spice_level}</span>
+                      </span>
+                      <Icon name="chevR" size={18} color="var(--muted)" />
+                    </button>
                   ) : (
-                    <div className="rounded-xl border border-dashed border-[#E8DDD0] bg-[#FFF8F0] px-4 py-6 text-center">
-                      <p className="text-[13px] text-[#806244]">
-                        Koi recipe nahi mili — khud choose karein →
-                      </p>
-                      <button
-                        type="button"
-                        onClick={() => router.push('/search')}
-                        className="tap-spring mt-2 min-h-[48px] rounded-full bg-[#BF4E06] px-4 py-2 text-[14px] font-semibold text-white"
-                        style={{ minHeight: 40 }}
-                      >
-                        Browse karein
+                    <div style={{ borderRadius: 14, border: '1.5px dashed var(--border)', background: 'var(--hero-lt)', padding: '16px', textAlign: 'center' }}>
+                      <p className="t-caption" style={{ margin: '0 0 8px' }}>Koi recipe nahi mili — khud choose karein</p>
+                      <button type="button" onClick={() => router.push('/search')} className="r-chip on tap-spring" style={{ minHeight: 44 }}>
+                        <Icon name="search" size={15} color="#fff" /> Browse karein
                       </button>
                     </div>
                   )}
-                </section>
+                </div>
               );
             })}
 
             {/* Action buttons */}
-            <div className="flex flex-col gap-3 mt-2">
+            <div className="flex flex-col" style={{ gap: 12, marginTop: 4 }}>
               {planned ? (
-                <div className="rounded-xl border border-[#BFE3CF] bg-[#EAF7F0] px-4 py-4 text-center">
-                  <p className="text-[14px] font-bold text-[#2D6A4F]">
-                    ✓ Aaj ki thali set hai!
+                <div className="r-card" style={{ padding: '16px', textAlign: 'center', background: 'var(--green-lt)', borderColor: 'var(--green)' }}>
+                  <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--green)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                    <Icon name="check" size={18} color="var(--green)" sw={2.4} /> Aaj ki thali set hai!
                   </p>
-                  <p className="mt-1 text-[13px] text-[#2D6A4F]">
-                    Aaj ka khaana plan ho gaya. Mazze se banao 💛
-                  </p>
-                  <button
-                    type="button"
-                    onClick={resetThali}
-                    className="mt-3 min-h-[48px] rounded-full px-4 py-2 text-[13px] font-semibold text-[#2D6A4F] underline"
-                    style={{ minHeight: 40 }}
-                  >
+                  <p style={{ marginTop: 4, fontSize: 13, color: 'var(--green)' }}>Aaj ka khaana plan ho gaya. Mazze se banao 💛</p>
+                  <button type="button" onClick={resetThali} className="tap-spring" style={{ marginTop: 10, minHeight: 44, fontSize: 13, fontWeight: 600, color: 'var(--green)', textDecoration: 'underline' }}>
                     Badalna hai? Reset karo
                   </button>
                 </div>
               ) : (
-                <button
-                  type="button"
-                  onClick={confirmThali}
-                  className="tap-spring flex h-12 items-center justify-center gap-2 rounded-xl text-[14px] font-semibold text-white"
-                  style={{ background: '#2D6A4F' }}
-                >
-                  Yeh theek hai ✓
+                <button type="button" onClick={confirmThali} className="r-cta tap-spring" style={{ background: 'var(--green)' }}>
+                  <Icon name="check" size={20} color="#fff" sw={2.4} /> Yeh theek hai
                 </button>
               )}
-              <button
-                type="button"
-                onClick={fetchThali}
-                className="tap-spring flex h-12 items-center justify-center gap-2 rounded-xl text-[14px] font-semibold"
-                style={{ background: '#FFF0E6', color: '#E8640C', border: '1px solid #E8DDD0' }}
-              >
-                🔄 Phir se suggest karo
+              <button type="button" onClick={fetchThali} className="r-cta ghost tap-spring" style={{ minHeight: 52 }}>
+                <Icon name="refresh" size={19} color="var(--hero-dk)" /> Phir se suggest karo
               </button>
             </div>
           </div>

@@ -7,8 +7,11 @@ import UpgradeModal from '@/components/UpgradeModal/UpgradeModal';
 import PWAInstallButton from '@/components/PWAInstallButton/PWAInstallButton';
 import PushNotificationButton from '@/components/PushNotificationButton/PushNotificationButton';
 import BackButton from '@/components/BackButton/BackButton';
-import RecipeCardCompact from '@/components/RecipeCard/RecipeCardCompact';
 import { IOSInstallProfileSection } from '@/components/IOSInstallPrompt/IOSInstallPrompt';
+import Icon, { type IconName } from '@/components/editorial/Icon';
+import DishImage from '@/components/editorial/DishArt';
+import { GridCard } from '@/components/editorial/RecipeCards';
+import { SectionHead } from '@/components/editorial/SectionHead';
 import type {
   Recipe,
   SubscriptionStatus,
@@ -103,6 +106,15 @@ const SHEET_TITLES: Record<PrefKey, string> = {
 function labelOf(options: { value: string; label: string }[], value: string | null) {
   return options.find((o) => o.value === value)?.label ?? '— Set nahi hai';
 }
+
+const PREF_ICON: Record<PrefKey, IconName> = {
+  diet_type: 'leaf',
+  preferred_region: 'map',
+  spice_preference: 'chili',
+  cooking_skill: 'pan',
+  time_preference: 'clock',
+  kitchen_setup: 'flame',
+};
 
 export default function ProfileClient({
   name,
@@ -272,221 +284,168 @@ export default function ProfileClient({
               : KITCHEN_OPTIONS;
 
   return (
-    <div className="flex flex-col gap-4 px-4 py-4 pb-24">
-      {/* Back nav */}
-      <div className="flex items-center gap-2">
-        <BackButton fallback="/home" className="bg-[#FFF0E6] text-[#5C3D1E]" />
-        <p className="font-bold text-[#1A1A1A]" style={{ fontSize: 16 }}>Mera Profile</p>
-      </div>
+    <div style={{ background: 'var(--cream)', minHeight: '100%' }}>
+      {/* Editorial header */}
+      <header className="sticky top-0 z-10" style={{ background: 'var(--cream)', padding: '12px 18px', borderBottom: '1px solid var(--border)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <BackButton fallback="/home" className="bg-[var(--hero-lt)] text-[var(--hero-dk)]" />
+          <div>
+            <div className="t-overline" style={{ color: 'var(--hero-dk)' }}>Aapka profile</div>
+            <h1 className="t-display" style={{ fontSize: 22, margin: 0, color: 'var(--text)' }}>Mera Rasoi Ghar</h1>
+          </div>
+        </div>
+      </header>
 
-      {/* Header */}
-      <div className="flex items-center gap-3 rounded-2xl border border-[#E8DDD0] bg-white px-4 py-4">
-        <div
-          className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full text-2xl"
-          style={{ background: 'linear-gradient(135deg, #FDDBC2, #FBC08A)' }}
-        >
-          👩‍🍳
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-[16px] font-bold text-[#1A1A1A] truncate">{displayName}</p>
-          {isPaid ? (
-            <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-[12px] font-semibold text-green-700">
-              💎 Premium
+      <div className="flex flex-col" style={{ gap: 16, padding: '16px 18px 96px' }}>
+        {/* Identity card */}
+        <div className="r-card card-entry stg-1" style={{ padding: 16, display: 'flex', alignItems: 'center', gap: 14 }}>
+          <span style={{ width: 60, height: 60, borderRadius: '50%', background: 'var(--hero-lt)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 30, flexShrink: 0 }}>👩‍🍳</span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div className="t-display" style={{ fontSize: 20, color: 'var(--text)' }}>{displayName}</div>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, marginTop: 4, padding: '3px 10px', borderRadius: 99, background: isPaid ? 'var(--green-lt)' : 'var(--hero-lt)', fontSize: 12, fontWeight: 600, color: isPaid ? 'var(--green)' : 'var(--hero-dk)' }}>
+              {isPaid ? <><Icon name="sparkle" size={13} color="var(--green)" /> Premium Member</> : <><Icon name="leaf" size={13} color="var(--hero-dk)" /> Free Member</>}
             </span>
-          ) : (
-            <span className="inline-flex items-center rounded-full bg-orange-100 px-2 py-0.5 text-[12px] font-semibold text-[#BF4E06]">
-              🆓 Free Plan
-            </span>
-          )}
+          </div>
         </div>
-      </div>
 
-      {/* Subscription card */}
-      {isPaid ? (
-        <div className="rounded-2xl border-2 border-green-400 bg-green-50 px-4 py-4">
-          <p className="text-[15px] font-bold text-green-800">💎 Premium Member</p>
-          {endsAtFormatted && (
-            <p className="mt-1 text-[13px] text-green-700">Active till {endsAtFormatted}</p>
-          )}
-          <p className="mt-2 text-[13px] text-green-700">
-            Unlimited chat, fridge scan, aur WhatsApp share — sab enjoy karein! 🎉
-          </p>
-        </div>
-      ) : (
-        <div className="rounded-2xl border-2 border-[#E8640C] bg-[#FFF0E6] px-4 py-4">
-          <p className="text-[15px] font-bold text-[#1A1A1A]">🆓 Free Plan</p>
-          <p className="mt-1 text-[13px] text-[#806244]">
-            Sirf 3 chat messages/din. Unlimited ke liye upgrade karein!
-          </p>
-          <p className="mt-1 text-[13px] font-semibold text-[#E8640C]">₹150/mahine mein sab kuch pao</p>
+        {/* Subscription card */}
+        {isPaid ? (
+          <div className="r-card card-entry stg-2" style={{ padding: '18px 20px', background: 'var(--green-lt)', borderColor: 'var(--green)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+              <Icon name="sparkle" size={20} color="var(--green)" />
+              <span className="t-display" style={{ fontSize: 19, color: 'var(--green)' }}>Premium chal raha hai</span>
+            </div>
+            {endsAtFormatted && <p style={{ margin: '0 0 4px', fontSize: 13, color: 'var(--green)' }}>Active till {endsAtFormatted}</p>}
+            <p style={{ margin: 0, fontSize: 13.5, color: 'var(--text)' }}>Unlimited chat, fridge scan, aur WhatsApp share — sab enjoy karein! 🎉</p>
+          </div>
+        ) : (
           <button
             type="button"
             onClick={() => setUpgradeOpen(true)}
-            className="mt-3 flex h-12 w-full items-center justify-center rounded-xl bg-[#E8640C] text-[15px] font-bold text-white active:opacity-90"
+            className="r-card card-entry stg-2 tap-spring tadka-host"
+            style={{ display: 'block', width: '100%', padding: '18px 20px', textAlign: 'left', position: 'relative', overflow: 'hidden', background: 'linear-gradient(135deg, var(--hero) 0%, var(--hero-dk) 100%)', border: 'none' }}
           >
-            Premium lo 🚀
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, color: '#fff' }}>
+              <Icon name="sparkle" size={20} color="#fff" />
+              <span className="t-display" style={{ fontSize: 20, color: '#fff' }}>Premium lein</span>
+            </div>
+            <p style={{ margin: '0 0 12px', fontSize: 13.5, color: 'rgba(255,255,255,0.92)' }}>Unlimited Arti, fridge scan aur share — sirf ₹150/mahina, chai ke ek cup se kam ☕</p>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 99, background: '#fff', color: 'var(--hero-dk)', fontWeight: 700, fontSize: 14 }}>
+              Premium banein <Icon name="chevR" size={16} color="var(--hero-dk)" />
+            </span>
           </button>
-        </div>
-      )}
+        )}
 
-      {/* Saved recipes */}
-      {savedRecipes.length > 0 && (
-        <section>
-          <h2 className="pb-2 text-[14px] font-semibold text-[#2C1810]">
-            ❤️ Saved Recipes
-          </h2>
-          <div className="grid grid-cols-2 gap-3">
-            {savedRecipes.map((recipe) => (
-              <RecipeCardCompact
-                key={recipe.id}
-                recipe={recipe}
-                onClick={() => router.push('/recipe/' + recipe.id)}
-              />
-            ))}
-          </div>
-        </section>
-      )}
+        {/* Saved recipes */}
+        {savedRecipes.length > 0 && (
+          <section>
+            <SectionHead over="Dil se save kiye" title="Saved Recipes" />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 14 }}>
+              {savedRecipes.map((recipe, i) => (
+                <GridCard key={recipe.id} recipe={recipe} idx={i % 6} saved onOpen={(id) => router.push('/recipe/' + id)} />
+              ))}
+            </div>
+          </section>
+        )}
 
-      {/* Recipes Arti generated — only entry point back to pending recipes */}
-      {generatedRecipes.length > 0 && (
-        <section>
-          <h2 className="pb-2 text-[14px] font-semibold text-[#2C1810]">
-            ✨ Arti ne aapke liye banayi
-          </h2>
-          <div className="flex flex-col gap-2">
-            {generatedRecipes.map((g) => (
-              <button
-                key={g.id}
-                type="button"
-                onClick={() => router.push('/recipe/pending/' + g.id)}
-                className="tap-spring flex items-center gap-3 rounded-2xl border border-[#E8DDD0] bg-white p-2 text-left"
-              >
-                {g.youtubeVideoId ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={`https://img.youtube.com/vi/${g.youtubeVideoId}/default.jpg`}
-                    alt={g.name}
-                    className="h-12 w-16 flex-shrink-0 rounded-lg object-cover"
-                  />
-                ) : (
-                  <span className="flex h-12 w-16 flex-shrink-0 items-center justify-center rounded-lg bg-[#FFF0E6] text-xl">
-                    🍲
+        {/* Recipes Arti generated — only entry point back to pending recipes */}
+        {generatedRecipes.length > 0 && (
+          <section>
+            <SectionHead over="Sirf aapke liye" title="Arti ne aapke liye banayi" />
+            <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {generatedRecipes.map((g) => (
+                <button
+                  key={g.id}
+                  type="button"
+                  onClick={() => router.push('/recipe/pending/' + g.id)}
+                  className="r-card tap-spring"
+                  style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 12, width: '100%', textAlign: 'left' }}
+                >
+                  {g.youtubeVideoId ? (
+                    <DishImage recipe={{ id: g.id, thumbnail_url: `https://img.youtube.com/vi/${g.youtubeVideoId}/default.jpg`, name_hinglish: g.name }} sizes="56px" style={{ width: 56, height: 56, borderRadius: 12, flexShrink: 0 }} />
+                  ) : (
+                    <DishImage recipe={{ id: g.id, name_hinglish: g.name }} sizes="56px" style={{ width: 56, height: 56, borderRadius: 12, flexShrink: 0 }} />
+                  )}
+                  <span style={{ flex: 1, minWidth: 0 }}>
+                    <span className="t-display" style={{ display: 'block', fontSize: 16, color: 'var(--text)' }}>{g.name}</span>
+                    <span className="t-caption" style={{ display: 'flex', alignItems: 'center', gap: 5 }}><Icon name="sparkle" size={12} color="var(--hero-dk)" /> Aapke liye generate ki</span>
                   </span>
-                )}
-                <span className="flex-1 text-[13px] font-medium text-[#1A1A1A] line-clamp-2">
-                  {g.name}
+                  <Icon name="chevR" size={18} color="var(--muted)" />
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Preferences */}
+        <section>
+          <SectionHead over="Sab badal sakti hain" title="Meri Preferences" />
+          <div className="r-card" style={{ marginTop: 12, overflow: 'hidden' }}>
+            {prefRows.map((row, i) => (
+              <button
+                key={row.key}
+                type="button"
+                onClick={() => openPref(row.key)}
+                className="tap-spring"
+                style={{ display: 'flex', alignItems: 'center', gap: 12, width: '100%', padding: '14px 16px', borderBottom: i < prefRows.length - 1 ? '1px solid var(--border)' : 'none', minHeight: 56, textAlign: 'left' }}
+              >
+                <span style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--hero-lt)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Icon name={PREF_ICON[row.key]} size={18} color="var(--hero-dk)" />
                 </span>
-                <span className="pr-1 text-[#806244]">›</span>
+                <span style={{ flex: 1, fontSize: 14.5, fontWeight: 500, color: 'var(--text)' }}>{row.title}</span>
+                <span style={{ fontSize: 13, color: 'var(--muted)', textAlign: 'right', maxWidth: 150, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.value}</span>
+                <Icon name="chevR" size={16} color="var(--muted)" />
               </button>
             ))}
+            {/* Parivar stepper */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '14px 16px', borderTop: '1px solid var(--border)' }}>
+              <div>
+                <p style={{ fontSize: 14.5, fontWeight: 500, color: 'var(--text)' }}>Parivar</p>
+                <p className="t-caption">Kitne log khaate hain?</p>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <button type="button" aria-label="Kam karein" disabled={peopleSaving || people <= 1} onClick={() => changePeople(-1)} className="tap-spring" style={{ width: 48, height: 48, borderRadius: 14, background: 'var(--hero-lt)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: people <= 1 ? 0.4 : 1 }}>
+                  <Icon name="minus" size={20} color="var(--hero-dk)" sw={2.2} />
+                </button>
+                <span className="t-display" style={{ minWidth: 56, textAlign: 'center', fontSize: 18, color: 'var(--text)' }}>{people} log</span>
+                <button type="button" aria-label="Zyada karein" disabled={peopleSaving || people >= 15} onClick={() => changePeople(1)} className="tap-spring" style={{ width: 48, height: 48, borderRadius: 14, background: 'var(--hero-lt)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: people >= 15 ? 0.4 : 1 }}>
+                  <Icon name="plus" size={20} color="var(--hero-dk)" sw={2.2} />
+                </button>
+              </div>
+            </div>
           </div>
         </section>
-      )}
 
-      {/* PWA install (Android) + iOS install instructions */}
-      <div className="mt-0 flex flex-col gap-2">
-        <PWAInstallButton />
-        <IOSInstallProfileSection />
-      </div>
-
-      {/* Push notifications */}
-      <PushNotificationButton />
-
-      {/* Meri Preferences */}
-      <div className="rounded-2xl border border-[#E8DDD0] bg-white px-4 py-4">
-        <p className="mb-1 text-[13px] font-semibold text-[#1A1A1A]">⚙️ Meri Preferences</p>
-        <p className="mb-2 text-[12px] text-[#806244]">Badalne ke liye tap karein</p>
-        <div className="flex flex-col divide-y divide-[#F3EADF]">
-          {prefRows.map((row) => (
-            <button
-              key={row.key}
-              type="button"
-              onClick={() => openPref(row.key)}
-              className="flex min-h-[48px] items-center justify-between gap-3 py-2 text-left"
-            >
-              <p className="flex-shrink-0 text-[13px] text-[#806244]">{row.title}</p>
-              <p className="flex items-center gap-1 text-right text-[13px] font-medium text-[#1A1A1A]">
-                <span className="truncate" style={{ maxWidth: 180 }}>{row.value}</span>
-                <span className="text-[#806244]">›</span>
-              </p>
-            </button>
-          ))}
-        </div>
-        <div className="mt-2 flex items-center justify-between border-t border-[#F3EADF] pt-3">
-          <div>
-            <p className="text-[13px] text-[#806244]">Parivar</p>
-            <p className="text-[12px] text-[#806244]">Kitne log khaate hain?</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              aria-label="Kam karein"
-              disabled={peopleSaving || people <= 1}
-              onClick={() => changePeople(-1)}
-              className="flex h-12 w-12 items-center justify-center rounded-full border border-[#E8DDD0] bg-[#FFF0E6] text-[20px] font-bold text-[#BF4E06] disabled:opacity-40"
-            >
-              −
-            </button>
-            <span className="min-w-[44px] text-center text-[15px] font-bold text-[#1A1A1A]">
-              {people} log
-            </span>
-            <button
-              type="button"
-              aria-label="Zyada karein"
-              disabled={peopleSaving || people >= 15}
-              onClick={() => changePeople(1)}
-              className="flex h-12 w-12 items-center justify-center rounded-full border border-[#E8DDD0] bg-[#FFF0E6] text-[20px] font-bold text-[#BF4E06] disabled:opacity-40"
-            >
-              +
-            </button>
+        {/* Settings: units */}
+        <div className="r-card" style={{ padding: '14px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--hero-lt)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon name="wheat" size={18} color="var(--hero-dk)" /></span>
+            <span style={{ fontSize: 14.5, fontWeight: 500, color: 'var(--text)' }}>Naap-tol</span>
+          </span>
+          <div style={{ display: 'flex', background: 'var(--hero-lt)', borderRadius: 99, padding: 3 }}>
+            {(['desi', 'metric'] as const).map((u) => (
+              <button key={u} type="button" disabled={unitLoading} onClick={() => toggleUnit(u)} className="tap-spring" style={{ minHeight: 42, padding: '0 18px', borderRadius: 99, fontSize: 13.5, fontWeight: 600, color: unit === u ? '#fff' : 'var(--muted)', background: unit === u ? 'var(--hero)' : 'transparent', transition: 'all 0.2s', textTransform: 'capitalize' }}>{u === 'desi' ? 'Desi' : 'Metric'}</button>
+            ))}
           </div>
         </div>
-      </div>
 
-      {/* Settings */}
-      <div className="rounded-2xl border border-[#E8DDD0] bg-white px-4 py-4">
-        <p className="mb-3 text-[13px] font-semibold text-[#1A1A1A]">⚙️ Settings</p>
-
-        {/* Units toggle */}
-        <div className="flex items-center justify-between">
-          <p className="text-[13px] text-[#1A1A1A]">📏 Units</p>
-          <div className="flex items-center gap-1 rounded-full border border-[#E8DDD0] bg-[#FFF0E6] p-1">
-            <button
-              type="button"
-              disabled={unitLoading}
-              onClick={() => toggleUnit('desi')}
-              className={`min-h-[48px] rounded-full px-4 text-[14px] font-semibold transition-colors ${unit === 'desi'
-                  ? 'bg-[#BF4E06] text-white'
-                  : 'text-[#806244]'
-                }`}
-            >
-              Desi
-            </button>
-            <button
-              type="button"
-              disabled={unitLoading}
-              onClick={() => toggleUnit('metric')}
-              className={`min-h-[48px] rounded-full px-4 text-[14px] font-semibold transition-colors ${unit === 'metric'
-                  ? 'bg-[#BF4E06] text-white'
-                  : 'text-[#806244]'
-                }`}
-            >
-              Metric
-            </button>
-          </div>
+        {/* PWA install (Android) + iOS install instructions */}
+        <div className="flex flex-col gap-2">
+          <PWAInstallButton />
+          <IOSInstallProfileSection />
         </div>
-      </div>
 
-      {/* Sign out */}
-      <div className="rounded-2xl border border-[#E8DDD0] bg-white px-4 py-2">
-        <SignOutButton redirectUrl="/sign-in">
-          <button
-            type="button"
-            className="flex h-12 w-full items-center justify-center gap-2 text-[14px] font-medium text-red-500"
-          >
-            🚪 Sign out karein
-          </button>
-        </SignOutButton>
+        {/* Push notifications */}
+        <PushNotificationButton />
+
+        {/* Sign out */}
+        <div className="r-card" style={{ padding: '4px 16px' }}>
+          <SignOutButton redirectUrl="/sign-in">
+            <button type="button" className="flex h-12 w-full items-center justify-center gap-2 text-[14px] font-medium" style={{ color: '#C0392B' }}>
+              🚪 Sign out karein
+            </button>
+          </SignOutButton>
+        </div>
       </div>
 
       <UpgradeModal isOpen={upgradeOpen} onClose={() => setUpgradeOpen(false)} />
@@ -506,8 +465,9 @@ export default function ProfileClient({
             className="slide-up relative w-full max-w-md rounded-t-3xl bg-white px-5 pb-8 pt-3"
             style={{ maxHeight: '80vh', overflowY: 'auto' }}
           >
-            <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-[#E8D5C0]" />
-            <p className="font-display mb-4 text-[18px]" style={{ color: 'var(--terracotta)' }}>
+            <div className="mx-auto mb-4 h-1.5 w-12 rounded-full" style={{ background: 'var(--border)' }} />
+            <div className="t-overline" style={{ color: 'var(--hero-dk)' }}>Badal lein</div>
+            <p className="t-display mb-4" style={{ fontSize: 21, color: 'var(--text)', marginTop: 4 }}>
               {SHEET_TITLES[openSheet]}
             </p>
 
@@ -544,7 +504,7 @@ export default function ProfileClient({
                   type="button"
                   disabled={kitchenDraft.length === 0 || prefSaving}
                   onClick={() => savePref('kitchen_setup', kitchenDraft)}
-                  className="mt-4 flex h-12 w-full items-center justify-center rounded-xl bg-[#E8640C] text-[15px] font-bold text-white active:opacity-90 disabled:opacity-40"
+                  className="r-cta tap-spring mt-4 disabled:opacity-40"
                 >
                   {prefSaving ? 'Thoda ruko…' : 'Save karein ✓'}
                 </button>
@@ -585,13 +545,20 @@ function SheetOption({
       type="button"
       disabled={disabled}
       onClick={onClick}
-      className={`tap-spring flex min-h-[52px] items-center justify-between rounded-2xl border-2 px-4 text-left text-[14px] font-medium transition-all ${selected
-          ? 'border-[#E8640C] bg-[#FFF0E6] text-[#1A1A1A]'
-          : 'border-[#E8D5C0] bg-white text-[#1A1A1A]'
-        } disabled:opacity-50`}
+      className="tap-spring flex min-h-[56px] items-center justify-between rounded-2xl px-4 text-left text-[15px] disabled:opacity-50"
+      style={{
+        border: selected ? '1.5px solid var(--hero)' : '1.5px solid var(--border)',
+        background: selected ? 'var(--hero-lt)' : 'var(--card)',
+        color: 'var(--text)',
+        fontWeight: selected ? 600 : 400,
+      }}
     >
       <span>{label}</span>
-      {selected && <span className="text-[#E8640C]">✓</span>}
+      {selected && (
+        <span style={{ width: 24, height: 24, borderRadius: '50%', background: 'var(--hero)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <Icon name="check" size={15} color="#fff" sw={2.6} />
+        </span>
+      )}
     </button>
   );
 }

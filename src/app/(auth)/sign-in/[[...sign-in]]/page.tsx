@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useSignIn } from '@clerk/nextjs/legacy';
 import { useRouter } from 'next/navigation';
+import { Steam } from '@/components/editorial/DishArt';
 
 export default function SignInPage() {
   const { isLoaded, signIn } = useSignIn();
@@ -40,7 +41,7 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-[#FFFDF9] px-6">
+    <div className="flex min-h-screen flex-col items-center justify-center px-6" style={{ background: 'var(--cream)' }}>
       {showClose && (
         <button
           type="button"
@@ -49,24 +50,26 @@ export default function SignInPage() {
             else router.push('/home');
           }}
           aria-label="Band karo"
-          className="absolute right-4 top-4 flex h-12 w-12 items-center justify-center rounded-full text-[18px] text-[#806244] transition-opacity active:opacity-70"
-          style={{ background: '#FFF0E6' }}
+          className="absolute right-4 top-4 flex h-12 w-12 items-center justify-center rounded-full text-[18px] transition-opacity active:opacity-70"
+          style={{ background: 'var(--hero-lt)', color: 'var(--hero-dk)' }}
         >
           ✕
         </button>
       )}
       <div className="w-full max-w-sm text-center">
-        <p className="text-5xl">🍳</p>
-        <h1 className="mt-3 text-2xl font-semibold text-[#1A1A1A]">Chief-AI-Arti</h1>
-        <p className="mt-1 text-base text-[#806244]">Aaj kya banao?</p>
+        <div className="flex justify-center"><Steam size={44} color="var(--terracotta)" /></div>
+        <div className="t-overline mt-3" style={{ color: 'var(--hero-dk)' }}>Aapki apni rasoi</div>
+        <h1 className="t-display mt-1" style={{ fontSize: 32, color: 'var(--text)' }}>Chief-AI-Arti</h1>
+        <p className="t-ital mt-1" style={{ fontSize: 16, color: 'var(--muted)' }}>Aaj kya banao?</p>
 
         <button
           onClick={googleLogin}
           disabled={loading}
-          className="mt-10 flex h-12 w-full items-center justify-center gap-3 rounded-xl bg-[#E8640C] text-base font-medium text-white transition-opacity active:opacity-80 disabled:opacity-60"
+          className="r-cta tap-spring mt-10 disabled:opacity-60"
+          style={{ background: 'var(--card)', color: 'var(--text)', border: '1px solid var(--border)', boxShadow: '0 2px 8px var(--shadow)' }}
         >
           {loading ? (
-            <span className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+            <span className="h-5 w-5 animate-spin rounded-full border-2" style={{ borderColor: 'var(--border)', borderTopColor: 'var(--hero)' }} />
           ) : (
             <GoogleIcon />
           )}
@@ -74,12 +77,12 @@ export default function SignInPage() {
         </button>
 
         {error && (
-          <div className="mt-4 rounded-xl border border-[#FBC08A] bg-[#FFF0E6] px-4 py-3 text-left">
-            <p className="text-sm text-[#BF4E06]">{error}</p>
+          <div className="r-card mt-4 px-4 py-3 text-left" style={{ background: 'var(--hero-lt)', borderColor: '#F5A55B' }}>
+            <p className="text-sm" style={{ color: 'var(--hero-dk)' }}>{error}</p>
           </div>
         )}
 
-        <p className="mt-4 text-xs text-[#C4B8A8]">
+        <p className="mt-4 text-xs" style={{ color: 'var(--muted)' }}>
           Login karke aap hamare Terms se agree karte hain
         </p>
       </div>

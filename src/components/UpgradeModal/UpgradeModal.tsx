@@ -2,17 +2,18 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Icon, { type IconName } from '@/components/editorial/Icon';
 
 interface UpgradeModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const BENEFITS = [
-  { icon: '📷', text: 'Fridge scan — roz 10 baar' },
-  { icon: '💬', text: 'Chef Arti se 20 sawaal/din' },
-  { icon: '🍱', text: 'Bacha Hua mode — leftovers into meals' },
-  { icon: '📐', text: '15 logon tak ka portion' },
+const BENEFITS: { icon: IconName; title: string; sub: string }[] = [
+  { icon: 'chat', title: 'Unlimited Chef Arti', sub: 'Jitna poochho, koi limit nahi' },
+  { icon: 'camera', title: 'Roz fridge scan', sub: 'Jo hai, usi se recipe' },
+  { icon: 'share', title: 'WhatsApp par share', sub: 'Recipe parivar ko bhejo' },
+  { icon: 'sparkle', title: 'Aapke liye nayi recipes', sub: 'Arti khaas aapke liye banaye' },
 ];
 
 const BURST_EMOJIS: { emoji: string; x: number; y: number }[] = [
@@ -183,27 +184,18 @@ export default function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
 
               {showSuccessText && (
                 <div className="flex flex-col items-center">
-                  <h2 className="font-display text-center text-[22px]" style={{ color: 'var(--terracotta)' }}>
-                    Aap Premium Member ban gayin! 👑
+                  <span style={{ width: 76, height: 76, borderRadius: '50%', background: 'var(--green)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: 14, boxShadow: '0 10px 30px -8px rgba(45,106,79,0.5)' }}>
+                    <Icon name="check" size={38} color="#fff" sw={2.6} />
+                  </span>
+                  <h2 className="t-display text-center" style={{ fontSize: 26, color: 'var(--text)' }}>
+                    Aap Premium hain! 🎉
                   </h2>
-                  <p
-                    className="mt-2 text-center text-[13px]"
-                    style={{ color: 'var(--muted)', lineHeight: 1.6 }}
-                  >
+                  <p className="mt-2 text-center text-[13.5px]" style={{ color: 'var(--muted)', lineHeight: 1.6 }}>
                     Ab Chef Arti hamesha aapke saath hai — koi limit nahi, koi rukawat nahi 🍳
                   </p>
 
-                  <button
-                    type="button"
-                    onClick={goHome}
-                    className="mt-5 flex w-full items-center justify-center rounded-[16px] text-[15px] font-semibold text-white"
-                    style={{
-                      height: 56,
-                      background: 'linear-gradient(135deg, #E8640C, #C4621E)',
-                      boxShadow: '0 6px 24px rgba(180,80,20,0.25)',
-                    }}
-                  >
-                    Theek hai, ghar chalein! →
+                  <button type="button" onClick={goHome} className="r-cta tap-spring mt-5">
+                    Chalo, kuch banayein <Icon name="chevR" size={18} color="#fff" />
                   </button>
 
                   {/* Countdown progress bar */}
@@ -258,51 +250,53 @@ export default function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
 
               {/* Header */}
               <div className="flex flex-col items-center">
-                <span className="text-[40px] leading-none">👑</span>
-                <h2 className="font-display mt-2 text-center text-[22px]" style={{ color: 'var(--terracotta)' }}>
+                <span style={{ width: 64, height: 64, borderRadius: '50%', background: 'var(--hero-lt)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
+                  <Icon name="sparkle" size={30} color="var(--hero-dk)" />
+                </span>
+                <div className="t-overline" style={{ color: 'var(--hero-dk)' }}>Arti Premium</div>
+                <h2 className="t-display mt-1 text-center" style={{ fontSize: 24, color: 'var(--text)' }}>
                   Premium Member bano
                 </h2>
-                <p className="mt-1 text-center text-[13px]" style={{ color: 'var(--muted)' }}>
-                  Unlimited Chef Arti — jab chahein, jitna chahein
+                <p className="mt-1 text-center text-[13.5px]" style={{ color: 'var(--muted)' }}>
+                  Chai ke ek cup se kam mein, poora saal ka saath ☕
                 </p>
               </div>
 
               {/* Benefits */}
-              <div className="mt-5">
+              <div className="r-card mt-5" style={{ padding: '4px 4px' }}>
                 {BENEFITS.map((b, i) => (
                   <div
-                    key={b.text}
-                    className="flex items-center gap-3 py-3"
-                    style={{ borderTop: i === 0 ? 'none' : '1px solid var(--border)' }}
+                    key={b.title}
+                    className="flex items-center gap-3.5"
+                    style={{ padding: '12px 12px', borderBottom: i < BENEFITS.length - 1 ? '1px solid var(--border)' : 'none' }}
                   >
-                    <span className="text-[20px] leading-none">{b.icon}</span>
-                    <span className="flex-1 text-[13px]" style={{ color: 'var(--text)' }}>{b.text}</span>
-                    <span className="text-[16px]" style={{ color: 'var(--green)' }}>✓</span>
+                    <span style={{ width: 42, height: 42, borderRadius: 12, background: 'var(--hero-lt)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <Icon name={b.icon} size={20} color="var(--hero-dk)" />
+                    </span>
+                    <span className="flex-1">
+                      <span className="block text-[14.5px] font-semibold" style={{ color: 'var(--text)' }}>{b.title}</span>
+                      <span className="t-caption">{b.sub}</span>
+                    </span>
+                    <Icon name="check" size={18} color="var(--green)" sw={2.4} />
                   </div>
                 ))}
               </div>
 
               {/* Price */}
-              <div className="mt-4 text-center">
-                <span className="font-display text-[36px]" style={{ color: 'var(--saffron)' }}>₹150</span>
-                <span className="ml-1 text-[14px]" style={{ color: 'var(--muted)' }}>/mahine</span>
-                <p className="mt-0.5 text-[13px] italic" style={{ color: 'var(--muted)' }}>= ek pizza ki kimat 🍕</p>
+              <div className="mt-4 flex items-baseline justify-center gap-1">
+                <span className="t-display" style={{ fontSize: 40, color: 'var(--text)' }}>₹150</span>
+                <span className="text-[15px]" style={{ color: 'var(--muted)' }}>/ mahina</span>
               </div>
 
               {/* CTA */}
               <button
                 type="button"
                 onClick={() => setCheckoutStarted(true)}
-                className="font-display mt-5 flex w-full items-center justify-center text-[16px] text-white"
-                style={{
-                  height: 56,
-                  background: 'linear-gradient(135deg, #E8640C, #C4621E)',
-                  borderRadius: 16,
-                  boxShadow: '0 6px 24px rgba(180,80,20,0.25)',
-                }}
+                className="r-cta tap-spring mt-5"
               >
-                Abhi Premium lo 🌟
+                <Icon name="lock" size={18} color="#fff" /> Razorpay se ₹150 dein
               </button>
+              <p className="t-caption text-center" style={{ marginTop: 10 }}>Kabhi bhi cancel kar sakti hain · UPI / Card / Netbanking</p>
             </div>
           )}
         </div>

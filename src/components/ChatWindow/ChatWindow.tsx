@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import UpgradeModal from '@/components/UpgradeModal/UpgradeModal';
 import { RATE_LIMITS } from '@/lib/rate-limits';
+import Icon from '@/components/editorial/Icon';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -110,28 +111,40 @@ export default function ChatWindow({ isOpen, onClose, recipeId, recipeName, subs
 
       {/* Bottom sheet */}
       <div
-        className={`fixed bottom-0 left-0 right-0 z-50 flex flex-col rounded-t-2xl bg-white transition-transform duration-300 ease-out`}
+        className={`fixed bottom-0 left-0 right-0 z-50 flex flex-col transition-transform duration-300 ease-out`}
         style={{
-          maxHeight: '65vh',
+          maxHeight: '72vh',
+          borderRadius: '24px 24px 0 0',
+          background: 'var(--cream)',
+          boxShadow: '0 -8px 40px rgba(44,24,16,0.25)',
           transform: isOpen ? 'translateY(0)' : 'translateY(100%)',
         }}
         aria-label="Chat with Chef Arti"
       >
         {/* A. Handle bar */}
-        <div className="flex justify-center pt-3 pb-1">
-          <div className="h-1 w-8 rounded-full bg-[#E8DDD0]" />
+        <div className="flex justify-center pt-2.5 pb-1">
+          <div className="h-1.5 w-11 rounded-full" style={{ background: 'var(--border)' }} />
         </div>
 
         {/* B. Header */}
-        <div className="flex items-center justify-between border-b border-[#E8DDD0] px-4 py-2">
-          <p className="text-[13px] font-bold text-[#1A1A1A]">Chef Arti se poochho 🍳</p>
+        <div className="flex items-center gap-3 px-[18px] pb-3 pt-1" style={{ borderBottom: '1px solid var(--border)' }}>
+          <span style={{ width: 44, height: 44, borderRadius: '50%', background: 'var(--hero)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Icon name="chat" size={22} color="#fff" />
+          </span>
+          <div style={{ flex: 1 }}>
+            <div className="t-display" style={{ fontSize: 18, color: 'var(--text)' }}>Chef Arti</div>
+            <div className="t-caption" style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+              <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--green)' }} /> Hamesha aapke saath
+            </div>
+          </div>
           <button
             type="button"
             onClick={onClose}
-            className="flex h-11 w-11 items-center justify-center rounded-full text-[18px] text-[#806244] active:bg-[#FFF0E6]"
+            className="flex items-center justify-center rounded-xl"
+            style={{ width: 44, height: 44, background: 'var(--hero-lt)' }}
             aria-label="Band karo"
           >
-            ✕
+            <Icon name="close" size={18} color="var(--hero-dk)" />
           </button>
         </div>
 
@@ -191,31 +204,28 @@ export default function ChatWindow({ isOpen, onClose, recipeId, recipeName, subs
         )}
 
         {/* D. Messages area */}
-        <div className="flex flex-1 flex-col gap-3 overflow-y-auto px-4 py-3 pb-2">
+        <div className="no-scrollbar flex flex-1 flex-col gap-2.5 overflow-y-auto px-[18px] py-3 pb-2">
           {messages.length === 0 && !loading ? (
-            <div className="flex flex-col items-center gap-2 pt-6">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FFF0E6] text-xl">
-                🍳
-              </div>
-              <p className="text-[13px] text-[#806244]">
-                Namaskar! Khaana pakane mein koi sawaal?
-              </p>
+            <div className="flex flex-col items-center gap-2.5 pt-8">
+              <span style={{ width: 56, height: 56, borderRadius: '50%', background: 'var(--hero-lt)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Icon name="chat" size={26} color="var(--hero-dk)" />
+              </span>
+              <p style={{ fontSize: 14, color: 'var(--muted)' }}>Namaskar! Khaana pakane mein koi sawaal?</p>
             </div>
           ) : (
             messages.map((msg, i) => (
-              <div
-                key={i}
-                className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
+              <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div
-                  className="max-w-[78%] px-3 py-2 text-[13px] leading-relaxed"
+                  className="max-w-[82%]"
                   style={{
-                    background: msg.role === 'user' ? '#E8640C' : '#FFF0E6',
-                    color: msg.role === 'user' ? '#fff' : '#1A1A1A',
-                    borderRadius:
-                      msg.role === 'user'
-                        ? '12px 0 12px 12px'
-                        : '0 12px 12px 12px',
+                    padding: '11px 14px',
+                    fontSize: 14,
+                    lineHeight: 1.5,
+                    background: msg.role === 'user' ? 'var(--hero)' : 'var(--card)',
+                    color: msg.role === 'user' ? '#fff' : 'var(--text)',
+                    border: msg.role === 'user' ? 'none' : '1px solid var(--border)',
+                    boxShadow: '0 1px 2px var(--shadow)',
+                    borderRadius: msg.role === 'user' ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
                   }}
                 >
                   {msg.content}
@@ -227,18 +237,9 @@ export default function ChatWindow({ isOpen, onClose, recipeId, recipeName, subs
           {/* Typing indicator */}
           {loading && (
             <div className="flex justify-start">
-              <div
-                className="flex items-center gap-1 px-3 py-2"
-                style={{ background: '#FFF0E6', borderRadius: '0 12px 12px 12px' }}
-              >
+              <div style={{ display: 'flex', gap: 5, padding: '12px 16px', background: 'var(--card)', border: '1px solid var(--border)', borderRadius: '18px 18px 18px 4px' }}>
                 {[0, 1, 2].map((i) => (
-                  <div
-                    key={i}
-                    className="h-2 w-2 rounded-full bg-[#E8640C]"
-                    style={{
-                      animation: `bounce 1s ease-in-out ${i * 0.15}s infinite`,
-                    }}
-                  />
+                  <span key={i} className="dot-b" style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--muted)', animationDelay: `${i * 0.18}s` }} />
                 ))}
               </div>
             </div>
@@ -246,46 +247,37 @@ export default function ChatWindow({ isOpen, onClose, recipeId, recipeName, subs
 
           {/* Error */}
           {error && !loading && (
-            <p className="text-center text-[13px] text-[#BF4E06]">{error}</p>
+            <p className="text-center text-[13px]" style={{ color: 'var(--hero-dk)' }}>{error}</p>
           )}
 
           <div ref={messagesEndRef} />
         </div>
 
         {/* E. Input row */}
-        <div className="flex items-center gap-2 border-t border-[#E8DDD0] bg-white px-4 py-3">
+        <div className="flex items-center gap-2 px-[18px] py-3" style={{ borderTop: '1px solid var(--border)' }}>
           <input
             ref={inputRef}
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Poochho kuch bhi..."
+            placeholder="Arti se kuch poochho…"
             disabled={remaining <= 0 || loading}
-            className="flex-1 rounded-full bg-[#FFF0E6] px-4 py-2 text-[14px] text-[#1A1A1A] outline-none placeholder:text-[#806244] disabled:opacity-50"
+            className="flex-1 outline-none disabled:opacity-50"
+            style={{ minHeight: 50, padding: '0 16px', borderRadius: 16, border: '1px solid var(--border)', background: 'var(--card)', fontSize: 14, color: 'var(--text)' }}
           />
           <button
             type="button"
             onClick={sendMessage}
             disabled={!input.trim() || loading || remaining <= 0}
-            className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full text-white disabled:opacity-40"
-            style={{ background: '#E8640C' }}
+            className="tap-spring flex flex-shrink-0 items-center justify-center disabled:opacity-40"
+            style={{ width: 50, minHeight: 50, borderRadius: 16, background: 'var(--hero)' }}
             aria-label="Bhejo"
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-              <path d="M22 2L11 13" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+            <Icon name="send" size={20} color="#fff" />
           </button>
         </div>
       </div>
-
-      <style>{`
-        @keyframes bounce {
-          0%, 80%, 100% { transform: translateY(0); }
-          40% { transform: translateY(-6px); }
-        }
-      `}</style>
 
       <UpgradeModal isOpen={upgradeOpen} onClose={() => setUpgradeOpen(false)} />
     </>

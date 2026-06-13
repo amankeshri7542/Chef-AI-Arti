@@ -9,6 +9,8 @@ import type {
   SpiceLevel,
   TimePreference,
 } from '@/types/index';
+import Icon from '@/components/editorial/Icon';
+import { Steam } from '@/components/editorial/DishArt';
 
 // ───────── Option data ─────────
 
@@ -154,35 +156,19 @@ export default function OnboardingPage() {
 
         {/* Middle */}
         <div className="flex flex-1 flex-col items-center justify-center text-center">
-          <span style={{ fontSize: 48 }}>🍳</span>
-          <h1
-            className="font-display mt-4"
-            style={{ fontSize: 24, color: 'var(--terracotta)' }}
-          >
+          <Steam size={40} color="var(--terracotta)" />
+          <div className="t-overline mt-3" style={{ color: 'var(--hero-dk)' }}>Namaste 🙏</div>
+          <h1 className="t-display mt-1" style={{ fontSize: 28, color: 'var(--text)' }}>
             Aapki apni Chef Arti
           </h1>
-          <p
-            className="mt-3"
-            style={{ fontSize: 14, color: 'var(--muted)', maxWidth: 240, lineHeight: 1.5 }}
-          >
+          <p className="mt-3" style={{ fontSize: 14, color: 'var(--muted)', maxWidth: 250, lineHeight: 1.55 }}>
             7 chhote sawaal — aur hum jaanenge aapki rasoi aur aapka swad
           </p>
         </div>
 
         {/* Bottom CTA */}
-        <button
-          onClick={() => setStep(1)}
-          className="w-full font-display transition-transform active:scale-[0.97]"
-          style={{
-            height: 56,
-            borderRadius: 16,
-            background: 'var(--saffron)',
-            color: '#fff',
-            fontSize: 18,
-            boxShadow: '0 4px 20px var(--shadow)',
-          }}
-        >
-          Shuru karein →
+        <button onClick={() => setStep(1)} className="r-cta tap-spring">
+          Shuru karein <Icon name="chevR" size={20} color="#fff" />
         </button>
 
         {/* Progress dots */}
@@ -424,15 +410,8 @@ export default function OnboardingPage() {
             <button
               onClick={finish}
               disabled={kitchen.length === 0 || loading}
-              className="font-display flex flex-1 items-center justify-center transition-transform active:scale-[0.97] disabled:opacity-40"
-              style={{
-                minHeight: 56,
-                borderRadius: 16,
-                background: 'var(--saffron)',
-                color: '#fff',
-                fontSize: 16,
-                boxShadow: '0 4px 20px var(--shadow)',
-              }}
+              className="r-cta tap-spring flex-1 disabled:opacity-40"
+              style={{ minHeight: 56 }}
             >
               {loading ? 'Thoda ruko…' : 'Ho gaya 🎉  ·  7 / 7'}
             </button>
@@ -479,10 +458,11 @@ function Question({
 }) {
   return (
     <div className="animate-fade-in-up flex flex-1 flex-col">
-      <h2 className="font-display" style={{ fontSize: 22, color: 'var(--terracotta)' }}>
+      <div className="t-overline" style={{ color: 'var(--hero-dk)', marginBottom: 4 }}>Thoda jaan lein</div>
+      <h2 className="t-display" style={{ fontSize: 25, color: 'var(--text)', lineHeight: 1.2 }}>
         {title}
       </h2>
-      <p className="mt-1 mb-6" style={{ fontSize: 14, color: 'var(--muted)' }}>
+      <p className="mt-1.5 mb-6" style={{ fontSize: 14, color: 'var(--muted)' }}>
         {sub}
       </p>
       {children}
@@ -519,17 +499,9 @@ function OptionCard({
       {selected && (
         <span
           className="absolute flex items-center justify-center rounded-full"
-          style={{
-            top: -8,
-            right: -8,
-            width: 24,
-            height: 24,
-            background: 'var(--saffron)',
-            color: '#fff',
-            fontSize: 13,
-          }}
+          style={{ top: -8, right: -8, width: 24, height: 24, background: 'var(--saffron)' }}
         >
-          ✓
+          <Icon name="check" size={14} color="#fff" sw={2.6} />
         </span>
       )}
     </button>
@@ -568,17 +540,10 @@ function NextButton({
     <button
       onClick={onClick}
       disabled={disabled}
-      className="font-display flex flex-1 items-center justify-center transition-transform active:scale-[0.97] disabled:opacity-40"
-      style={{
-        minHeight: 56,
-        borderRadius: 16,
-        background: 'var(--saffron)',
-        color: '#fff',
-        fontSize: 16,
-        boxShadow: '0 4px 20px var(--shadow)',
-      }}
+      className="r-cta tap-spring flex-1 disabled:opacity-40"
+      style={{ minHeight: 56 }}
     >
-      Aage →&nbsp;&nbsp;·&nbsp;&nbsp;{count}
+      Aage&nbsp;&nbsp;·&nbsp;&nbsp;{count} <Icon name="chevR" size={18} color="#fff" />
     </button>
   );
 }
@@ -587,19 +552,10 @@ function BackButton({ onClick }: { onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="flex items-center justify-center transition-transform active:scale-[0.97]"
-      style={{
-        minHeight: 56,
-        minWidth: 56,
-        paddingInline: 20,
-        borderRadius: 16,
-        border: '2px solid var(--border)',
-        background: '#fff',
-        color: 'var(--muted)',
-        fontSize: 15,
-      }}
+      className="r-cta ghost tap-spring flex items-center justify-center gap-1.5"
+      style={{ minHeight: 56, minWidth: 56, width: 'auto', paddingInline: 20, fontSize: 15 }}
     >
-      ← Wapas
+      <Icon name="back" size={18} color="var(--hero-dk)" /> Wapas
     </button>
   );
 }

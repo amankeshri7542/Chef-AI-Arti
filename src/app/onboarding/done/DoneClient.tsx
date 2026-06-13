@@ -2,7 +2,8 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import RecipeCardCompact from '@/components/RecipeCard/RecipeCardCompact';
+import { GridCard } from '@/components/editorial/RecipeCards';
+import Icon from '@/components/editorial/Icon';
 import type { Recipe } from '@/types/index';
 
 const BURST = [
@@ -60,47 +61,30 @@ export default function DoneClient({ recipes }: { recipes: Recipe[] }) {
       {showContent && (
         <div className="flex flex-1 flex-col">
           <div className="mt-16 text-center">
-            <h1
-              className="font-display animate-fade-in-up"
-              style={{ fontSize: 22, color: 'var(--terracotta)' }}
-            >
+            <div className="t-overline animate-fade-in-up" style={{ color: 'var(--hero-dk)' }}>Sab set ho gaya</div>
+            <h1 className="t-display animate-fade-in-up mt-1" style={{ fontSize: 26, color: 'var(--text)', animationDelay: '60ms', animationFillMode: 'backwards' }}>
               Aapki Chef Arti ready hai! 🍳
             </h1>
             <p
               className="animate-fade-in-up mt-2"
-              style={{ fontSize: 13, color: 'var(--muted)', animationDelay: '120ms', animationFillMode: 'backwards' }}
+              style={{ fontSize: 13.5, color: 'var(--muted)', animationDelay: '120ms', animationFillMode: 'backwards' }}
             >
-              Aapke liye yeh recipes hain aaj:
+              Aapke swaad ke hisaab se Arti ne yeh chuna hai —
             </p>
           </div>
 
-          <div className="mt-6 grid grid-cols-3 gap-3">
-            {recipes.slice(0, 3).map((r, i) => (
-              <div
-                key={r.id}
-                className="animate-card-entry"
-                style={{ animationDelay: `${240 + i * 120}ms` }}
-              >
-                <RecipeCardCompact recipe={r} />
-              </div>
+          <div className="mt-6 grid grid-cols-2 gap-3">
+            {recipes.slice(0, 4).map((r, i) => (
+              <GridCard key={r.id} recipe={r} idx={i} onOpen={(id) => router.push('/recipe/' + id)} />
             ))}
           </div>
 
           <button
             onClick={() => router.push('/home')}
-            className="font-display animate-fade-in-up mt-auto flex w-full items-center justify-center transition-transform active:scale-[0.97]"
-            style={{
-              minHeight: 56,
-              borderRadius: 16,
-              background: 'var(--saffron)',
-              color: '#fff',
-              fontSize: 16,
-              boxShadow: '0 4px 20px var(--shadow)',
-              animationDelay: '600ms',
-              animationFillMode: 'backwards',
-            }}
+            className="r-cta tap-spring animate-fade-in-up mt-auto"
+            style={{ animationDelay: '600ms', animationFillMode: 'backwards' }}
           >
-            Sabhi recipes dekhein →
+            Sabhi recipes dekhein <Icon name="chevR" size={18} color="#fff" />
           </button>
         </div>
       )}
