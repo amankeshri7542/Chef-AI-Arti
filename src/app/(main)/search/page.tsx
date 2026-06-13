@@ -4,13 +4,15 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
 import { toast } from '@/lib/toast';
-import RecipeCardCompact from '@/components/RecipeCard/RecipeCardCompact';
 import CollectionCard from '@/components/CollectionCard/CollectionCard';
 import BackButton from '@/components/BackButton/BackButton';
 import RecipeGridSkeleton from '@/components/Skeletons/RecipeGridSkeleton';
 import PullToRefresh from '@/components/PullToRefresh/PullToRefresh';
 import { RECIPE_COLLECTIONS } from '@/lib/collections';
 import { Recipe } from '@/types/index';
+import Icon from '@/components/editorial/Icon';
+import { SectionHead } from '@/components/editorial/SectionHead';
+import { GridCard } from '@/components/editorial/RecipeCards';
 
 /** Lightweight Dice/bigram similarity for YouTube query normalization. */
 function bigramSim(a: string, b: string): number {
@@ -31,12 +33,11 @@ function bigramSim(a: string, b: string): number {
 /**
  * Given a raw (possibly typo'd) query and a list of recipe names, return the
  * canonical name if similarity exceeds threshold, else the raw query.
- * This prevents typo'd queries ("Malasa Dosa") from reaching YouTube as-is.
  */
 function normalizeYouTubeQuery(raw: string, recipeNames: string[]): string {
   if (!raw.trim() || recipeNames.length === 0) return raw;
   let best = raw;
-  let bestSim = 0.45; // minimum threshold — below this, use raw query
+  let bestSim = 0.45;
   for (const name of recipeNames) {
     const s = bigramSim(raw, name);
     if (s > bestSim) {
@@ -48,13 +49,13 @@ function normalizeYouTubeQuery(raw: string, recipeNames: string[]): string {
 }
 
 const CATEGORY_CHIPS = [
-  { label: '🥗 Sabzi', query: 'sabzi' },
-  { label: '🫘 Dal', query: 'dal' },
-  { label: '🍚 Chawal', query: 'chawal' },
-  { label: '🍳 Nashta', query: 'nashta' },
-  { label: '🫓 Roti', query: 'roti' },
-  { label: '🍬 Meetha', query: 'meetha' },
-  { label: '🕉️ Vrat', query: 'vrat' },
+  { label: 'Sabzi', query: 'sabzi' },
+  { label: 'Dal', query: 'dal' },
+  { label: 'Chawal', query: 'chawal' },
+  { label: 'Nashta', query: 'nashta' },
+  { label: 'Roti', query: 'roti' },
+  { label: 'Meetha', query: 'meetha' },
+  { label: 'Vrat', query: 'vrat' },
 ];
 
 type ActiveSource =
@@ -66,11 +67,11 @@ type ActiveSource =
 /** Fast SQL-only browse — no embedding / vector search. */
 async function fetchBrowse(filter: Record<string, unknown>): Promise<Recipe[]> {
   const params = new URLSearchParams();
-  if (filter.category)         params.set('category', String(filter.category));
-  if (filter.tag)              params.set('tag',      String(filter.tag));
-  if (filter.is_vrat_friendly) params.set('vrat',     'true');
-  if (filter.vibe)             params.set('vibe',     String(filter.vibe));
-  if (filter.limit)            params.set('limit',    String(filter.limit));
+  if (filter.category) params.set('category', String(filter.category));
+  if (filter.tag) params.set('tag', String(filter.tag));
+  if (filter.is_vrat_friendly) params.set('vrat', 'true');
+  if (filter.vibe) params.set('vibe', String(filter.vibe));
+  if (filter.limit) params.set('limit', String(filter.limit));
 
   const res = await fetch(`/api/recipes/browse?${params.toString()}`);
   if (!res.ok) return [];
@@ -79,21 +80,18 @@ async function fetchBrowse(filter: Record<string, unknown>): Promise<Recipe[]> {
 }
 
 /** RAG search — uses embedding + vector similarity. Only for text queries. */
-async function fetchSearch(
-  query: string,
-): Promise<{ recipes: Recipe[]; miss: boolean }> {
+async function fetchSearch(query: string): Promise<{ recipes: Recipe[]; miss: boolean }> {
   const params = new URLSearchParams();
   params.set('q', query);
   const res = await fetch(`/api/recipes/search?${params.toString()}`);
   if (!res.ok) return { recipes: [], miss: true };
   const data = await res.json();
-  // A fallback result is the top-popular list dressed up as a match — treat it
-  // as "nothing found" so the UI shows the generate CTA, not random recipes.
   const miss = !!(data.isEmptyStateFallback || data.triggerCase2);
   return { recipes: miss ? [] : data.recipes ?? [], miss };
 }
 
-function GenerateButtons({
+/** Editorial generate CTA — "Arti se banwao" (signed-in) or login nudge. */
+function GenerateButton({
   isSignedIn,
   generating,
   onGenerate,
@@ -104,24 +102,32 @@ function GenerateButtons({
   onGenerate: () => void;
   onLogin: () => void;
 }) {
-  return isSignedIn ? (
-    <button
-      type="button"
-      disabled={generating}
-      onClick={onGenerate}
-      className="tap-spring flex items-center gap-2 rounded-xl bg-[#BF4E06] px-6 py-3 text-white font-medium disabled:opacity-60"
-      style={{ fontSize: 14, minHeight: 48 }}
-    >
-      {generating ? '✨ Arti bana rahi hai...' : '🎬 YouTube se dhundho aur banao'}
-    </button>
-  ) : (
-    <button
-      type="button"
-      onClick={onLogin}
-      className="tap-spring rounded-xl border border-[#BF4E06] px-6 py-3 text-[#BF4E06] font-medium"
-      style={{ fontSize: 14, minHeight: 48 }}
-    >
-      Login karke try karein →
+  if (!isSignedIn) {
+    return (
+      <button type="button" onClick={onLogin} className="r-cta ghost tap-spring">
+        Login karke try karein <Icon name="chevR" size={18} color="var(--hero-dk)" />
+      </button>
+    );
+  }
+  if (generating) {
+    return (
+      <div className="r-card" style={{ width: '100%', padding: '22px', textAlign: 'center' }}>
+        <span className="pot-stir" style={{ display: 'inline-flex' }}>
+          <Icon name="pot" size={40} color="var(--hero)" sw={1.5} />
+        </span>
+        <p className="t-display" style={{ fontSize: 18, margin: '10px 0 4px', color: 'var(--text)' }}>Arti soch rahi hai…</p>
+        <p className="t-caption" style={{ margin: '0 0 12px' }}>Samagri aur vidhi likhi ja rahi hai</p>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 6 }}>
+          {[0, 1, 2].map((i) => (
+            <span key={i} className="dot-b" style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--hero)', animationDelay: `${i * 0.18}s` }} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+  return (
+    <button type="button" onClick={onGenerate} className="r-cta tap-spring">
+      <Icon name="sparkle" size={20} color="#fff" /> Haan Arti, bana do!
     </button>
   );
 }
@@ -147,7 +153,9 @@ export default function SearchPage() {
         if (!cancelled) setSavedIds(new Set((d.recipes ?? []).map((r) => r.id)));
       })
       .catch(() => {});
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [isSignedIn]);
 
   // Default: load top recipes on mount (fast browse, no vector search)
@@ -161,7 +169,9 @@ export default function SearchPage() {
         setActiveSource({ type: 'none' });
       }
     });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const runSearch = useCallback(async (searchTerm: string) => {
@@ -169,8 +179,6 @@ export default function SearchPage() {
     setLoading(true);
     setActiveSource({ type: 'search', term: searchTerm });
     try {
-      // Raw query — the API does direct name/tag match first, then translates
-      // ingredient words to Hinglish only for the vector-search fallback.
       const { recipes } = await fetchSearch(searchTerm.trim());
       setResults(recipes);
     } catch {
@@ -182,7 +190,6 @@ export default function SearchPage() {
 
   useEffect(() => {
     if (!query.trim()) {
-      // Reset to top recipes when cleared
       if (activeSource.type === 'search') {
         setLoading(true);
         setActiveSource({ type: 'none' });
@@ -200,16 +207,14 @@ export default function SearchPage() {
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, runSearch]);
 
   const handleChipClick = (chip: { label: string; query: string }) => {
     setQuery('');
     setLoading(true);
     setActiveSource({ type: 'chip', label: chip.label, query: chip.query });
-    // Chips use browse API (category filter) not vector search
     const chipFilter: Record<string, unknown> = { limit: 24 };
-    // Map chip queries to browse params
     if (chip.query === 'vrat') chipFilter.is_vrat_friendly = true;
     else chipFilter.category = chip.query;
     fetchBrowse(chipFilter).then((recipes) => {
@@ -228,15 +233,9 @@ export default function SearchPage() {
     });
   };
 
-  const handleClear = () => {
-    setQuery('');
-  };
-
   const handleGenerateRecipe = async (searchQuery: string) => {
     if (generating) return;
     setGenerating(true);
-    // Normalize potentially typo'd query against known recipe names so YouTube
-    // gets a canonical dish name ("Masala Dosa") not a typo ("Malasa Dosa").
     const knownNames = results.map((r) => r.name_hinglish);
     const normalizedQuery = normalizeYouTubeQuery(searchQuery, knownNames);
     try {
@@ -266,7 +265,6 @@ export default function SearchPage() {
 
   const activeCollectionId = activeSource.type === 'collection' ? activeSource.id : null;
 
-  // Key for the results grid — changes with query/filter so cards re-animate
   const gridKey: string = (() => {
     if (activeSource.type === 'search') return `search:${activeSource.term}`;
     if (activeSource.type === 'chip') return `chip:${activeSource.query}`;
@@ -274,212 +272,147 @@ export default function SearchPage() {
     return 'browse';
   })();
 
-  const resultsHeading: string | null = (() => {
-    if (activeSource.type === 'search') return `"${activeSource.term}" ke results`;
-    if (activeSource.type === 'chip') return `${activeSource.label} recipes`;
-    if (activeSource.type === 'collection') return `${activeSource.emoji} ${activeSource.label}`;
-    return '🔥 Popular Recipes';
+  // Editorial heading: overline + Playfair title.
+  const heading: { over: string; title: string } = (() => {
+    if (activeSource.type === 'search') {
+      return { over: `"${activeSource.term}" ke liye`, title: `${results.length} recipe mili` };
+    }
+    if (activeSource.type === 'chip') return { over: 'Filter', title: `${activeSource.label} recipes` };
+    if (activeSource.type === 'collection') return { over: 'Collection', title: activeSource.label };
+    return { over: 'Sab pasand karte hain', title: 'Popular Recipes' };
   })();
 
   return (
     <PullToRefresh onRefresh={handleRefresh}>
-    <div className="flex flex-col min-h-full bg-[#FFFAF6]">
-      {/* Sticky header */}
-      <div
-        className="sticky top-0 z-10 bg-white px-4 pt-3 pb-2"
-        style={{ borderBottom: '1px solid #E8DDD0' }}
-      >
-        <div className="flex items-center gap-2 mb-2">
-          <BackButton fallback="/home" className="bg-[#FFF0E6] text-[#5C3D1E]" />
-          <div>
-            <p className="font-bold text-[#1A1A1A]" style={{ fontSize: 16 }}>
-              🔍 Recipe Dhundho
-            </p>
-            <p className="text-[#806244]" style={{ fontSize: 12 }}>
-              Kuch bhi likho — aloo, dal, biryani...
-            </p>
-          </div>
-        </div>
-
-        {/* Search input */}
-        <div className="relative mb-1">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#806244] text-sm select-none">
-            🔍
-          </span>
-          <input
-            type="search"
-            inputMode="search"
-            enterKeyHint="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                if (debounceRef.current) clearTimeout(debounceRef.current);
-                runSearch(query);
-              }
-            }}
-            placeholder="Aloo gobhi, moong dal..."
-            className="w-full rounded-full px-4 pl-9 pr-12 py-3 text-sm text-[#1A1A1A] outline-none"
-            style={{
-              background: '#FFF0E6',
-              border: '1px solid #E8DDD0',
-              fontSize: 14,
-            }}
-          />
-          {query.length > 0 && (
-            <button
-              type="button"
-              onClick={handleClear}
-              className="absolute right-1 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full text-[#806244] text-sm leading-none"
-              aria-label="Clear search"
-            >
-              ✕
-            </button>
-          )}
-        </div>
-
-        {/* Category chips */}
-        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none mt-2">
-          {CATEGORY_CHIPS.map((chip) => {
-            const isActive = activeSource.type === 'chip' && activeSource.query === chip.query;
-            return (
-              <button
-                key={chip.query}
-                type="button"
-                onClick={() => handleChipClick(chip)}
-                className="tap-spring flex-shrink-0 rounded-full font-medium"
-                style={{
-                  background: isActive ? 'var(--saffron-dk)' : '#FFFFFF',
-                  border: isActive ? '1px solid var(--saffron-dk)' : '1px solid var(--border)',
-                  color: isActive ? '#fff' : 'var(--text)',
-                  fontSize: 14,
-                  padding: '12px 16px',
-                  minHeight: 48,
-                  transform: isActive ? 'scale(1.02)' : 'scale(1)',
-                  transition: 'all 200ms ease',
-                }}
-              >
-                {chip.label}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Body */}
-      <div className="flex-1 px-4 py-3">
-        {/* Food Library */}
-        {activeSource.type !== 'search' && (
-          <div className="mb-6">
-            <p className="font-semibold text-[#1A1A1A] mb-3" style={{ fontSize: 15 }}>
-              📚 Food Library
-            </p>
-            <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-none">
-              {RECIPE_COLLECTIONS.map((col) => (
-                <CollectionCard
-                  key={col.id}
-                  collection={col}
-                  active={activeCollectionId === col.id}
-                  onClick={() => handleCollectionClick(col)}
-                />
-              ))}
+      <div style={{ background: 'var(--cream)', minHeight: '100%' }}>
+        {/* Sticky editorial header */}
+        <header className="sticky top-0 z-10" style={{ background: 'var(--cream)', padding: '12px 18px 12px', borderBottom: '1px solid var(--border)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+            <BackButton fallback="/home" className="bg-[var(--hero-lt)] text-[var(--hero-dk)]" />
+            <div>
+              <div className="t-overline" style={{ color: 'var(--hero-dk)' }}>Recipe Dhundho</div>
+              <div className="t-ital" style={{ fontSize: 16, color: 'var(--text)' }}>Kuch bhi likho — aloo, dal, biryani…</div>
             </div>
           </div>
-        )}
 
-        {/* Results heading + count. Default browse loads only a slice of the
-            library, so showing its count ("24 recipes") falsely implies that's
-            all there is — drop the count there; show it only for real searches. */}
-        {resultsHeading && !loading && (
-          <p className="text-[#806244] mb-3" style={{ fontSize: 13 }}>
-            {resultsHeading}
-            {results.length > 0 && activeSource.type !== 'none' &&
-              ` — ${results.length} recipes mili`}
-          </p>
-        )}
+          {/* Search input */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, minHeight: 50, padding: '0 16px', borderRadius: 16, background: 'var(--hero-lt)', border: '1px solid var(--border)' }}>
+            <Icon name="search" size={19} color="var(--hero-dk)" />
+            <input
+              type="search"
+              inputMode="search"
+              enterKeyHint="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  if (debounceRef.current) clearTimeout(debounceRef.current);
+                  runSearch(query);
+                }
+              }}
+              placeholder="Aloo gobhi, moong dal…"
+              style={{ flex: 1, border: 'none', outline: 'none', background: 'transparent', fontSize: 14.5, color: 'var(--text)', minHeight: 48 }}
+            />
+            {query.length > 0 && (
+              <button type="button" aria-label="Saaf karein" onClick={() => setQuery('')} style={{ display: 'flex', width: 32, height: 48, alignItems: 'center', justifyContent: 'center' }}>
+                <Icon name="close" size={16} color="var(--muted)" />
+              </button>
+            )}
+          </div>
 
-        {/* Loading — content-shaped skeleton so it never feels slow */}
-        {loading && <RecipeGridSkeleton className="pb-24" />}
+          {/* Category chips */}
+          <div className="no-scrollbar" style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingTop: 10 }}>
+            {CATEGORY_CHIPS.map((chip) => {
+              const isActive = activeSource.type === 'chip' && activeSource.query === chip.query;
+              return (
+                <button key={chip.query} type="button" onClick={() => handleChipClick(chip)} className={`r-chip tap-spring ${isActive ? 'on' : ''}`}>
+                  {chip.query === 'vrat' && <Icon name="om" size={15} />}
+                  {chip.label}
+                </button>
+              );
+            })}
+          </div>
+        </header>
 
-        {/* Recipe grid — keyed by active source so it re-animates on filter change */}
-        {!loading && results.length > 0 && (
-          <div key={gridKey} className="grid grid-cols-2 gap-3.5 pb-24">
-            {results.map((recipe, i) => (
-              <div
-                key={recipe.id}
-                className="card-entry"
-                style={{ animationDelay: `${Math.min(i, 11) * 60}ms` }}
-              >
-                <RecipeCardCompact
-                  recipe={recipe}
-                  saved={savedIds.has(recipe.id)}
-                  onClick={() => router.push(`/recipe/${recipe.id}`)}
-                />
+        {/* Body */}
+        <div style={{ padding: '14px 18px 0' }}>
+          {/* Food Library — only when not searching */}
+          {activeSource.type !== 'search' && (
+            <section style={{ marginBottom: 18 }}>
+              <SectionHead over="Food library" title="Collections" />
+              <div className="no-scrollbar" style={{ display: 'flex', gap: 12, overflowX: 'auto', padding: '14px 0 4px' }}>
+                {RECIPE_COLLECTIONS.map((col) => (
+                  <CollectionCard key={col.id} collection={col} active={activeCollectionId === col.id} onClick={() => handleCollectionClick(col)} />
+                ))}
               </div>
-            ))}
-          </div>
-        )}
+            </section>
+          )}
 
-        {/* Empty state — search miss offers AI generation */}
-        {!loading && results.length === 0 && activeSource.type === 'search' && (
-          <div className="animate-fade-in-up flex flex-col items-center gap-4 py-8 text-center px-4">
-            <span className="text-4xl">🔍</span>
-            <p className="font-semibold text-[#2C1810]" style={{ fontSize: 14 }}>
-              &quot;{activeSource.term}&quot; ke liye koi recipe nahi mili
-            </p>
-            <p className="text-[#806244]" style={{ fontSize: 13 }}>
-              Kya Arti aapke liye yeh recipe banaye?
-            </p>
-            <GenerateButtons
-              isSignedIn={!!isSignedIn}
-              generating={generating}
-              onGenerate={() => handleGenerateRecipe(activeSource.term)}
-              onLogin={() => router.push('/sign-in')}
-            />
-          </div>
-        )}
+          {/* Results heading */}
+          {!loading && (results.length > 0 || activeSource.type === 'search') && (
+            <SectionHead over={heading.over} title={heading.title} />
+          )}
 
-        {/* Below search results — vector search always returns *something*,
-            so the generate CTA must also show alongside weak matches */}
-        {!loading && results.length > 0 && activeSource.type === 'search' && (
-          <div className="mb-24 -mt-16 flex flex-col items-center gap-3 rounded-2xl border border-[#E8D5C0] bg-[#FFF8F0] px-4 py-5 text-center">
-            <p className="font-semibold text-[#2C1810]" style={{ fontSize: 13 }}>
-              Jo dhundh rahe the woh nahi mila? 🤔
-            </p>
-            <p className="text-[#806244]" style={{ fontSize: 13 }}>
-              Arti &quot;{activeSource.term}&quot; ki recipe YouTube se dhundh ke bana sakti hai
-            </p>
-            <GenerateButtons
-              isSignedIn={!!isSignedIn}
-              generating={generating}
-              onGenerate={() => handleGenerateRecipe(activeSource.term)}
-              onLogin={() => router.push('/sign-in')}
-            />
-          </div>
-        )}
+          {/* Loading skeleton */}
+          {loading && <div style={{ paddingTop: 14 }}><RecipeGridSkeleton className="pb-24" /></div>}
 
-        {/* Empty state — chip/collection filters with no recipes */}
-        {!loading && results.length === 0 && (activeSource.type === 'chip' || activeSource.type === 'collection') && (
-          <div className="animate-fade-in-up flex flex-col items-center justify-center py-16 text-center gap-3">
-            <p className="text-4xl">🍲</p>
-            <p className="font-semibold text-[#1A1A1A]" style={{ fontSize: 15 }}>
-              Arre, yeh recipe abhi nahi mili!
-            </p>
-            <p className="text-[#806244]" style={{ fontSize: 13 }}>
-              Koi baat nahi — kuch aur likh ke dekho, ya fridge ki photo se recipe banwao 🥕
-            </p>
-            <button
-              type="button"
-              onClick={() => router.push('/fridge')}
-              className="tap-spring mt-2 px-6 py-3 rounded-full font-semibold text-white"
-              style={{ background: 'var(--saffron-dk)', fontSize: 14, minHeight: 52 }}
-            >
-              📷 Fridge Scan karo
-            </button>
-          </div>
-        )}
+          {/* Recipe grid */}
+          {!loading && results.length > 0 && (
+            <div key={gridKey} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 14, paddingBottom: 24 }}>
+              {results.map((recipe, i) => (
+                <GridCard key={recipe.id} recipe={recipe} idx={i % 6} saved={savedIds.has(recipe.id)} onOpen={(id) => router.push(`/recipe/${id}`)} />
+              ))}
+            </div>
+          )}
+
+          {/* Empty state — search miss offers AI generation */}
+          {!loading && results.length === 0 && activeSource.type === 'search' && (
+            <div className="r-card card-entry" style={{ marginTop: 14, padding: '26px 22px', textAlign: 'center', marginBottom: 96 }}>
+              {!generating && (
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}>
+                  <span style={{ width: 64, height: 64, borderRadius: '50%', background: 'var(--hero-lt)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Icon name="pot" size={30} color="var(--hero-dk)" sw={1.6} />
+                  </span>
+                </div>
+              )}
+              {!generating && (
+                <>
+                  <h3 className="t-display" style={{ fontSize: 21, margin: '0 0 6px', color: 'var(--text)' }}>
+                    &quot;{activeSource.term}&quot; abhi library mein nahi hai
+                  </h3>
+                  <p style={{ margin: '0 0 16px', color: 'var(--muted)', fontSize: 14 }}>
+                    Koi baat nahi! Arti aapke liye yeh recipe abhi bana degi — bilkul aapke swaad ke hisaab se. 🎬
+                  </p>
+                </>
+              )}
+              <GenerateButton isSignedIn={!!isSignedIn} generating={generating} onGenerate={() => handleGenerateRecipe(activeSource.term)} onLogin={() => router.push('/sign-in')} />
+            </div>
+          )}
+
+          {/* Below weak search results — also offer generate */}
+          {!loading && results.length > 0 && activeSource.type === 'search' && (
+            <div className="r-card" style={{ marginBottom: 96, marginTop: 4, padding: '20px 22px', textAlign: 'center' }}>
+              <p style={{ margin: '0 0 4px', fontWeight: 600, fontSize: 14, color: 'var(--text)' }}>Jo dhundh rahe the woh nahi mila? 🤔</p>
+              <p style={{ margin: '0 0 14px', color: 'var(--muted)', fontSize: 13.5 }}>
+                Arti &quot;{activeSource.term}&quot; ki recipe YouTube se dhundh ke bana sakti hai
+              </p>
+              <GenerateButton isSignedIn={!!isSignedIn} generating={generating} onGenerate={() => handleGenerateRecipe(activeSource.term)} onLogin={() => router.push('/sign-in')} />
+            </div>
+          )}
+
+          {/* Empty state — chip/collection filters with no recipes */}
+          {!loading && results.length === 0 && (activeSource.type === 'chip' || activeSource.type === 'collection') && (
+            <div className="card-entry" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 12, padding: '48px 16px' }}>
+              <span style={{ fontSize: 38 }}>🍲</span>
+              <p className="t-display" style={{ fontSize: 18, margin: 0, color: 'var(--text)' }}>Arre, yeh recipe abhi nahi mili!</p>
+              <p style={{ margin: 0, color: 'var(--muted)', fontSize: 13.5 }}>Kuch aur likh ke dekho, ya fridge ki photo se recipe banwao 🥕</p>
+              <button type="button" onClick={() => router.push('/fridge')} className="r-cta tap-spring" style={{ marginTop: 6, maxWidth: 280 }}>
+                <Icon name="camera" size={20} color="#fff" /> Fridge Scan karo
+              </button>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
     </PullToRefresh>
   );
 }

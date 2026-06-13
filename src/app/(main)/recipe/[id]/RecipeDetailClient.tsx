@@ -1,12 +1,14 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, type ReactNode } from 'react';
 import { speakText, stopSpeaking } from '@/lib/tts';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Recipe, Ingredient, UnitPreference, SubscriptionStatus } from '@/types/index';
 import { scaleIngredients, shouldShowScalingWarning } from '@/lib/portion';
 import { getIngredientEmoji } from '@/lib/emoji';
+import Icon, { type IconName } from '@/components/editorial/Icon';
+import DishImage from '@/components/editorial/DishArt';
+import { SectionHead, Divider } from '@/components/editorial/SectionHead';
 import PortionSelector from '@/components/PortionSelector/PortionSelector';
 import TTSButton from '@/components/TTSButton/TTSButton';
 import WhatsAppShare from '@/components/WhatsAppShare/WhatsAppShare';
@@ -257,46 +259,24 @@ export default function RecipeDetailClient({
 
   return (
     <div className="min-h-screen pb-32" style={{ background: 'var(--cream)' }}>
-      {/* Hero — full-bleed image, 260px, dark gradient bottom */}
-      <div className="relative w-full overflow-hidden" style={{ height: 260 }}>
+      {/* Hero — full-bleed photo (or DishArt fallback), 290px, tadka sweep */}
+      <div className="tadka-host" style={{ position: 'relative', height: 290 }}>
         <div
           className="absolute inset-0"
-          style={{
-            transform: heroIn ? 'scale(1)' : 'scale(1.05)',
-            transition: 'transform 400ms ease-out',
-          }}
+          style={{ transform: heroIn ? 'scale(1)' : 'scale(1.05)', transition: 'transform 400ms ease-out' }}
         >
-          {recipe.thumbnail_url ? (
-            <Image
-              src={recipe.thumbnail_url}
-              alt={recipe.name_hinglish}
-              fill
-              priority
-              sizes="100vw"
-              className="object-cover"
-            />
-          ) : (
-            <div
-              className="flex h-full w-full items-center justify-center text-6xl"
-              style={{ background: 'linear-gradient(135deg, #FDDBC2, #FBC08A)' }}
-            >
-              {getCategoryEmoji(recipe.category)}
-            </div>
-          )}
+          <DishImage recipe={recipe} big priority sizes="100vw" style={{ position: 'absolute', inset: 0 }} />
         </div>
 
         {/* Gradient overlay */}
         <div
           className="pointer-events-none absolute inset-0"
-          style={{ background: 'linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.6) 100%)' }}
+          style={{ background: 'linear-gradient(180deg, rgba(44,24,16,0.25) 0%, transparent 35%, transparent 55%, rgba(44,24,16,0.65) 100%)' }}
         />
 
         {/* YouTube-frame placeholder attribution */}
         {recipe.thumbnail_source === 'youtube-temp' && (
-          <p
-            className="pointer-events-none absolute bottom-1 right-2 text-white/80"
-            style={{ fontSize: 10 }}
-          >
+          <p className="pointer-events-none absolute bottom-1 right-2 text-white/80" style={{ fontSize: 10, zIndex: 3 }}>
             📺 Source: YouTube
           </p>
         )}
@@ -306,10 +286,10 @@ export default function RecipeDetailClient({
           type="button"
           onClick={() => router.back()}
           aria-label="Wapas jao"
-          className="tap-spring absolute left-3 top-3 flex items-center justify-center rounded-full text-lg text-white"
-          style={{ background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(6px)', height: 48, width: 48, minHeight: 48, minWidth: 48 }}
+          className="tap-spring absolute left-3 top-3 flex items-center justify-center rounded-full"
+          style={{ background: 'rgba(44,24,16,0.45)', backdropFilter: 'blur(6px)', height: 48, width: 48, zIndex: 3 }}
         >
-          ←
+          <Icon name="back" size={20} color="#fff" />
         </button>
 
         {/* Overlay heart button */}
@@ -317,61 +297,48 @@ export default function RecipeDetailClient({
           type="button"
           onClick={handleSaveToggle}
           aria-label={isSaved ? 'Save hata do' : 'Recipe save karo'}
-          className="tap-spring absolute right-3 top-3 flex items-center justify-center rounded-full text-lg"
-          style={{ background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(6px)', height: 48, width: 48, minHeight: 48, minWidth: 48 }}
+          className="tap-spring absolute right-3 top-3 flex items-center justify-center rounded-full"
+          style={{ background: 'rgba(44,24,16,0.45)', backdropFilter: 'blur(6px)', height: 48, width: 48, zIndex: 3 }}
         >
           <span key={isSaved ? 'saved' : 'unsaved'} className={isSaved ? 'heart-pop animate-heart-pop' : ''}>
-            {isSaved ? '❤️' : '🤍'}
+            <Icon name="heart" size={22} color={isSaved ? '#C0392B' : '#fff'} />
           </span>
         </button>
 
-        {/* Name (bottom-left) + vibe pills (bottom-right) */}
-        <div className="absolute bottom-0 left-0 right-0 flex items-end justify-between gap-2 p-4">
-          <h1
-            className="font-display flex-1 text-white"
-            style={{ fontSize: 20, lineHeight: 1.25, textShadow: '0 1px 8px rgba(0,0,0,0.4)' }}
-          >
-            {recipe.name_hinglish}
-          </h1>
+        {/* Vibes + Playfair title + hindi name */}
+        <div style={{ position: 'absolute', left: 18, right: 18, bottom: 14, zIndex: 3 }}>
           {recipe.vibes.length > 0 && (
-            <div className="flex flex-shrink-0 flex-col items-end gap-1">
-              {recipe.vibes.slice(0, 2).map((vibe) => (
-                <span
-                  key={vibe}
-                  className="rounded-full px-2 py-0.5 text-[11px] font-semibold"
-                  style={{ background: 'rgba(255,255,255,0.92)', color: 'var(--terracotta)' }}
-                >
+            <div style={{ display: 'flex', gap: 6, marginBottom: 8, flexWrap: 'wrap' }}>
+              {recipe.vibes.slice(0, 3).map((vibe) => (
+                <span key={vibe} style={{ background: 'rgba(255,248,240,0.92)', color: 'var(--hero-dk)', fontSize: 11.5, fontWeight: 600, padding: '4px 10px', borderRadius: 99 }}>
                   {vibe}
                 </span>
               ))}
             </div>
           )}
+          <h1 className="t-display" style={{ color: '#fff', fontSize: 30, margin: 0, lineHeight: 1.15, textShadow: '0 2px 12px rgba(44,24,16,0.4)' }}>
+            {recipe.name_hinglish}
+          </h1>
+          {recipe.name_hindi && (
+            <div className="t-hindi" style={{ color: 'rgba(255,255,255,0.92)', fontSize: 15, marginTop: 2 }}>{recipe.name_hindi}</div>
+          )}
         </div>
       </div>
 
       {/* Info pills — horizontal scroll */}
-      <div className="mt-3 flex gap-2 overflow-x-auto px-4 pb-1 scrollbar-hide">
-        <InfoPill emoji="⏱" label={`${totalMinutes} min`} />
-        <InfoPill emoji="👥" label={`${portionSize} log`} />
-        <InfoPill emoji="🌶" label={recipe.spice_level} />
-        <InfoPill emoji="🌾" label={REGION_LABEL[recipe.region_origin] ?? recipe.region_origin} />
-        {ratingCount >= 3 && <InfoPill emoji="⭐" label={avgRating.toFixed(1)} />}
-        {recipe.soak_required && <InfoPill emoji="💧" label="Raat bhar bhigao" />}
+      <div className="no-scrollbar" style={{ display: 'flex', gap: 8, overflowX: 'auto', padding: '14px 18px 0' }}>
+        <RPill icon="clock">{totalMinutes} min</RPill>
+        <RPill icon="users">{portionSize} log</RPill>
+        <RPill icon="chili">{recipe.spice_level}</RPill>
+        <RPill icon="wheat">{REGION_LABEL[recipe.region_origin] ?? recipe.region_origin}</RPill>
+        {ratingCount >= 3 && <RPill icon="star">{avgRating.toFixed(1)}</RPill>}
+        {recipe.soak_required && <RPill icon="clock">Raat bhar bhigao</RPill>}
       </div>
 
-      <div className="flex flex-col gap-4 px-4 py-4">
-        {/* Hindi name + description */}
-        {(recipe.name_hindi || recipe.description) && (
-          <div>
-            {recipe.name_hindi && (
-              <p className="text-[14px]" style={{ color: 'var(--muted)', fontFamily: 'var(--font-devanagari)' }}>
-                {recipe.name_hindi}
-              </p>
-            )}
-            {recipe.description && (
-              <p className="mt-1 text-[14px]" style={{ color: 'var(--muted)' }}>{recipe.description}</p>
-            )}
-          </div>
+      <div className="flex flex-col gap-4 px-[18px] py-4">
+        {/* Description */}
+        {recipe.description && (
+          <p style={{ fontSize: 14.5, color: 'var(--text)', lineHeight: 1.55 }}>{recipe.description}</p>
         )}
 
         {/* Rating display */}
@@ -379,21 +346,10 @@ export default function RecipeDetailClient({
           <StarRatingDisplay avg_rating={avgRating} rating_count={ratingCount} size="md" />
         )}
 
-        {/* 🍳 Banana Shuru Karein CTA */}
+        {/* Banana Shuru Karein CTA */}
         {!cookingActive && (
-          <button
-            type="button"
-            onClick={startCooking}
-            className="tap-spring flex w-full items-center justify-center gap-2 rounded-2xl font-medium text-white"
-            style={{
-              height: 56,
-              fontSize: 15,
-              background: 'linear-gradient(135deg, #E8640C, #BF4E06)',
-              boxShadow: '0 4px 16px rgba(180,80,20,0.3)',
-            }}
-          >
-            <span className="text-[20px]">🍳</span>
-            Banana Shuru Karein
+          <button type="button" onClick={startCooking} className="r-cta tap-spring">
+            <Icon name="flame" size={20} color="#fff" /> Banana Shuru Karein
           </button>
         )}
 
@@ -427,19 +383,18 @@ export default function RecipeDetailClient({
           )}
         </div>
 
+        <Divider />
+
         {/* Ingredients — 2-col emoji cards */}
         <section>
-          <h2 className="font-display mb-2" style={{ fontSize: 16, color: 'var(--terracotta)' }}>
-            🧂 Samagri
-          </h2>
+          <SectionHead over="Samagri" title="Kya kya chahiye" style={{ marginBottom: 14 }} />
           <div className="grid grid-cols-2 gap-3">
             {scaledIngredients.map((ing, i) => (
               <div
                 key={`${ing.name}-${i}`}
-                className="card-entry flex flex-col items-center rounded-xl bg-white text-center"
+                className="card-entry r-card flex flex-col items-center text-center"
                 style={{
-                  padding: 10,
-                  border: '1px solid var(--border)',
+                  padding: 14,
                   animationDelay: `${i * 40}ms`,
                 }}
               >
@@ -458,11 +413,9 @@ export default function RecipeDetailClient({
           </div>
         </section>
 
-        {/* Steps — 📋 Vidhi */}
+        {/* Steps — Vidhi */}
         <section ref={stepsRef}>
-          <h2 className="font-display mb-3" style={{ fontSize: 16, color: 'var(--terracotta)' }}>
-            📋 Vidhi
-          </h2>
+          <SectionHead over="Vidhi" title="Kaise banayein" style={{ marginBottom: 14 }} />
 
           {/* Progress bar while cooking */}
           {cookingActive && (
@@ -503,11 +456,8 @@ export default function RecipeDetailClient({
                       <p style={{ fontSize: 15, lineHeight: 1.6, color: 'var(--text)' }}>{step.instruction}</p>
                       <div className="mt-1 flex items-center gap-2">
                         {step.time_minutes > 0 && (
-                          <span
-                            className="rounded-full px-2 py-0.5 text-[12px]"
-                            style={{ color: 'var(--muted)', background: 'var(--cream)' }}
-                          >
-                            ⏱ {step.time_minutes} min
+                          <span className="r-pill" style={{ height: 26, padding: '0 10px', fontSize: 12 }}>
+                            <Icon name="clock" size={12} color="var(--hero-dk)" /> {step.time_minutes} min
                           </span>
                         )}
                       </div>
@@ -517,10 +467,10 @@ export default function RecipeDetailClient({
                         type="button"
                         onClick={() => speakStep(step.instruction)}
                         aria-label={stepSpeaking ? 'Awaaz band karo' : 'Step suno'}
-                        className="tap-spring flex flex-shrink-0 items-center justify-center self-start rounded-full text-[18px]"
-                        style={{ height: 48, width: 48, background: 'rgba(232,100,12,0.12)' }}
+                        className="tap-spring flex flex-shrink-0 items-center justify-center self-start rounded-full"
+                        style={{ height: 48, width: 48, background: stepSpeaking ? 'var(--hero)' : 'var(--hero-lt)' }}
                       >
-                        {stepSpeaking ? '⏹' : '🔊'}
+                        <Icon name="speaker" size={20} color={stepSpeaking ? '#fff' : 'var(--hero-dk)'} />
                       </button>
                     )}
                   </div>
@@ -536,18 +486,24 @@ export default function RecipeDetailClient({
                           type="button"
                           onClick={goPrevStep}
                           disabled={activeStep === 0}
-                          className="tap-spring flex flex-1 items-center justify-center rounded-xl text-[14px] font-semibold disabled:opacity-30"
-                          style={{ height: 48, background: '#FFFFFF', border: '2px solid var(--saffron)', color: 'var(--saffron-dk)' }}
+                          className="tap-spring flex flex-1 items-center justify-center gap-1.5 rounded-xl text-[14px] font-semibold disabled:opacity-30"
+                          style={{ height: 48, background: '#FFFFFF', border: '2px solid var(--hero)', color: 'var(--hero-dk)' }}
                         >
-                          ← Pichla
+                          <Icon name="back" size={17} color="var(--hero-dk)" /> Pichla
                         </button>
                         <button
                           type="button"
                           onClick={goNextStep}
-                          className="tap-spring flex flex-1 items-center justify-center rounded-xl text-[14px] font-bold text-white"
-                          style={{ height: 48, background: 'var(--saffron)' }}
+                          className="tap-spring flex flex-1 items-center justify-center gap-1.5 rounded-xl text-[14px] font-bold text-white"
+                          style={{ height: 48, background: 'var(--hero)' }}
                         >
-                          {activeStep === totalSteps - 1 ? 'Ho Gaya! 🎉' : 'Agla →'}
+                          {activeStep === totalSteps - 1 ? (
+                            'Ho Gaya! 🎉'
+                          ) : (
+                            <>
+                              Agla <span style={{ transform: 'rotate(180deg)', display: 'inline-flex' }}><Icon name="back" size={17} color="#fff" /></span>
+                            </>
+                          )}
                         </button>
                       </div>
                       <button
@@ -568,8 +524,8 @@ export default function RecipeDetailClient({
 
         {/* Goes well with */}
         {recipe.goes_well_with.length > 0 && (
-          <p className="text-[13px]" style={{ color: 'var(--muted)' }}>
-            🍽 Ke saath: {recipe.goes_well_with.join(', ')}
+          <p className="t-caption" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Icon name="thali" size={15} color="var(--muted)" /> Ke saath: {recipe.goes_well_with.join(', ')}
           </p>
         )}
 
@@ -719,20 +675,10 @@ export default function RecipeDetailClient({
   );
 }
 
-function InfoPill({ emoji, label }: { emoji: string; label: string }) {
+function RPill({ icon, children }: { icon: IconName; children: ReactNode }) {
   return (
-    <span
-      className="flex flex-shrink-0 items-center rounded-full bg-white text-[13px]"
-      style={{ padding: '8px 16px', gap: 6, border: '1px solid var(--border)', color: 'var(--muted)' }}
-    >
-      {emoji} {label}
+    <span className="r-pill" style={{ flexShrink: 0 }}>
+      <Icon name={icon} size={15} color="var(--hero-dk)" /> {children}
     </span>
   );
-}
-
-function getCategoryEmoji(category: string): string {
-  const map: Record<string, string> = {
-    sabzi: '🥬', dal: '🫘', roti: '🫓', chawal: '🍚', nashta: '🍳', meetha: '🍬',
-  };
-  return map[category] ?? '🍽️';
 }
