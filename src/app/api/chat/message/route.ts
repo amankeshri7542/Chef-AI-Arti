@@ -14,6 +14,7 @@ import {
   RATE_LIMITS,
 } from '@/lib/redis';
 import { searchKnowledge, hasSafetyFlag } from '@/lib/knowledge';
+import { buildPersonalizationContext } from '@/lib/personalization';
 import type { ChatSession, ChatMessage } from '@/types/index';
 
 interface MessageBody {
@@ -43,7 +44,9 @@ export async function POST(req: NextRequest) {
     const supabase = createServerClient();
     const { data: user } = await supabase
       .from('users')
-      .select('diet_type, family_size, is_vrat_mode, spice_preference, subscription_status')
+      .select(
+        'diet_type, family_size, is_vrat_mode, spice_preference, subscription_status, preferred_region, cooking_skill, time_preference, kitchen_setup, cooking_for',
+      )
       .eq('clerk_user_id', userId)
       .single<{
         diet_type: string;
@@ -51,6 +54,11 @@ export async function POST(req: NextRequest) {
         is_vrat_mode: boolean;
         spice_preference: string;
         subscription_status: string;
+        preferred_region: string | null;
+        cooking_skill: string | null;
+        time_preference: string | null;
+        kitchen_setup: string[] | null;
+        cooking_for: string | null;
       }>();
 
     if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
@@ -136,6 +144,20 @@ export async function POST(req: NextRequest) {
       .replace('{cooking_progress}', session.compressed_memory.cooking_progress ?? '')
       .replace('{retrieved_recipe}', retrievedRecipe)
       .replace('{retrieved_knowledge}', retrievedKnowledge);
+
+    // Append personalization context (additive; does not change Redis session shape)
+    const personCtx = buildPersonalizationContext({
+      diet_type: user.diet_type as Parameters<typeof buildPersonalizationContext>[0]['diet_type'],
+      spice_preference: (user.spice_preference ?? 'medium') as Parameters<typeof buildPersonalizationContext>[0]['spice_preference'],
+      preferred_region: user.preferred_region ?? null,
+      cooking_skill: (user.cooking_skill ?? 'intermediate') as Parameters<typeof buildPersonalizationContext>[0]['cooking_skill'],
+      time_preference: (user.time_preference ?? 'any') as Parameters<typeof buildPersonalizationContext>[0]['time_preference'],
+      kitchen_setup: user.kitchen_setup ?? [],
+      is_vrat_mode: user.is_vrat_mode,
+      cooking_for: (user.cooking_for ?? 'family') as Parameters<typeof buildPersonalizationContext>[0]['cooking_for'],
+      family_size: user.family_size,
+    });
+    if (personCtx) filledPrompt += personCtx;
 
     // 7. Safety flag check
     if (hasSafetyFlag(knowledgeDocs)) {

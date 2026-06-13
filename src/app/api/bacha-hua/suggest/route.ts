@@ -5,6 +5,7 @@ import { searchRecipes } from '@/lib/rag';
 import { buildHinglishQuery } from '@/lib/ingredient-map';
 import { generateRecipeViaYouTube } from '@/lib/generate-recipe';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/redis';
+import { buildPersonalizationContext } from '@/lib/personalization';
 import type { User } from '@/types/index';
 
 type UserCtx = Pick<
@@ -84,6 +85,27 @@ export async function POST(request: NextRequest) {
   };
 
   // 5 — retrieval-first
+  // Build personalization context for CASE 2 generation. CASE 1 (rag.ts) is
+  // already personalized through userCtx soft boosts (region/spice re-rank).
+  const _personCtx = buildPersonalizationContext({
+    diet_type: userCtx.diet_type,
+    spice_preference: userCtx.spice_preference,
+    preferred_region: userCtx.preferred_region ?? null,
+    cooking_skill: (userCtx.cooking_skill ?? 'intermediate') as User['cooking_skill'],
+    time_preference: (userCtx.time_preference ?? 'any') as User['time_preference'],
+    kitchen_setup: userCtx.kitchen_setup ?? [],
+    is_vrat_mode: userCtx.is_vrat_mode,
+    cooking_for: 'family' as User['cooking_for'],
+    family_size: userCtx.family_size ?? 4,
+  });
+
+  // Regional/spice hint appended to the CASE 2 YouTube search query so the
+  // search reflects the user's cuisine preference (e.g. "south-indian dosa").
+  const regionHint =
+    userCtx.preferred_region && !['pan-north-indian', null].includes(userCtx.preferred_region)
+      ? userCtx.preferred_region
+      : '';
+
   const query = buildHinglishQuery(ingredients);
 
   let result;
@@ -116,9 +138,12 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    // Enrich the query with region hint so YouTube search surfaces regional
+    // videos (e.g. "south-indian dosa idli sambar" for a south-indian user).
+    const enrichedQuery = [query, regionHint].filter(Boolean).join(' ');
     const { recipe: generated, video } = await generateRecipeViaYouTube(
       ingredients,
-      undefined,
+      enrichedQuery,
       {
         familySize: userCtx.family_size ?? 4,
         dietType: userCtx.diet_type ?? 'veg',
