@@ -10,7 +10,7 @@ Hinglish-first AI recipe PWA for North Indian homemakers.
 > Authoritative technical snapshot. On any conflict, **this section overrides** the
 > chronological `## Build Status` session log and the older "What's NOT Built" lists
 > further down (many of those are stale — the features were since built). Last
-> updated: **session-36 (readability/a11y pass — committed, NOT yet deployed)**, branch `main`.
+> updated: **session-37 (iOS install prompt, parallel YT transcripts, south-indian seeding, regional guarantee, search re-rank, personalization — committed, NOT yet deployed)**, branch `main`.
 
 ## What it is
 A mobile-first **PWA** (installable, offline-aware) that helps North Indian homemakers
@@ -19,7 +19,7 @@ Retrieval-first recipe engine over a curated library, with AI generation only on
 **Phase 1**: ~15 users, ₹150/mo paid tier, free tier capped (3 chat msgs/day). Profitable from user 1.
 
 ## Live metrics (verify with SQL before trusting — these drift)
-- **198** curated recipes (0 missing nutrition, 0 missing thumbnails), **146** knowledge docs.
+- **202** curated recipes (4 new south-indian: Sada Dosa, Medu Vada, Ven Pongal, Pyaaz Uttapam), **146** knowledge docs.
 - **5** users (2 paid), 10 cooks logged, a handful of ratings. Tiny dataset — design for that.
 - Prod: `https://arti.amankeshri.com` (also `chief-ai-arti.vercel.app`).
 
@@ -42,7 +42,7 @@ Retrieval-first recipe engine over a curated library, with AI generation only on
   embed query → `match_recipes`/`match_knowledge_docs` RPC (pgvector, ivfflat probes=10) → `SIMILARITY_FLOOR=0.30` → soft re-rank (region/spice/time/skill/kitchen boosts, recency penalty) → top 3.
 - **CASE 1** (retrieval hit): refine the curated recipe for the user (family_size, spice, diet, vrat). Never silently rewrite ingredients/steps.
 - **CASE 2** (miss → `triggerCase2`): generate via **YouTube pipeline** (`lib/youtube.ts` → transcript → gpt-5-mini extraction) with a plain-GPT fallback. Result saved to `recipes_pending` (NOT `recipes`), shown only to the requester (`shown_to_user_ids`). **Promotion** to canonical `recipes` needs `cooked_count>=3 AND reported_count=0`, OR admin approval — never auto-promoted on first cook. On promote, `promoted_recipe_id` is set and the pending page redirects there.
-- **Search** (`api/recipes/search`): direct SQL name/tag match FIRST, vector only to fill. Honors `isEmptyStateFallback`/`triggerCase2` → shows the generate CTA, not popular recipes.
+- **Search** (`api/recipes/search`): direct SQL name/tag match FIRST (individual words included so typos still match), trigram re-rank in JS to prefer closer name matches. Vector only to fill. Honors `isEmptyStateFallback`/`triggerCase2` → shows the generate CTA, not popular recipes. YouTube CTA normalizes typo'd queries via bigram similarity against current results before hitting generate.
 - **Fridge** (`api/fridge/validate` → `scan`): vision → ingredient chips → recipes (CASE 2 if miss).
 - **Chat** (`api/chat/message`): rate-limit → RAG context → Redis session → gpt-5-mini → save session.
 - **41 API routes**; all are auth'd (Clerk), self-guarded (CRON_SECRET / webhook HMAC), or admin-cookie-gated.
@@ -69,13 +69,14 @@ Retrieval-first recipe engine over a curated library, with AI generation only on
 - **NOT phone-tested** is the recurring gap — desktop-browser verification only across most sessions. Flag UI changes as needing real-device testing.
 
 ## Open tasks / what's next (priority order)
-1. **Real Android device test** — the #1 risk for a mobile-only app for non-technical users (golden path + cooking mode + payment).
+1. **Real Android/iOS device test** — #1 risk for a mobile-only app. iOS install prompt added (session-37) but untested on real device. Golden path + cooking mode + payment.
 2. **Vercel BotID/Firewall** on `/api/recipes/search` + `/generate` — IP rotation evades the app-layer guest cap (the real DDoS backstop).
 3. **Sentry SDK config** is outdated (build warns: missing `onRequestError` hook, move `sentry.client.config.ts`→`instrumentation-client.ts`) — errors may be under-reported.
-4. **Generation quality** — CASE 2 drifts ("Manchurian"→"Manchurian Fried Rice bacha hua"); pin the generated dish to the canonical name in the prompt.
+4. **Generation quality** — CASE 2 extraction prompt pinning (generate-recipe.ts): pin generated dish name to canonical, extend GenerationContext with spice/region (session-37 personalization wired to bacha-hua query but not yet to extraction prompt — reserved next session).
 5. **Personalization** — refine-in-place chips (kam tel / aur teekha / jain), learn ranking from actual cooks+ratings (not just onboarding), "why this recipe" reason line.
-6. **Saved/rating badges on home featured cards** (search grid + profile done; home uses an inline FeaturedCard not yet wired).
-7. **CLAUDE.md hygiene** — the chronological log below is history; trust THIS section. Consider pruning stale "What's NOT Built" lists.
+6. **Thumbnail generation** for 4 new south-indian recipes (run `npx tsx scripts/generate-thumbnails.ts` — ~₹4 via gpt-image-1).
+7. **Saved/rating badges on home featured cards** (search grid + profile done; home FeaturedCard not yet wired).
+8. **CLAUDE.md hygiene** — the chronological log below is history; trust THIS section. Consider pruning stale "What's NOT Built" lists.
 
 ## Source-of-truth docs
 - This file (auto-loaded) · `AGENTS.md` (Next 16 conventions) · `../chief-ai-arti-PRD-v2.md` + `../chief-ai-arti-sysdesign-v2.md` (both have v3 "As-Built" sections) · `scripts/schema.sql` (DB).
@@ -127,6 +128,19 @@ Sign-in page: single "Google se login karo" button. No OTP flow.
 - North Indian household vocabulary (katori, chammach, tadka, bhuno, sukha/tariwala).
 
 ## Build Status
+SESSION 37 ✅ — iOS install prompt, parallel YT transcripts, south-indian seeding + regional guarantee, search re-rank, saved_count surfacing, personalization lib
+  - PHASE 1 (iOS install prompt): IOSInstallPrompt component (banner + profile section). Detects iOS Safari via userAgent + !navigator.standalone. First-visit banner (localStorage-dismissed). Persistent "📱 iPhone install karein" section in ProfileClient. Android beforeinstallprompt flow unchanged.
+  - PHASE 2 (parallel YT transcripts): generate-recipe.ts now fetches transcripts for top 5 candidates via Promise.allSettled. Logs timing + success rate. Falls back to direct GPT if all fail. Backward-compatible — all existing callers unchanged.
+  - PHASE 3 AUDIT (fridge pipeline, no changes): Client compresses to maxWidthOrHeight:800 (browser-image-compression defaults). Server sends detail:'low' to all three OpenAI vision call sites (validateImage x2, extractIngredients x1). No server-side recompression. Switching to detail:'high' would increase accuracy but cost ~4× more tokens per call — reserved for future session.
+  - PHASE 4A AUDIT: 5 south-indian recipes existed (Idli Sambar, Suji Masala Dosa, Rava Upma, Tomato Rasam, Nimbu Rice). Missing staples: Sada Dosa, Medu Vada, Ven Pongal, Uttapam. Region distribution: pan-north-indian 109, Punjab 22, UP 16, Rajasthan 12, Bihar 8, south-indian 5 (before). CASE: REGION_MAP in onboarding/done had no entries for 'south-indian'/'bengali'/'gujarati'/'maharashtrian' → users selecting these regions got 0 regional recipes on onboarding/done AND in home "Aaj ke liye" feed.
+  - PHASE 4B (seeding): Seeded 4 new south-indian recipes via scripts/seed/recipes-south-indian.json: Sada Dosa (Ghar wala), Medu Vada, Ven Pongal (Khara Pongal), Pyaaz Uttapam. DB now 202 curated, 9 south-indian. pg_trgm extension enabled.
+  - PHASE 4C (guarantee logic): (1) onboarding/done REGION_MAP extended to cover south-indian/bengali/gujarati/maharashtrian/individual states. Query now two-tier: guaranteed up to 2 regional recipes first, then pan-north-indian fill — not a single merged query where regional gets drowned. (2) home/page.tsx: fetches up to 2 regionalRecipes separately for non-pan users (stored in PAN_REGIONS set), passes as new prop to HomeClient. HomeClient injects regionalRecipes at front of "Aaj ke liye" featured strip (deduped). (3) recommendations API: selects preferred_region; after building cook-based groups, adds "Aapke region ke recipes" group if user's region is not represented. Logs fallback if zero regional recipes for diet combo.
+  - PHASE 5A (search re-rank): nameTerms now includes individual words from query (typo "Malasa Dosa" → ["malasa","dosa"] → ILIKE still finds Dosa recipes). Added JS trigramSim() function; sort step uses it — closer/shorter name matches rank above incidental word-overlap (e.g. "Suji Masala Dosa" above "Arbi Masala" for query "Masala Dosa").
+  - PHASE 5B (saved_count ordering): home/page.tsx and browse/route.ts now order by saved_count DESC, cooked_count DESC (was cooked_count only). Most-saved within the user's filtered set surfaces first.
+  - PHASE 5C (YouTube query normalization): search/page.tsx normalizeYouTubeQuery() uses bigram similarity; if raw query matches a known recipe name ≥0.45, passes canonical name to /api/recipes/generate. Prevents typo'd queries from reaching YouTube literally.
+  - PHASE 6 (personalization): NEW src/lib/personalization.ts — buildPersonalizationContext(user) builds a compact text block (diet, family, spice, region, vrat, skill, time, equipment). Wired into chat/message (appended to filled system prompt, Redis session unchanged) and bacha-hua/suggest (region hint in CASE 2 YouTube search query). generate-recipe.ts untouched — reserved next session for extraction prompt extension.
+  - VERIFY: tsc clean, next build --webpack clean (PWA sw.js regenerated). 4 commits: ec7dc8f (phase 1, previously committed), fe10c33 (phases 2+4), f7ff3bb (phase 5), 0735c30 (phase 6). NOT phone-tested.
+
 SESSION 36 ✅ — readability/accessibility pass (typography floor, WCAG-AA contrast, 48px tap targets) + warm-family feature cards + SVG bottom-nav icons — prep for first real-device handoff to 35-55yo users
   - TYPOGRAPHY FLOOR (informational text ≥13-14px; decorative floor 10-11px): FeaturedCard (HomeClient) name 11→14/meta 9→12 + card 160×190→170×210; RecipeCardCompact name 11→14/meta 9→12 (white/70→white/90); CollectionCard label 8→12 + card 80→96px; VibeBadges 8→11; RecipeDetailClient samagri name 10→14 + qty 11→14 (+w-full break-words; qty now saffron-DK for contrast), Vidhi step instruction 13→15, info pills 11→13, hindi-name/description 13→14, step-time chip 11→12, scaling warning/goes-well/step-counter/rating prompts 10-12→12-13; NutritionDisplay legend+values 11→13, kcal 9→11, heaviness 11→13, disclaimer 9→11; search/page heading 12→13, chips 13→14, empty states 12→13, Food Library 13→15; fridge/Thali/BachaHua/Profile/Pending/chat/ArtiLoader/CommunityPhotos/PWAInstall/Push/PullToRefresh 9-12px → 12-14px; BottomNav labels 10→12; home section headers (Kya karna hai 13→15, Aaj ke liye 14→16, brand 14→16, greeting sub 12→13); PostCookSuggestions name 11→13; RecipeCard (legacy horizontal) 12→14/10→12. Decorative left ≤11px: vrat 🕉️ dots (8→10), footer credit 10, YT attribution 9→10, PortionSelector ▼ caret.
   - CONTRAST (WCAG AA 4.5:1 computed): --muted + --color-muted #8B6B4A/#8B7355 → #806244 GLOBALLY (old value was 4.38:1 on --saffron-lt #FFF0E6 and 4.03:1 for the placeholder-on-saffron-lt pairing; new = 5.03 on saffron-lt / 5.61 on white). #C4A584 (Profile hint, 2.3:1) → #806244. White-on-flat-saffron #E8640C (3.36:1) fixed at every small-text instance: solid CTAs → #BF4E06 saffron-dk (4.87:1) or the brand gradient with dark stop where text sits (Bana liya, GenerateButtons, Thali swap, unit toggle active, search active chips, ChatWindow upsell CTA + ₹150 price, "Pichla" text, fridge/PWA/IngredientChips saffron text → #BF4E06); home rating star #D97706 (3.18) → #B45309 @12px; Thali #5C8A72 (3.94) → --green #2D6A4F (6.39); Profile green-600 → green-700. Hero back/heart buttons rgba(255,255,255,0.22) → rgba(0,0,0,0.35) scrim (was invisible on bright photos).
@@ -202,7 +216,7 @@ SESSION 27 ✅ — 5 bug fixes, Sentry+PostHog, full admin panel, CloudFront CDN
   - BUG 4 TTS + HYDRATION ROOT CAUSE: TTSButton returned null on server (typeof window check in render) → server/client tree mismatch → full client regen on every recipe page load. Rewritten: always renders, hides post-mount if unsupported. NEW src/lib/tts.ts — speakText/stopSpeaking/isTTSSupported with hi→en-IN→default voice fallback, onvoiceschanged + 250ms timeout guard (some Androids never fire it), rate 0.85. Both TTSButton and inline cooking speakStep use it.
   - BUG 5 SCROLL: PageTransition now scrollTo(0,instant) on pathname change; RecipeDetailClient also resets on mount.
   - MONITORING: @sentry/nextjs (sentry.client/server.config.ts + instrumentation.ts + instrumentation-client.ts, enabled only when NEXT_PUBLIC_SENTRY_DSN set — DSN still EMPTY, Aman must create sentry.io project); next.config wrapped withSentryConfig (sourcemaps disabled w/o SENTRY_AUTH_TOKEN). Sentry.captureException in chat/message, fridge/scan, fridge/validate, recipes/search, recipes/generate; chat/message + fridge/validate + fridge/scan now have whole-route try/catch (Hinglish 500s, guard statuses preserved). posthog-js + PHProvider (src/components/PHProvider, wraps root layout inside ClerkProvider) + src/lib/analytics.ts (trackEvent/identifyUser — not yet called anywhere). NEXT_PUBLIC_POSTHOG_KEY pushed to Vercel prod.
-  - ADMIN PANEL (cookie auth, NOT Clerk; dark navy #1A1A2E/#16213E + saffron): src/lib/admin-auth.ts (sha256 token, timingSafeEqual, requireAdmin per-PAGE not layout — login page shares layout); /api/admin/{login,logout,verify,recipes,recipes/[id],users/[id],users/[id]/history,pending/[id]/approve,pending/[id]/reject,push/send,photos/[id]} all cookie-gated; pages /admin{,/login,/recipes,/recipes/new,/recipes/[id]/edit,/users,/pending,/push,/photos,/analytics}. Recipe create/edit re-embeds via api/admin/_lib/embedding.ts (replica of seed-recipes embedding_text). Approve mirrors pending-cook promotion (source 'curated'). push/send loops sendPushToUser + logs to NEW push_logs table (migration create_push_logs applied). proxy.ts: /admin(.*) + /api/admin/(.*) public to Clerk, early-return sets X-Robots-Tag noindex. ADMIN_PASSWORD in .env.local + Vercel prod (generated 3d8887cb5e1293540fdfd3b7). Analytics page = DB quick stats + PostHog link-out (iframes blocked). Dashboard "chat messages today" shows "—" (Redis-only, not tracked).
+  - ADMIN PANEL (cookie auth, NOT Clerk; dark navy #1A1A2E/#16213E + saffron): src/lib/admin-auth.ts (sha256 token, timingSafeEqual, requireAdmin per-PAGE not layout — login page shares layout); /api/admin/{login,logout,verify,recipes,recipes/[id],users/[id],users/[id]/history,pending/[id]/approve,pending/[id]/reject,push/send,photos/[id]} all cookie-gated; pages /admin{,/login,/recipes,/recipes/new,/recipes/[id]/edit,/users,/pending,/push,/photos,/analytics}. Recipe create/edit re-embeds via api/admin/_lib/embedding.ts (replica of seed-recipes embedding_text). Approve mirrors pending-cook promotion (source 'curated'). push/send loops sendPushToUser + logs to NEW push_logs table (migration create_push_logs applied). proxy.ts: /admin(.*) + /api/admin/(.*) public to Clerk, early-return sets X-Robots-Tag noindex. ADMIN_PASSWORD in .env.local + Vercel prod (value in .env.local — NEVER commit it here). Analytics page = DB quick stats + PostHog link-out (iframes blocked). Dashboard "chat messages today" shows "—" (Redis-only, not tracked).
   - CLOUDFRONT: Aman created distribution chef-AI-Arti-CDN → drj954v3cskcn.cloudfront.net (verified 200 on thumbnail). CLOUDFRONT_DOMAIN in .env.local + Vercel; next.config remotePatterns reads it (S3 fallback). docs/cloudfront-setup.md has the full guide. DB thumbnail_url rewrite SQL run AFTER deploy (old deploy lacked CF host in remotePatterns) — see commit notes; if thumbnails ever 404 via CF, check S3 key vs distribution origin.
   - Dev-server note: `npm run dev` FAILS on Next 16 (Turbopack rejects webpack config) — use `npx next dev --webpack`.
 
@@ -519,17 +533,18 @@ SESSION 9 ✅ — Paid user chat bypass, real PWA icons (canvas, 5.3KB/15.5KB), 
 - 3 fresh production deploys done. Both chief-ai-arti.vercel.app and arti.amankeshri.com are live.
 
 ## Manual Steps Still Needed (Aman must do in dashboards)
-1. RAZORPAY WEBHOOK — see below for exact secret value and instructions
+1. RAZORPAY WEBHOOK — see below for instructions (secret value lives in .env.local + Vercel env)
 2. CLERK — add arti.amankeshri.com as allowed origin in Clerk dashboard
 3. PWA icons — replace public/icon-192.png + icon-512.png with real branded art
 4. Test payment end-to-end with Razorpay test card 4111 1111 1111 1111
 
 ## RAZORPAY_WEBHOOK_SECRET (set in Vercel)
-Secret value: 204e557a212b02abd323e5deb2d376a37373d73bd377277cb081ff671548decf
+Secret value: in .env.local + Vercel env (RAZORPAY_WEBHOOK_SECRET) — never commit the value to this file
 Webhook URL: https://arti.amankeshri.com/api/webhooks/razorpay
 Events: subscription.activated, subscription.charged, subscription.cancelled, subscription.expired
 
 ## Hard constraints
+- **NEVER commit secrets/env values to git** — no passwords, API keys, webhook secrets, or tokens in CLAUDE.md, docs, code, or any tracked file. Secrets live ONLY in .env.local (git-ignored) + Vercel env. Reference them by env-var NAME only.
 - No Claude API anywhere
 - No `chat_sessions` table in Supabase — Redis handles all chat memory
 - Vrat mode must filter feed instantly without reload
