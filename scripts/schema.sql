@@ -238,6 +238,10 @@ CREATE TABLE recipes_pending (
   shown_to_user_ids     UUID[] DEFAULT '{}',
   promoted_at           TIMESTAMPTZ,
   promoted_recipe_id    UUID REFERENCES recipes(id) ON DELETE SET NULL,
+  segment_key           TEXT,
+  youtube_video_id      TEXT,
+  youtube_video_url     TEXT,
+  youtube_channel_name  TEXT,
   created_at            TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -250,10 +254,12 @@ COMMENT ON COLUMN recipes_pending.cooked_count       IS 'How many unique users c
 COMMENT ON COLUMN recipes_pending.reported_count     IS 'If > 0, auto-reject from promotion queue.';
 COMMENT ON COLUMN recipes_pending.shown_to_user_ids  IS 'Prevents gaming cooked_count — one cook per user.';
 COMMENT ON COLUMN recipes_pending.promoted_at        IS 'Set when status flips to promoted.';
+COMMENT ON COLUMN recipes_pending.segment_key        IS 'Canonical "diet_type|preferred_region" key. Dedup on dish name is scoped per segment — different segments generate separate, region/diet-adapted rows. Rows with segment_key IS NULL predate session-38 and are never matched by new dedup queries.';
 
 CREATE INDEX recipes_pending_status_idx        ON recipes_pending (status);
 CREATE INDEX recipes_pending_requested_by_idx  ON recipes_pending (requested_by);
 CREATE INDEX recipes_pending_reported_count_idx ON recipes_pending (reported_count);
+CREATE INDEX recipes_pending_segment_key_idx   ON recipes_pending (segment_key);
 
 -- ─────────────────────────────────────
 -- NOTE: No chat_sessions table.
