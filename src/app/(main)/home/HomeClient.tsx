@@ -17,6 +17,7 @@ interface HomeClientProps {
   initialIsVrat: boolean;
   isAuthenticated: boolean;
   dietType: DietType | null;
+  spicePreference?: string | null;
   cookedCount: number;
 }
 
@@ -125,6 +126,7 @@ export default function HomeClient({
   initialIsVrat,
   isAuthenticated,
   dietType,
+  spicePreference,
   cookedCount,
 }: HomeClientProps) {
   const router = useRouter();
@@ -164,17 +166,26 @@ export default function HomeClient({
 
   const firstName = userName ? userName.split(' ')[0] : '';
 
-  // Top 4 for "Aaj ke liye": vrat + diet filtered.
-  // If the user has a specific preferred_region (e.g. south-indian), regionalRecipes
-  // are injected first to guarantee regional representation (server already fetched
-  // and filtered them); remaining slots filled from global top-20.
+  // Top 4 for "Aaj ke liye": vrat + diet filtered, then spice-sorted.
+  // regionalRecipes are injected first (server guarantees dietary + regional match).
+  // Global fill is spice-sorted so mild/hot users see matching recipes first.
   const dietVratFilter = (r: Recipe) => {
     if (isVrat && !r.is_vrat_friendly) return false;
+    // Diet check: server already filtered by diet, but vrat-toggle can flip at runtime.
     if (dietType === 'veg' && r.diet_type !== 'veg') return false;
     return true;
   };
+
+  // Spice sort: exact match = 0 (first), mismatch = 1, no pref = 0 (no reorder).
+  const spiceScore = (r: Recipe) => {
+    if (!spicePreference || spicePreference === 'medium') return 0;
+    return r.spice_level === spicePreference ? 0 : 1;
+  };
+
   const regionalFiltered = regionalRecipes.filter(dietVratFilter);
-  const globalFiltered = recipes.filter(dietVratFilter);
+  const globalFiltered = recipes
+    .filter(dietVratFilter)
+    .sort((a, b) => spiceScore(a) - spiceScore(b));
   const seenFeaturedIds = new Set(regionalFiltered.map((r) => r.id));
   const globalFill = globalFiltered.filter((r) => !seenFeaturedIds.has(r.id));
   const featured = [...regionalFiltered, ...globalFill].slice(0, 4);

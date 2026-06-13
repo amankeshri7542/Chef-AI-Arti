@@ -7,23 +7,20 @@ import { User, Recipe } from '@/types/index';
 // These match region_origin values in the recipes table.
 const PAN_REGIONS = new Set(['pan-north-indian', 'UP', 'Bihar', 'Punjab', 'Haryana', 'Rajasthan', 'MP', 'Delhi-NCR', 'Jharkhand', 'Uttarakhand']);
 
+// Map diet_type to the set of diet_type values that user can eat.
+function dietAllowList(dietType: string | null | undefined): string[] {
+  if (dietType === 'eggetarian') return ['veg', 'eggetarian'];
+  if (dietType === 'non-veg') return ['veg', 'eggetarian', 'non-veg'];
+  // veg / vegan / jain / null (guest) → show only veg
+  return ['veg'];
+}
+
 export default async function HomePage() {
   const { userId } = await auth();
 
   const supabase = createServerClient();
 
-  // Always fetch top 20 global recipes (public).
-  // Order by most-saved first within curated recipes, cooked_count as tiebreak.
-  const { data: recipes } = await supabase
-    .from('recipes')
-    .select('*')
-    .eq('source', 'curated')
-    .order('saved_count', { ascending: false })
-    .order('cooked_count', { ascending: false })
-    .limit(20)
-    .returns<Recipe[]>();
-
-  // Fetch user only if logged in
+  // Fetch user first (needed to filter global pool by diet).
   let user: User | null = null;
   let cookedCount = 0;
   let regionalRecipes: Recipe[] = [];
@@ -35,41 +32,82 @@ export default async function HomePage() {
       .eq('clerk_user_id', userId)
       .single<User>();
     user = data;
+  }
 
-    if (user) {
-      const { count } = await supabase
-        .from('cooking_history')
-        .select('id', { count: 'exact', head: true })
-        .eq('user_id', user.id);
-      cookedCount = count ?? 0;
+  // Build diet allow-list so the global pool is already diet-correct.
+  const allowed = dietAllowList(user?.diet_type);
 
-      // Guarantee ≥1-2 regional recipes in "Aaj ke liye" for users whose
-      // preferred_region is a non-pan specific cuisine (south-indian, bengali, etc.)
-      const region = user.preferred_region;
-      if (region && !PAN_REGIONS.has(region)) {
-        const dietMatch =
-          user.diet_type === 'eggetarian'
-            ? ['veg', 'eggetarian']
-            : user.diet_type === 'non-veg'
-              ? ['veg', 'eggetarian', 'non-veg']
-              : ['veg'];
+  // Fetch top 30 diet-filtered curated recipes.
+  // Over-fetch (30 not 20) so spice-sort in HomeClient still leaves 20 options
+  // after any vrat filter is applied client-side.
+  // For pan sub-region users (UP, Punjab, etc.) also pull their region first so
+  // sub-regional dishes surface even if they haven't been saved/cooked yet.
+  const region = user?.preferred_region ?? null;
+  const isPanSubRegion = region && PAN_REGIONS.has(region) && region !== 'pan-north-indian';
 
-        let q = supabase
-          .from('recipes')
-          .select('*')
-          .eq('source', 'curated')
-          .eq('region_origin', region)
-          .in('diet_type', dietMatch);
-        if (user.is_vrat_mode) q = q.eq('is_vrat_friendly', true);
+  let globalQuery = supabase
+    .from('recipes')
+    .select('*')
+    .eq('source', 'curated')
+    .in('diet_type', allowed);
 
-        const { data: rr } = await q
-          .order('cooked_count', { ascending: false })
-          .limit(2)
-          .returns<Recipe[]>();
-        regionalRecipes = rr ?? [];
-        if (regionalRecipes.length === 0) {
-          console.log(`[home] no ${region} recipes for diet=${user.diet_type}`);
-        }
+  // For pan sub-regions (UP, Punjab, Bihar…), prioritise their region + pan.
+  // For south-indian/bengali/etc., the separate regionalRecipes fetch below handles it.
+  if (isPanSubRegion) {
+    globalQuery = globalQuery.in('region_origin', [region!, 'pan-north-indian']);
+  }
+
+  const { data: recipesRaw } = await globalQuery
+    .order('saved_count', { ascending: false })
+    .order('cooked_count', { ascending: false })
+    .limit(30)
+    .returns<Recipe[]>();
+
+  const recipes: Recipe[] = recipesRaw ?? [];
+
+  // If we got < 10 results (e.g. very specific region with few recipes), fill
+  // from pan-north-indian so the carousel never looks empty.
+  let recipesOut = recipes;
+  if (isPanSubRegion && recipes.length < 10) {
+    const { data: fill } = await supabase
+      .from('recipes')
+      .select('*')
+      .eq('source', 'curated')
+      .in('diet_type', allowed)
+      .eq('region_origin', 'pan-north-indian')
+      .not('id', 'in', `(${recipes.map((r) => r.id).join(',')})`)
+      .order('saved_count', { ascending: false })
+      .limit(30 - recipes.length)
+      .returns<Recipe[]>();
+    recipesOut = [...recipes, ...(fill ?? [])];
+  }
+
+  if (userId && user) {
+    const { count } = await supabase
+      .from('cooking_history')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id);
+    cookedCount = count ?? 0;
+
+    // For non-pan specific cuisines (south-indian, bengali, gujarati, maharashtrian),
+    // guarantee up to 4 regional recipes so they always lead "Aaj ke liye".
+    if (region && !PAN_REGIONS.has(region)) {
+      const dietMatch = dietAllowList(user.diet_type);
+      let q = supabase
+        .from('recipes')
+        .select('*')
+        .eq('source', 'curated')
+        .eq('region_origin', region)
+        .in('diet_type', dietMatch);
+      if (user.is_vrat_mode) q = q.eq('is_vrat_friendly', true);
+
+      const { data: rr } = await q
+        .order('cooked_count', { ascending: false })
+        .limit(4)
+        .returns<Recipe[]>();
+      regionalRecipes = rr ?? [];
+      if (regionalRecipes.length === 0) {
+        console.log(`[home] no ${region} recipes for diet=${user.diet_type}`);
       }
     }
   }
@@ -77,13 +115,14 @@ export default async function HomePage() {
   return (
     <main>
       <HomeClient
-        initialRecipes={(recipes ?? []) as Recipe[]}
+        initialRecipes={recipesOut}
         regionalRecipes={regionalRecipes}
         userName={user?.name ?? null}
         subscriptionStatus={user?.subscription_status ?? 'free'}
         initialIsVrat={user?.is_vrat_mode ?? false}
         isAuthenticated={!!userId}
         dietType={user?.diet_type ?? null}
+        spicePreference={user?.spice_preference ?? null}
         cookedCount={cookedCount}
       />
     </main>
