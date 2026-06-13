@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
 import { checkRateLimit } from '@/lib/redis';
 import { generateRecipeViaYouTube } from '@/lib/generate-recipe';
+import { buildSegmentContext, makeSegmentKey } from '@/lib/personalization';
 import type { SubscriptionStatus } from '@/types/index';
 
 export async function POST(req: NextRequest) {
@@ -15,16 +16,18 @@ export async function POST(req: NextRequest) {
 
   const supabase = createServerClient();
 
-  // 2. Resolve internal user (UUID + tier)
+  // 2. Resolve internal user (UUID + tier + segment fields)
   const { data: user } = await supabase
     .from('users')
-    .select('id, subscription_status, family_size, diet_type')
+    .select('id, subscription_status, family_size, diet_type, preferred_region, spice_preference')
     .eq('clerk_user_id', userId)
     .single<{
       id: string;
       subscription_status: SubscriptionStatus;
       family_size: number | null;
       diet_type: string | null;
+      preferred_region: string | null;
+      spice_preference: string | null;
     }>();
 
   if (!user) {
@@ -48,18 +51,26 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Kuch ingredients bhejo' }, { status: 400 });
   }
 
-  // 4a. Dish-name dedup BEFORE the per-user dedup — "save once, serve many".
-  // If ANY user already generated this dish in the last 30 days, reuse it:
-  // append this user to shown_to_user_ids and return the existing pending recipe.
+  // Build segment key and context — used for both dedup and extraction prompt.
+  const segmentKey = makeSegmentKey(user.diet_type ?? 'veg', user.preferred_region ?? null);
+  const segmentContext = buildSegmentContext({
+    diet_type: user.diet_type ?? 'veg',
+    preferred_region: user.preferred_region ?? null,
+    spice_preference: user.spice_preference ?? 'medium',
+  });
+
+  // 4a. Segment-aware dish-name dedup — "save once, serve many within a segment".
+  // Matches on dish name AND segment_key so north-Indian-veg "Masala Dosa" and
+  // south-Indian-veg "Masala Dosa" get separate, segment-appropriate generations.
+  // Old rows (segment_key IS NULL) are never matched — they lack segment context.
   const dishName = query?.trim();
   if (dishName) {
     const cutoff30d = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
     const { data: dishMatch } = await supabase
       .from('recipes_pending')
       .select('id, generated_recipe, shown_to_user_ids')
-      // Exact (case-insensitive) name match only. `%${dishName}%` was too
-      // aggressive — "paneer" returned ANY paneer dish ever generated.
       .ilike('generated_recipe->>name_hinglish', dishName)
+      .eq('segment_key', segmentKey)
       .gte('created_at', cutoff30d)
       .order('created_at', { ascending: false })
       .limit(1)
@@ -77,7 +88,7 @@ export async function POST(req: NextRequest) {
           .update({ shown_to_user_ids: [...shownTo, user.id] })
           .eq('id', dishMatch.id);
       }
-      console.log(`[yt-pipeline] dish-name dedup hit: "${dishName}" → ${dishMatch.id}`);
+      console.log(`[generate] segment dedup hit: "${dishName}" (${segmentKey}) → ${dishMatch.id}`);
       return NextResponse.json({
         pendingId: dishMatch.id,
         recipe: dishMatch.generated_recipe,
@@ -99,13 +110,16 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // 6. Generate — YouTube transcript pipeline first, GPT fallback inside
+  // 6. Generate — YouTube transcript pipeline first, GPT fallback inside.
+  // segmentContext threads through to both extractRecipeFromTranscript and
+  // the GPT fallback in generateRecipe, making both paths segment-aware.
   let recipe;
   let video;
   try {
     ({ recipe, video } = await generateRecipeViaYouTube(ingredients, query, {
       familySize: user.family_size ?? 4,
       dietType: user.diet_type ?? 'veg',
+      segmentContext: segmentContext || undefined,
     }));
   } catch (err) {
     Sentry.captureException(err);
@@ -115,7 +129,8 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // 7. Persist to recipes_pending (requester pre-seeded into shown_to_user_ids)
+  // 7. Persist to recipes_pending — write segment_key so future dedup queries
+  //    can match same-segment requests without touching different-segment rows.
   const { data: inserted, error: insertErr } = await supabase
     .from('recipes_pending')
     .insert({
@@ -124,6 +139,7 @@ export async function POST(req: NextRequest) {
       generated_recipe: recipe,
       status: 'pending',
       shown_to_user_ids: [user.id],
+      segment_key: segmentKey,
       youtube_video_id: video?.videoId ?? null,
       youtube_video_url: video?.url ?? null,
       youtube_channel_name: video?.channelName ?? null,

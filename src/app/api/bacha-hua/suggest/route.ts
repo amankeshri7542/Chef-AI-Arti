@@ -5,7 +5,7 @@ import { searchRecipes } from '@/lib/rag';
 import { buildHinglishQuery } from '@/lib/ingredient-map';
 import { generateRecipeViaYouTube } from '@/lib/generate-recipe';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/redis';
-import { buildPersonalizationContext } from '@/lib/personalization';
+import { buildPersonalizationContext, buildSegmentContext, makeSegmentKey } from '@/lib/personalization';
 import type { User } from '@/types/index';
 
 type UserCtx = Pick<
@@ -85,8 +85,16 @@ export async function POST(request: NextRequest) {
   };
 
   // 5 — retrieval-first
-  // Build personalization context for CASE 2 generation. CASE 1 (rag.ts) is
-  // already personalized through userCtx soft boosts (region/spice re-rank).
+  // Build segment key + context for CASE 2. CASE 1 is already personalized
+  // through userCtx soft boosts (region/spice re-rank) in rag.ts.
+  const segmentKey = makeSegmentKey(userCtx.diet_type ?? 'veg', userCtx.preferred_region ?? null);
+  const segmentContext = buildSegmentContext({
+    diet_type: userCtx.diet_type ?? 'veg',
+    preferred_region: userCtx.preferred_region ?? null,
+    spice_preference: userCtx.spice_preference ?? 'medium',
+  });
+
+  // Keep _personCtx for any future use (chat/message already uses it separately).
   const _personCtx = buildPersonalizationContext({
     diet_type: userCtx.diet_type,
     spice_preference: userCtx.spice_preference,
@@ -99,8 +107,7 @@ export async function POST(request: NextRequest) {
     family_size: userCtx.family_size ?? 4,
   });
 
-  // Regional/spice hint appended to the CASE 2 YouTube search query so the
-  // search reflects the user's cuisine preference (e.g. "south-indian dosa").
+  // Regional hint for YouTube search query — surfaces region-appropriate videos.
   const regionHint =
     userCtx.preferred_region && !['pan-north-indian', null].includes(userCtx.preferred_region)
       ? userCtx.preferred_region
@@ -138,8 +145,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    // Enrich the query with region hint so YouTube search surfaces regional
-    // videos (e.g. "south-indian dosa idli sambar" for a south-indian user).
+    // Enrich the query with region hint so YouTube search surfaces regional videos.
     const enrichedQuery = [query, regionHint].filter(Boolean).join(' ');
     const { recipe: generated, video } = await generateRecipeViaYouTube(
       ingredients,
@@ -147,6 +153,7 @@ export async function POST(request: NextRequest) {
       {
         familySize: userCtx.family_size ?? 4,
         dietType: userCtx.diet_type ?? 'veg',
+        segmentContext: segmentContext || undefined,
       },
     );
 
@@ -158,6 +165,7 @@ export async function POST(request: NextRequest) {
         generated_recipe: generated,
         status: 'pending',
         shown_to_user_ids: [(user as { id: string }).id],
+        segment_key: segmentKey,
         youtube_video_id: video?.videoId ?? null,
         youtube_video_url: video?.url ?? null,
         youtube_channel_name: video?.channelName ?? null,

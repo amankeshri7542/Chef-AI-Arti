@@ -46,16 +46,21 @@ Warm, respectful "aap" tone in Hinglish. description is one warm Hinglish senten
 export async function generateRecipe(
   ingredients: string[],
   query?: string,
+  segmentContext?: string,
 ): Promise<GeneratedRecipe> {
   const ingredientList = ingredients.join(', ');
   const userContent = query
     ? `Leftover/available ingredients: ${ingredientList}\nUser also asked: ${query}\nSuggest ONE realistic ghar ka khana dish.`
     : `User has these leftover ingredients: ${ingredientList}\nSuggest ONE realistic ghar ka khana dish.`;
 
+  const systemContent = segmentContext
+    ? `${SYSTEM_PROMPT}\n\n${segmentContext}`
+    : SYSTEM_PROMPT;
+
   const res = await openai.chat.completions.create({
     model: CHAT_MODEL,
     messages: [
-      { role: 'system', content: SYSTEM_PROMPT },
+      { role: 'system', content: systemContent },
       { role: 'user', content: userContent },
     ],
     response_format: { type: 'json_object' },
@@ -135,13 +140,19 @@ description is one warm Hinglish sentence.`;
 export async function extractRecipeFromTranscript(
   transcript: string,
   dishName: string,
-  ctx: { familySize: number; dietType: string },
+  ctx: { familySize: number; dietType: string; segmentContext?: string },
 ): Promise<GeneratedRecipe | null> {
   try {
+    // Prepend segment context to system prompt when provided.
+    // This keeps segment guidance separate from the base transcript rules.
+    const systemContent = ctx.segmentContext
+      ? `${TRANSCRIPT_SYSTEM_PROMPT}\n\n${ctx.segmentContext}`
+      : TRANSCRIPT_SYSTEM_PROMPT;
+
     const res = await openai.chat.completions.create({
       model: TRANSCRIPT_MODEL,
       messages: [
-        { role: 'system', content: TRANSCRIPT_SYSTEM_PROMPT },
+        { role: 'system', content: systemContent },
         {
           role: 'user',
           content: `Dish: ${dishName}
@@ -178,7 +189,7 @@ ${transcript}`,
 export async function generateRecipeViaYouTube(
   ingredients: string[],
   query: string | undefined,
-  ctx: { familySize: number; dietType: string },
+  ctx: { familySize: number; dietType: string; segmentContext?: string },
 ): Promise<{ recipe: GeneratedRecipe; video: YouTubeVideo | null }> {
   const dishName = query ?? ingredients.join(' ');
 
@@ -207,6 +218,7 @@ export async function generateRecipeViaYouTube(
       if (result.status === 'fulfilled' && result.value) {
         const video = top[i];
         const transcript = result.value;
+        // Pass segmentContext into extraction so the prompt is segment-aware
         const recipe = await extractRecipeFromTranscript(transcript, dishName, ctx);
         if (recipe) {
           console.log(
@@ -223,6 +235,8 @@ export async function generateRecipeViaYouTube(
     console.log('[yt-pipeline] no YouTube video found, falling back to GPT');
   }
 
-  const recipe = await generateRecipe(ingredients, query);
+  // GPT fallback also receives segment context so the non-YouTube path is
+  // equally segment-aware (spice, diet restrictions, regional style).
+  const recipe = await generateRecipe(ingredients, query, ctx.segmentContext);
   return { recipe, video: null };
 }
