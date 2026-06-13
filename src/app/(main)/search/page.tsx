@@ -12,6 +12,41 @@ import PullToRefresh from '@/components/PullToRefresh/PullToRefresh';
 import { RECIPE_COLLECTIONS } from '@/lib/collections';
 import { Recipe } from '@/types/index';
 
+/** Lightweight Dice/bigram similarity for YouTube query normalization. */
+function bigramSim(a: string, b: string): number {
+  const bigrams = (s: string) => {
+    const lc = s.toLowerCase().replace(/[^a-z0-9ऀ-ॿ ]/g, '');
+    const set = new Set<string>();
+    for (let i = 0; i < lc.length - 1; i++) set.add(lc.slice(i, i + 2));
+    return set;
+  };
+  const ba = bigrams(a);
+  const bb = bigrams(b);
+  if (ba.size + bb.size === 0) return 0;
+  let n = 0;
+  for (const g of ba) if (bb.has(g)) n++;
+  return (2 * n) / (ba.size + bb.size);
+}
+
+/**
+ * Given a raw (possibly typo'd) query and a list of recipe names, return the
+ * canonical name if similarity exceeds threshold, else the raw query.
+ * This prevents typo'd queries ("Malasa Dosa") from reaching YouTube as-is.
+ */
+function normalizeYouTubeQuery(raw: string, recipeNames: string[]): string {
+  if (!raw.trim() || recipeNames.length === 0) return raw;
+  let best = raw;
+  let bestSim = 0.45; // minimum threshold — below this, use raw query
+  for (const name of recipeNames) {
+    const s = bigramSim(raw, name);
+    if (s > bestSim) {
+      bestSim = s;
+      best = name;
+    }
+  }
+  return best;
+}
+
 const CATEGORY_CHIPS = [
   { label: '🥗 Sabzi', query: 'sabzi' },
   { label: '🫘 Dal', query: 'dal' },
@@ -200,11 +235,15 @@ export default function SearchPage() {
   const handleGenerateRecipe = async (searchQuery: string) => {
     if (generating) return;
     setGenerating(true);
+    // Normalize potentially typo'd query against known recipe names so YouTube
+    // gets a canonical dish name ("Masala Dosa") not a typo ("Malasa Dosa").
+    const knownNames = results.map((r) => r.name_hinglish);
+    const normalizedQuery = normalizeYouTubeQuery(searchQuery, knownNames);
     try {
       const res = await fetch('/api/recipes/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: searchQuery, ingredients: [searchQuery] }),
+        body: JSON.stringify({ query: normalizedQuery, ingredients: [normalizedQuery] }),
       });
       if (!res.ok) throw new Error(`generate failed: ${res.status}`);
       const data = await res.json();

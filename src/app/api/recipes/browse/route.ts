@@ -48,7 +48,11 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  query = query.order('cooked_count', { ascending: false }).limit(limit);
+  // Most saved within the filtered set first; cooked_count as tiebreak.
+  query = query
+    .order('saved_count', { ascending: false })
+    .order('cooked_count', { ascending: false })
+    .limit(limit);
 
   const { data, error } = await query;
 

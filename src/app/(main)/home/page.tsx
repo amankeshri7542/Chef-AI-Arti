@@ -12,11 +12,13 @@ export default async function HomePage() {
 
   const supabase = createServerClient();
 
-  // Always fetch top 20 global recipes (public)
+  // Always fetch top 20 global recipes (public).
+  // Order by most-saved first within curated recipes, cooked_count as tiebreak.
   const { data: recipes } = await supabase
     .from('recipes')
     .select('*')
     .eq('source', 'curated')
+    .order('saved_count', { ascending: false })
     .order('cooked_count', { ascending: false })
     .limit(20)
     .returns<Recipe[]>();

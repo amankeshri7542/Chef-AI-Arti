@@ -7,6 +7,21 @@ import { buildHinglishQuery, INGREDIENT_EN_TO_HI } from '@/lib/ingredient-map';
 import { checkRateLimit, getRateLimitRemaining, RATE_LIMITS } from '@/lib/redis';
 import type { Recipe, User } from '@/types/index';
 
+/** Character-trigram similarity (0–1) — same idea as pg_trgm similarity(). */
+function trigramSim(a: string, b: string): number {
+  const trigrams = (s: string): Set<string> => {
+    const p = `  ${s.toLowerCase()}  `;
+    const set = new Set<string>();
+    for (let i = 0; i < p.length - 2; i++) set.add(p.slice(i, i + 3));
+    return set;
+  };
+  const ta = trigrams(a);
+  const tb = trigrams(b);
+  let intersection = 0;
+  for (const t of ta) if (tb.has(t)) intersection++;
+  return ta.size + tb.size === 0 ? 0 : (2 * intersection) / (ta.size + tb.size);
+}
+
 const GUEST_USER_CONTEXT = {
   diet_type: 'veg' as const,
   is_vrat_mode: false,
@@ -132,7 +147,9 @@ async function handleSearch(params: SearchParams, userId: string | null, ip: str
     const hinglishWords = words
       .map((w) => INGREDIENT_EN_TO_HI[w])
       .filter((w): w is string => !!w);
-    const nameTerms = [...new Set([rawClean, ...hinglishWords])].filter(Boolean);
+    // Include individual words so typo queries ("Malasa Dosa") still ILIKE-match
+    // on the correctly-spelled word tokens ("dosa" → hits Dosa recipes).
+    const nameTerms = [...new Set([rawClean, ...words, ...hinglishWords])].filter(Boolean);
     const tagTerms = [...new Set([rawClean.toLowerCase(), ...words, ...hinglishWords])];
     const nameOrExpr = nameTerms.map((t) => `name_hinglish.ilike.%${t}%`).join(',');
 
@@ -172,12 +189,16 @@ async function handleSearch(params: SearchParams, userId: string | null, ip: str
     const tagMatches = (tagRows ?? []) as Recipe[];
 
     if (nameMatches.length > 0 || tagMatches.length > 0) {
-      // Priority: exact name > partial name > tag > vector fill
+      // Priority: exact name > trigram similarity (shorter/closer names rank above
+      // recipes that merely share one word like "masala") > cooked_count tiebreak.
       const lower = raw.toLowerCase();
       nameMatches.sort((a, b) => {
         const aExact = a.name_hinglish.toLowerCase() === lower ? 1 : 0;
         const bExact = b.name_hinglish.toLowerCase() === lower ? 1 : 0;
         if (aExact !== bExact) return bExact - aExact;
+        const aSim = trigramSim(a.name_hinglish, raw);
+        const bSim = trigramSim(b.name_hinglish, raw);
+        if (Math.abs(bSim - aSim) > 0.05) return bSim - aSim;
         return (b.cooked_count ?? 0) - (a.cooked_count ?? 0);
       });
 
