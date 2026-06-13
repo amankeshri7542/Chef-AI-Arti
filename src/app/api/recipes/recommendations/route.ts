@@ -3,6 +3,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
 import type { Recipe, DietType } from '@/types/index';
 
+// Regions where a soft vector boost is sufficient; these have large recipe counts.
+const PAN_REGIONS = new Set([
+  'pan-north-indian', 'UP', 'Bihar', 'Punjab', 'Haryana',
+  'Rajasthan', 'MP', 'Delhi-NCR', 'Jharkhand', 'Uttarakhand',
+]);
+
 /**
  * "Because you cooked..." recommendations.
  * Cheap SQL only — no embeddings, no GPT, no rate limit.
@@ -77,9 +83,9 @@ export async function GET(request: NextRequest) {
 
     const { data: user } = await supabase
       .from('users')
-      .select('id, diet_type, is_vrat_mode')
+      .select('id, diet_type, is_vrat_mode, preferred_region')
       .eq('clerk_user_id', userId)
-      .single<{ id: string; diet_type: DietType; is_vrat_mode: boolean }>();
+      .single<{ id: string; diet_type: DietType; is_vrat_mode: boolean; preferred_region: string | null }>();
 
     if (!user) {
       return NextResponse.json({ groups: [await popularGroup(supabase, null)] });
@@ -166,6 +172,44 @@ export async function GET(request: NextRequest) {
         ...groups.filter((g) => g.base_id === biasRecipeId),
         ...groups.filter((g) => g.base_id !== biasRecipeId),
       ];
+    }
+
+    // ── Regional guarantee group ──────────────────────────────────────────────
+    // For users with a specific non-pan preferred_region (e.g. south-indian),
+    // check if their region is already represented in the existing groups.
+    // If not, append a "Aapke region ke recipes" group so they always see
+    // at least some regional content, even if they've never cooked those dishes.
+    const preferredRegion = user.preferred_region;
+    if (preferredRegion && !PAN_REGIONS.has(preferredRegion)) {
+      const alreadyCovered = groups.some((g) =>
+        g.recipes.some((r) => r.region_origin === preferredRegion),
+      );
+      if (!alreadyCovered) {
+        let rq = supabase
+          .from('recipes')
+          .select('*')
+          .eq('source', 'curated')
+          .eq('reported_count', 0)
+          .eq('region_origin', preferredRegion);
+        rq = applyDietFilter(rq, user.diet_type);
+        if (user.is_vrat_mode) rq = rq.eq('is_vrat_friendly', true);
+        const { data: rdata } = await rq
+          .order('cooked_count', { ascending: false })
+          .limit(3);
+        const regionalPicked = ((rdata ?? []) as Recipe[]).filter(
+          (r) => !seen.has(r.id),
+        );
+        if (regionalPicked.length > 0) {
+          groups.push({
+            reason: 'Aapke region ke khaas recipes',
+            based_on_recipe: '',
+            base_id: '',
+            recipes: regionalPicked,
+          });
+        } else {
+          console.log(`[recommendations] no ${preferredRegion} recipes for diet=${user.diet_type}`);
+        }
+      }
     }
 
     return NextResponse.json({

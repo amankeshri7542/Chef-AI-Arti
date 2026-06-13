@@ -1,0 +1,405 @@
+[
+  {
+    "name_hinglish": "Sada Dosa (Ghar wala)",
+    "name_hindi": "सादा डोसा",
+    "description": "Crispy, thin dosa jo chawal-dal ki fermented batter se banta hai — coconut chutney aur sambar ke saath subah ka sabse achha nashta. Ghar mein banao, dhaba wala feel aayega!",
+    "category": "nashta",
+    "meal_type": ["breakfast", "snack"],
+    "diet_type": "veg",
+    "is_vrat_friendly": false,
+    "excluded_items": [],
+    "ingredients": [
+      {
+        "name": "Chawal",
+        "prep": "soaked 6 hours, ground",
+        "qty_desi": "3 katori",
+        "qty_metric": "300g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Urad dal",
+        "prep": "soaked 6 hours, ground",
+        "qty_desi": "1 katori",
+        "qty_metric": "100g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Namak",
+        "qty_desi": "1 chammach",
+        "qty_metric": "5g",
+        "scale_type": "salt"
+      },
+      {
+        "name": "Tel",
+        "qty_desi": "2-3 chammach",
+        "qty_metric": "30ml",
+        "scale_type": "oil"
+      }
+    ],
+    "steps": [
+      {
+        "step": 1,
+        "instruction": "Chawal aur urad dal alag-alag 6 ghante paani mein bhigao, phir alag-alag smooth paste pees lo. Dono ko mila do, namak daalo.",
+        "time_minutes": 10
+      },
+      {
+        "step": 2,
+        "instruction": "Batter ko raat bhar ya 8 ghante dhak kar warm jagah ferment hone do — batter thoda phool jaayega.",
+        "time_minutes": 480
+      },
+      {
+        "step": 3,
+        "instruction": "Tawa ya non-stick pan garam karo, thoda paani chhhidak kar pocho. Tel ki kuch boondein dalo.",
+        "time_minutes": 2
+      },
+      {
+        "step": 4,
+        "instruction": "Ek katori batter tawa par daal kar gol ghumao — bahar se andar ki taraf thin circle banao.",
+        "time_minutes": 1
+      },
+      {
+        "step": 5,
+        "instruction": "Medium-high aanch par 2-3 minute bake hone do jab tak edges sone-brown ho jaayein aur crispy lagein. Fold karo, nikaalo.",
+        "time_minutes": 3
+      }
+    ],
+    "cook_time_minutes": 10,
+    "prep_time_minutes": 20,
+    "soak_required": true,
+    "base_family_size": 4,
+    "spice_level": "mild",
+    "cooking_style": "roasted",
+    "region_origin": "south-indian",
+    "heaviness": "halka",
+    "goes_well_with": ["coconut-chutney", "sambar", "moong-dal"],
+    "vibes": ["halki-dish", "tiffin-ready", "comfort-food"],
+    "tags": ["dosa", "south-indian", "nashta", "fermented", "rice", "urad-dal"],
+    "thumbnail_url": null,
+    "thumbnail_source": "none",
+    "cooked_count": 0,
+    "source": "curated",
+    "embedding_text": null
+  },
+  {
+    "name_hinglish": "Medu Vada",
+    "name_hindi": "मेदू वड़ा",
+    "description": "Crispy bahar se, fluffy andar se — urad dal ke ye donut-shaped vade sambar aur chutney ke saath khao toh subah ban jaaye! Ghar mein bhi asaan hai agar batter sahi ho.",
+    "category": "nashta",
+    "meal_type": ["breakfast", "snack"],
+    "diet_type": "veg",
+    "is_vrat_friendly": false,
+    "excluded_items": [],
+    "ingredients": [
+      {
+        "name": "Urad dal",
+        "prep": "soaked 4 hours, finely ground",
+        "qty_desi": "2 katori",
+        "qty_metric": "200g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Hari mirch",
+        "prep": "finely chopped",
+        "qty_desi": "2-3",
+        "qty_metric": "10g",
+        "scale_type": "fixed"
+      },
+      {
+        "name": "Adrak",
+        "prep": "grated",
+        "qty_desi": "half inch tukda",
+        "qty_metric": "5g",
+        "scale_type": "fixed"
+      },
+      {
+        "name": "Kadi patta",
+        "prep": "finely chopped",
+        "qty_desi": "8-10 patte",
+        "qty_metric": "5g",
+        "scale_type": "fixed"
+      },
+      {
+        "name": "Jeera",
+        "qty_desi": "half chammach",
+        "qty_metric": "2g",
+        "scale_type": "fixed"
+      },
+      {
+        "name": "Namak",
+        "qty_desi": "1 chammach",
+        "qty_metric": "5g",
+        "scale_type": "salt"
+      },
+      {
+        "name": "Tel (fry ke liye)",
+        "qty_desi": "deep fry ke liye",
+        "qty_metric": "500ml",
+        "scale_type": "fixed"
+      }
+    ],
+    "steps": [
+      {
+        "step": 1,
+        "instruction": "Urad dal 4 ghante bhigao. Kam paani ke saath smooth aur fluffy batter pees lo — batter mota hona chahiye, poura nahi.",
+        "time_minutes": 10
+      },
+      {
+        "step": 2,
+        "instruction": "Batter mein hari mirch, adrak, kadi patta, jeera aur namak mila do. Haath se 2-3 minute achhe se phentao taaki air mix ho jaaye.",
+        "time_minutes": 5
+      },
+      {
+        "step": 3,
+        "instruction": "Kadhai mein tel garam karo. Geele haath par thoda batter rakho, beech mein hole karo — vada shape banao.",
+        "time_minutes": 5
+      },
+      {
+        "step": 4,
+        "instruction": "Geele haath se vada dheerey tel mein slip karo. Medium aanch par golden brown hone tak fry karo, beech-beech mein palatao.",
+        "time_minutes": 4
+      },
+      {
+        "step": 5,
+        "instruction": "Tissue par nikaal lo. Garam sambar aur coconut chutney ke saath serve karo.",
+        "time_minutes": 1
+      }
+    ],
+    "cook_time_minutes": 20,
+    "prep_time_minutes": 15,
+    "soak_required": true,
+    "base_family_size": 4,
+    "spice_level": "mild",
+    "cooking_style": "fried",
+    "region_origin": "south-indian",
+    "heaviness": "medium",
+    "goes_well_with": ["sambar", "coconut-chutney", "tomato-chutney"],
+    "vibes": ["comfort-food", "guest-special", "bacchon-ki-fav"],
+    "tags": ["vada", "medu-vada", "south-indian", "nashta", "urad-dal", "fried"],
+    "thumbnail_url": null,
+    "thumbnail_source": "none",
+    "cooked_count": 0,
+    "source": "curated",
+    "embedding_text": null
+  },
+  {
+    "name_hinglish": "Ven Pongal (Khara Pongal)",
+    "name_hindi": "वेन पोंगल",
+    "description": "South India ka comfort food — chawal aur moong dal ko ghee mein pakao, kali mirch aur jeera ka tadka do. Subah ke liye halka, filling aur bahut hi soothing nashta.",
+    "category": "nashta",
+    "meal_type": ["breakfast", "lunch"],
+    "diet_type": "veg",
+    "is_vrat_friendly": false,
+    "excluded_items": [],
+    "ingredients": [
+      {
+        "name": "Chawal",
+        "prep": "washed",
+        "qty_desi": "1 katori",
+        "qty_metric": "100g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Moong dal (dhuli)",
+        "prep": "washed",
+        "qty_desi": "half katori",
+        "qty_metric": "50g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Ghee",
+        "qty_desi": "2 chammach",
+        "qty_metric": "30g",
+        "scale_type": "oil"
+      },
+      {
+        "name": "Kali mirch (saboot)",
+        "qty_desi": "1 chammach",
+        "qty_metric": "4g",
+        "scale_type": "spice"
+      },
+      {
+        "name": "Jeera",
+        "qty_desi": "1 chammach",
+        "qty_metric": "4g",
+        "scale_type": "fixed"
+      },
+      {
+        "name": "Adrak",
+        "prep": "grated",
+        "qty_desi": "1 inch tukda",
+        "qty_metric": "10g",
+        "scale_type": "fixed"
+      },
+      {
+        "name": "Kadi patta",
+        "qty_desi": "10-12 patte",
+        "qty_metric": "5g",
+        "scale_type": "fixed"
+      },
+      {
+        "name": "Kaju",
+        "prep": "halved",
+        "qty_desi": "2 chammach",
+        "qty_metric": "15g",
+        "scale_type": "fixed"
+      },
+      {
+        "name": "Namak",
+        "qty_desi": "1 chammach",
+        "qty_metric": "5g",
+        "scale_type": "salt"
+      },
+      {
+        "name": "Paani",
+        "qty_desi": "4 katori",
+        "qty_metric": "800ml",
+        "scale_type": "linear"
+      }
+    ],
+    "steps": [
+      {
+        "step": 1,
+        "instruction": "Chawal aur moong dal ko dhoak lo. Pressure cooker mein 4 katori paani ke saath 3-4 seeti tak pakao — ekdum mashed ho jaana chahiye.",
+        "time_minutes": 15
+      },
+      {
+        "step": 2,
+        "instruction": "Tadka: ghee garam karo, kaju golden karo, nikaal lo. Usi ghee mein jeera aur kali mirch chatak lo.",
+        "time_minutes": 3
+      },
+      {
+        "step": 3,
+        "instruction": "Adrak aur kadi patta daalo, 30 second aur bhuno.",
+        "time_minutes": 1
+      },
+      {
+        "step": 4,
+        "instruction": "Paka hua chawal-dal mix daal do, namak mila do. Agar zyada thick lage toh thoda paani daal do. Achhe se mila do.",
+        "time_minutes": 3
+      },
+      {
+        "step": 5,
+        "instruction": "Kaju se garnish karo, extra ghee daal sako toh daal do — garam-garam sambar ya coconut chutney ke saath serve karo.",
+        "time_minutes": 1
+      }
+    ],
+    "cook_time_minutes": 20,
+    "prep_time_minutes": 5,
+    "soak_required": false,
+    "base_family_size": 4,
+    "spice_level": "mild",
+    "cooking_style": "boiled",
+    "region_origin": "south-indian",
+    "heaviness": "medium",
+    "goes_well_with": ["sambar", "coconut-chutney", "pickle"],
+    "vibes": ["comfort-food", "halki-dish", "bujurg-friendly", "one-pot"],
+    "tags": ["pongal", "south-indian", "nashta", "rice", "moong-dal", "ghee"],
+    "thumbnail_url": null,
+    "thumbnail_source": "none",
+    "cooked_count": 0,
+    "source": "curated",
+    "embedding_text": null
+  },
+  {
+    "name_hinglish": "Pyaaz Uttapam",
+    "name_hindi": "प्याज़ उत्तपम",
+    "description": "Dosa jaise batter se bana thick, soft uttapam — upar se pyaaz, tamatar aur hari mirch ki topping ke saath. Crispy edges, fluffy center — south Indian nashta jo sab ko pasand aata hai.",
+    "category": "nashta",
+    "meal_type": ["breakfast", "snack"],
+    "diet_type": "veg",
+    "is_vrat_friendly": false,
+    "excluded_items": [],
+    "ingredients": [
+      {
+        "name": "Dosa batter (ready-made ya ghar ka)",
+        "prep": "fermented",
+        "qty_desi": "3 katori",
+        "qty_metric": "600g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Pyaaz",
+        "prep": "finely chopped",
+        "qty_desi": "2 medium",
+        "qty_metric": "150g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Tamatar",
+        "prep": "finely chopped, seeds removed",
+        "qty_desi": "1 medium",
+        "qty_metric": "80g",
+        "scale_type": "linear"
+      },
+      {
+        "name": "Hari mirch",
+        "prep": "finely chopped",
+        "qty_desi": "2",
+        "qty_metric": "8g",
+        "scale_type": "fixed"
+      },
+      {
+        "name": "Hara dhaniya",
+        "prep": "chopped",
+        "qty_desi": "2 chammach",
+        "qty_metric": "10g",
+        "scale_type": "fixed"
+      },
+      {
+        "name": "Namak",
+        "qty_desi": "half chammach",
+        "qty_metric": "3g",
+        "scale_type": "salt"
+      },
+      {
+        "name": "Tel",
+        "qty_desi": "2 chammach",
+        "qty_metric": "20ml",
+        "scale_type": "oil"
+      }
+    ],
+    "steps": [
+      {
+        "step": 1,
+        "instruction": "Pyaaz, tamatar, hari mirch aur dhaniya ek bowl mein mila lo. Ek chutki namak daal do.",
+        "time_minutes": 5
+      },
+      {
+        "step": 2,
+        "instruction": "Non-stick tawa medium aanch par garam karo. Thoda tel lagao.",
+        "time_minutes": 2
+      },
+      {
+        "step": 3,
+        "instruction": "Ek bada karchhi batter daal do — spread karo magar dosa jaisa thin nahin, thoda mota rakho (uttapam thick hota hai).",
+        "time_minutes": 1
+      },
+      {
+        "step": 4,
+        "instruction": "Fauran upar se pyaaz-tamatar ka mix bikhero, halka dabao taki topping chipak jaaye.",
+        "time_minutes": 1
+      },
+      {
+        "step": 5,
+        "instruction": "Dhak do aur 3-4 minute pakao jab tak neeche golden ho jaaye. Palat do, aur 2 minute aur pakao. Coconut chutney ke saath serve karo.",
+        "time_minutes": 6
+      }
+    ],
+    "cook_time_minutes": 15,
+    "prep_time_minutes": 10,
+    "soak_required": false,
+    "base_family_size": 4,
+    "spice_level": "mild",
+    "cooking_style": "roasted",
+    "region_origin": "south-indian",
+    "heaviness": "medium",
+    "goes_well_with": ["coconut-chutney", "sambar", "tomato-chutney"],
+    "vibes": ["comfort-food", "tiffin-ready", "bacchon-ki-fav"],
+    "tags": ["uttapam", "south-indian", "nashta", "pyaaz", "dosa-batter"],
+    "thumbnail_url": null,
+    "thumbnail_source": "none",
+    "cooked_count": 0,
+    "source": "curated",
+    "embedding_text": null
+  }
+]

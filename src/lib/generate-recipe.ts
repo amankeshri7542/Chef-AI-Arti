@@ -1,7 +1,7 @@
 import OpenAI from 'openai';
 import { CHAT_MODEL } from '@/lib/openai';
 import {
-  searchYouTubeRecipe,
+  searchYouTubeRecipeCandidates,
   extractTranscript,
   type YouTubeVideo,
 } from '@/lib/youtube';
@@ -170,6 +170,10 @@ ${transcript}`,
  * Full CASE 2 pipeline: YouTube search (free) → transcript (free) →
  * gpt-4o-mini extraction (~₹0.5). Any failure along the way falls back to
  * the original direct generateRecipe (CHAT_MODEL, ~₹4) with video: null.
+ *
+ * Session-37: fetches transcripts for top 5 candidates in PARALLEL
+ * (Promise.allSettled) instead of trying one at a time. Uses the first
+ * fulfilled result with a non-null transcript.
  */
 export async function generateRecipeViaYouTube(
   ingredients: string[],
@@ -178,21 +182,43 @@ export async function generateRecipeViaYouTube(
 ): Promise<{ recipe: GeneratedRecipe; video: YouTubeVideo | null }> {
   const dishName = query ?? ingredients.join(' ');
 
-  const video = await searchYouTubeRecipe(dishName);
-  if (video) {
-    const transcript = await extractTranscript(video.videoId);
-    if (transcript) {
-      const recipe = await extractRecipeFromTranscript(transcript, dishName, ctx);
-      if (recipe) {
-        console.log(
-          `[yt-pipeline] used YouTube transcript: ${video.videoId} (${video.channelName})`,
-        );
-        return { recipe, video };
+  const candidates = await searchYouTubeRecipeCandidates(dishName);
+
+  if (candidates.length > 0) {
+    const top = candidates.slice(0, 5);
+    const t0 = Date.now();
+
+    // Fetch transcripts in parallel
+    const results = await Promise.allSettled(
+      top.map((v) => extractTranscript(v.videoId)),
+    );
+
+    const elapsed = Date.now() - t0;
+    const succeeded = results.filter(
+      (r) => r.status === 'fulfilled' && r.value !== null,
+    ).length;
+    console.log(
+      `[yt-pipeline] parallel transcript fetch: ${elapsed}ms, ${succeeded}/${top.length} succeeded`,
+    );
+
+    // Use the first candidate that has a usable transcript
+    for (let i = 0; i < results.length; i++) {
+      const result = results[i];
+      if (result.status === 'fulfilled' && result.value) {
+        const video = top[i];
+        const transcript = result.value;
+        const recipe = await extractRecipeFromTranscript(transcript, dishName, ctx);
+        if (recipe) {
+          console.log(
+            `[yt-pipeline] used YouTube transcript: ${video.videoId} (${video.channelName})`,
+          );
+          return { recipe, video };
+        }
+        console.log(`[yt-pipeline] transcript extraction failed for ${video.videoId}, trying next`);
       }
-      console.log('[yt-pipeline] transcript extraction failed, falling back to GPT');
-    } else {
-      console.log(`[yt-pipeline] no transcript for ${video.videoId}, falling back to GPT`);
     }
+
+    console.log('[yt-pipeline] all transcripts failed/unusable, falling back to GPT');
   } else {
     console.log('[yt-pipeline] no YouTube video found, falling back to GPT');
   }

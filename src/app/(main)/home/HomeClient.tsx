@@ -11,6 +11,7 @@ import { IOSInstallBanner } from '@/components/IOSInstallPrompt/IOSInstallPrompt
 
 interface HomeClientProps {
   initialRecipes: Recipe[];
+  regionalRecipes?: Recipe[];
   userName: string | null;
   subscriptionStatus: 'free' | 'paid';
   initialIsVrat: boolean;
@@ -118,6 +119,7 @@ interface FeatureCardDef {
 
 export default function HomeClient({
   initialRecipes,
+  regionalRecipes = [],
   userName,
   subscriptionStatus,
   initialIsVrat,
@@ -162,14 +164,20 @@ export default function HomeClient({
 
   const firstName = userName ? userName.split(' ')[0] : '';
 
-  // Top 4 for "Aaj ke liye": vrat + diet filtered (non-veg/egg users see all).
-  const featured = recipes
-    .filter((r) => {
-      if (isVrat && !r.is_vrat_friendly) return false;
-      if (dietType === 'veg' && r.diet_type !== 'veg') return false;
-      return true;
-    })
-    .slice(0, 4);
+  // Top 4 for "Aaj ke liye": vrat + diet filtered.
+  // If the user has a specific preferred_region (e.g. south-indian), regionalRecipes
+  // are injected first to guarantee regional representation (server already fetched
+  // and filtered them); remaining slots filled from global top-20.
+  const dietVratFilter = (r: Recipe) => {
+    if (isVrat && !r.is_vrat_friendly) return false;
+    if (dietType === 'veg' && r.diet_type !== 'veg') return false;
+    return true;
+  };
+  const regionalFiltered = regionalRecipes.filter(dietVratFilter);
+  const globalFiltered = recipes.filter(dietVratFilter);
+  const seenFeaturedIds = new Set(regionalFiltered.map((r) => r.id));
+  const globalFill = globalFiltered.filter((r) => !seenFeaturedIds.has(r.id));
+  const featured = [...regionalFiltered, ...globalFill].slice(0, 4);
 
   async function onVratToggle() {
     setVatLoading(true);
