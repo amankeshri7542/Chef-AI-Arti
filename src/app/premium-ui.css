@@ -1,0 +1,218 @@
+/* Premium UI layer: tactile, calm and food-first. */
+:root {
+  --premium-radius-sm: 14px;
+  --premium-radius: 22px;
+  --premium-radius-lg: 28px;
+  --premium-shadow: 0 1px 2px rgba(77,39,17,.04), 0 12px 32px rgba(96,47,18,.08);
+  --premium-shadow-hover: 0 2px 5px rgba(77,39,17,.06), 0 20px 48px rgba(96,47,18,.13);
+  --premium-shadow-float: 0 16px 48px rgba(76,35,10,.18);
+  --premium-ease: cubic-bezier(.22,1,.36,1);
+  --content-max: 520px;
+}
+
+html { scroll-behavior: smooth; background: #f3eee8; }
+body {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  background:
+    radial-gradient(circle at 50% -10%, rgba(232,100,12,.10), transparent 34rem),
+    #f3eee8;
+}
+button, a { -webkit-tap-highlight-color: transparent; }
+button { cursor: pointer; }
+::selection { background: color-mix(in srgb, var(--hero) 20%, white); color: var(--text); }
+
+button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--hero) 30%, transparent);
+  outline-offset: 3px;
+}
+
+/* One deliberate app canvas on tablets and desktop. */
+body > div,
+body > main {
+  width: 100%;
+}
+@media (min-width: 560px) {
+  body > div,
+  body > main {
+    max-width: var(--content-max);
+    margin-inline: auto;
+    box-shadow: 0 0 0 1px rgba(83,45,23,.05), 0 28px 90px rgba(76,35,10,.12);
+  }
+}
+
+/* Safe-area spacing for installed PWA and modern iPhones. */
+header.sticky { padding-top: max(12px, env(safe-area-inset-top)) !important; }
+main, [data-vrat] { min-height: 100dvh; }
+
+/* Glass headers remain warm and readable. */
+header.sticky {
+  background: color-mix(in srgb, var(--cream) 86%, transparent) !important;
+  backdrop-filter: blur(22px) saturate(1.28);
+  -webkit-backdrop-filter: blur(22px) saturate(1.28);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--border) 72%, transparent), 0 8px 24px rgba(70,35,15,.035);
+}
+
+/* Editorial hierarchy. */
+.t-display { letter-spacing: -.025em; text-wrap: balance; }
+.t-overline { letter-spacing: .16em; }
+.t-caption { line-height: 1.45; }
+
+/* Shared surfaces. */
+.r-card {
+  border-radius: var(--premium-radius);
+  border-color: color-mix(in srgb, var(--border) 86%, white);
+  box-shadow: var(--premium-shadow);
+  transition: transform .28s var(--premium-ease), box-shadow .28s var(--premium-ease), border-color .2s ease;
+  overflow: clip;
+}
+@media (hover:hover) {
+  .r-card:hover { transform: translateY(-2px); box-shadow: var(--premium-shadow-hover); border-color: color-mix(in srgb, var(--hero) 15%, var(--border)); }
+}
+
+/* Recipe imagery looks intentional even with mixed source images. */
+.r-card img,
+button img,
+a img {
+  image-rendering: auto;
+  transition: transform .5s var(--premium-ease), filter .35s ease;
+}
+@media (hover:hover) {
+  .r-card:hover img, button:hover img, a:hover img { transform: scale(1.025); filter: saturate(1.04) contrast(1.015); }
+}
+
+/* Consistent tactile feedback. */
+.tap-spring {
+  will-change: transform;
+  transition: transform .22s var(--premium-ease), box-shadow .22s var(--premium-ease), filter .2s ease !important;
+}
+.tap-spring:active { transform: scale(.975) !important; }
+@media (hover:hover) { .tap-spring:hover { filter: saturate(1.04) brightness(1.012); } }
+
+/* Horizontal rails feel native and show where the next item is. */
+.no-scrollbar {
+  scroll-snap-type: x proximity;
+  overscroll-behavior-inline: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar > * { scroll-snap-align: start; scroll-snap-stop: normal; }
+
+/* Chips are easier to scan and tap. */
+.r-chip, .r-pill {
+  box-shadow: 0 2px 8px rgba(77,39,17,.035);
+  transition: transform .2s var(--premium-ease), background .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+.r-chip:active, .r-pill:active { transform: scale(.97); }
+.r-chip.on {
+  box-shadow: 0 9px 22px color-mix(in srgb, var(--hero) 22%, transparent);
+}
+
+/* Motion is restrained and staggered. */
+.card-entry { animation-duration: .5s !important; animation-timing-function: var(--premium-ease) !important; }
+.page-enter { animation-duration: .42s !important; animation-timing-function: var(--premium-ease) !important; }
+.stg-1 { animation-delay: 30ms; }
+.stg-2 { animation-delay: 85ms; }
+.stg-3 { animation-delay: 140ms; }
+.stg-4 { animation-delay: 195ms; }
+.stg-5 { animation-delay: 250ms; }
+
+/* Primary actions have clear depth without looking glossy. */
+.r-cta {
+  border-radius: 18px;
+  min-height: 56px;
+  box-shadow: 0 11px 30px color-mix(in srgb, var(--hero) 25%, transparent);
+  transition: transform .22s var(--premium-ease), box-shadow .22s ease, filter .2s ease;
+}
+.r-cta:active { transform: scale(.98); }
+@media (hover:hover) { .r-cta:hover { filter: brightness(1.035); box-shadow: 0 15px 38px color-mix(in srgb, var(--hero) 31%, transparent); } }
+
+/* Inputs read as intentional controls. */
+input, textarea, select {
+  caret-color: var(--hero);
+  transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+}
+input::placeholder, textarea::placeholder { color: color-mix(in srgb, var(--muted) 78%, transparent); }
+input:focus, textarea:focus, select:focus {
+  border-color: color-mix(in srgb, var(--hero) 58%, var(--border)) !important;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--hero) 11%, transparent);
+}
+
+/* Recipe and collection grids breathe better on larger phones. */
+@media (min-width: 390px) {
+  [style*="grid-template-columns: 1fr 1fr"] { gap: 14px !important; }
+}
+
+/* Loading surfaces feel calmer. */
+.skel-shine {
+  background: linear-gradient(100deg, #f3e8dc 8%, #fff6ee 24%, #f3e8dc 42%);
+  background-size: 220% 100%;
+  animation-duration: 1.7s;
+}
+
+/* Floating overlays and sheets. */
+[role="dialog"],
+.slide-up,
+.animate-sheet-spring {
+  border-radius: var(--premium-radius-lg) var(--premium-radius-lg) 0 0;
+  box-shadow: 0 -16px 56px rgba(69,32,10,.18);
+}
+
+/* Dedicated Chef Arti landing. */
+.arti-stage {
+  position: relative;
+  isolation: isolate;
+  min-height: calc(100dvh - 74px);
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 85% 14%, color-mix(in srgb, var(--hero) 15%, transparent), transparent 18rem),
+    radial-gradient(circle at 5% 65%, rgba(45,106,79,.10), transparent 20rem),
+    var(--cream);
+}
+.arti-stage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: .32;
+  background-image: radial-gradient(rgba(133,76,37,.16) .7px, transparent .7px);
+  background-size: 18px 18px;
+  mask-image: linear-gradient(to bottom, #000, transparent 76%);
+}
+.arti-orb {
+  width: 104px;
+  height: 104px;
+  border-radius: 32px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(145deg, #fff, var(--hero-lt));
+  border: 1px solid color-mix(in srgb, var(--hero) 18%, var(--border));
+  box-shadow: 0 20px 50px color-mix(in srgb, var(--hero) 20%, transparent), inset 0 1px 0 white;
+  animation: artiFloat 4s ease-in-out infinite;
+}
+.arti-prompt {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 58px;
+  padding: 11px 14px;
+  text-align: left;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--card) 92%, transparent);
+  box-shadow: 0 8px 24px rgba(76,35,10,.06);
+}
+@keyframes artiFloat { 0%,100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-7px) rotate(1deg); } }
+
+/* Reduced motion remains first-class. */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
