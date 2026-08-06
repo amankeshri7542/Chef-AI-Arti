@@ -1,0 +1,32 @@
+/* Keep third-party portals and Next.js root containers unconstrained.
+   Only the actual Chef Arti app shell should become a framed canvas on wide screens. */
+@media (min-width: 560px) {
+  body > div,
+  body > main {
+    max-width: none;
+    margin-inline: 0;
+    box-shadow: none;
+  }
+
+  .app-shell {
+    max-width: var(--content-max);
+    margin-inline: auto;
+    box-shadow: 0 0 0 1px rgba(83, 45, 23, .055), 0 30px 96px rgba(76, 35, 10, .13);
+  }
+}
+
+/* Preserve clear boundaries for users requesting stronger contrast. */
+@media (prefers-contrast: more) {
+  .r-card,
+  .surface-card,
+  .status-banner,
+  .search-launch,
+  .input-surface {
+    border-color: currentColor;
+  }
+
+  .t-caption,
+  .screen-subtitle {
+    color: var(--text);
+  }
+}

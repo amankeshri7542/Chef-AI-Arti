@@ -13,11 +13,12 @@ import { GridCard } from '@/components/editorial/RecipeCards';
 
 function BachaHeader() {
   return (
-    <header className="sticky top-0 z-10" style={{ background: 'var(--cream)', borderBottom: '1px solid var(--border)', padding: '12px 18px', display: 'flex', alignItems: 'center', gap: 10 }}>
+    <header className="screen-header sticky top-0 z-20 flex items-start gap-3" style={{ padding: '12px 18px', borderBottom: '1px solid var(--border)' }}>
       <BackButton fallback="/home" className="bg-[var(--hero-lt)] text-[var(--hero-dk)]" />
-      <div>
-        <div className="t-overline" style={{ color: 'var(--hero-dk)' }}>Leftovers → naya dish</div>
-        <h1 className="t-display" style={{ fontSize: 20, margin: 0, color: 'var(--text)' }}>Bacha Hua</h1>
+      <div className="screen-header__copy pt-0.5">
+        <div className="t-overline" style={{ color: 'var(--hero-dk)' }}>Zero-waste cooking</div>
+        <h1 className="screen-title">Bacha Hua</h1>
+        <p className="screen-subtitle">Leftovers ko practical nayi dish mein badlein</p>
       </div>
     </header>
   );
@@ -58,24 +59,40 @@ export default function BachaHuaClient({ isPaid }: Props) {
   const router = useRouter();
   const [upgradeOpen, setUpgradeOpen] = useState(false);
 
-  // ─── Upgrade wall (free users) ────────────────────────────────────────────
   if (!isPaid) {
     return (
-      <div style={{ background: 'var(--cream)', minHeight: '100%' }}>
+      <div className="app-screen safe-bottom">
         <BachaHeader />
 
-        <div className="flex flex-col items-center text-center" style={{ padding: '56px 24px' }}>
-          <span style={{ width: 80, height: 80, borderRadius: 22, background: 'var(--hero-lt)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Icon name="pot" size={40} color="var(--hero-dk)" sw={1.5} />
-          </span>
-          <div className="t-overline" style={{ color: 'var(--hero-dk)', marginTop: 16 }}>Premium feature</div>
-          <h2 className="t-display" style={{ fontSize: 23, margin: '4px 0 6px', color: 'var(--text)' }}>Bacha Hua Mode</h2>
-          <p style={{ fontSize: 14, color: 'var(--muted)', maxWidth: 280, lineHeight: 1.55 }}>
-            Bachi roti, thanda chawal, aadhi dal — sab kuch naye dish mein badlo!
-          </p>
-          <button type="button" onClick={() => setUpgradeOpen(true)} className="r-cta tap-spring" style={{ marginTop: 22, maxWidth: 280 }}>
-            <Icon name="sparkle" size={20} color="#fff" /> Premium lein — ₹150/mahina
+        <div className="screen-content">
+          <section className="home-hero r-card card-entry text-center">
+            <span className="mx-auto grid h-20 w-20 place-items-center rounded-[26px]" style={{ background: 'var(--hero-lt)', boxShadow: 'inset 0 1px 0 white' }}>
+              <Icon name="pot" size={40} color="var(--hero-dk)" sw={1.5} />
+            </span>
+            <div className="t-overline mt-5" style={{ color: 'var(--hero-dk)' }}>Premium kitchen tool</div>
+            <h2 className="t-display mt-2" style={{ fontSize: 26, color: 'var(--text)' }}>Bacha hua khaana waste nahi hoga</h2>
+            <p className="mx-auto mt-2 max-w-[320px] text-[14px] leading-6" style={{ color: 'var(--muted)' }}>
+              Roti, chawal, dal ya sabzi select kariye. Arti available leftovers se realistic dish suggest karegi.
+            </p>
+          </section>
+
+          <div className="mt-5 grid gap-2.5">
+            {[
+              'Ek saath multiple leftovers combine karein',
+              'Available ingredients ke hisaab se practical ideas',
+              'Exact match na mile toh custom recipe generation',
+            ].map((benefit) => (
+              <div key={benefit} className="status-banner">
+                <Icon name="check" size={18} color="var(--green)" sw={2.3} />
+                <p className="m-0 text-[13.5px] leading-5">{benefit}</p>
+              </div>
+            ))}
+          </div>
+
+          <button type="button" onClick={() => setUpgradeOpen(true)} className="r-cta tap-spring mt-5">
+            <Icon name="sparkle" size={20} color="#fff" /> Premium dekhein · ₹150/mahina
           </button>
+          <p className="mt-3 text-center text-[11.5px] leading-5" style={{ color: 'var(--muted)' }}>Upgrade se pehle plan details clearly dikhengi.</p>
         </div>
 
         <UpgradeModal isOpen={upgradeOpen} onClose={() => setUpgradeOpen(false)} />
@@ -86,46 +103,33 @@ export default function BachaHuaClient({ isPaid }: Props) {
   return <BachaHuaPaid router={router} />;
 }
 
-// ─── Paid flow ──────────────────────────────────────────────────────────────
-
-function BachaHuaPaid({
-  router,
-}: {
-  router: ReturnType<typeof useRouter>;
-}) {
+function BachaHuaPaid({ router }: { router: ReturnType<typeof useRouter> }) {
   const [stage, setStage] = useState<Stage>('select');
   const [selected, setSelected] = useState<string[]>([]);
   const [customActive, setCustomActive] = useState(false);
   const [customText, setCustomText] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
-
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [generated, setGenerated] = useState<GeneratedResult | null>(null);
 
   function toggleChip(label: string) {
     if (label === CUSTOM_LABEL) {
-      setCustomActive((v) => !v);
+      setCustomActive((current) => !current);
       return;
     }
-    setSelected((prev) =>
-      prev.includes(label) ? prev.filter((l) => l !== label) : [...prev, label],
-    );
+    setSelected((current) => current.includes(label) ? current.filter((item) => item !== label) : [...current, label]);
   }
 
   function buildIngredients(): string[] {
     const custom = customActive
-      ? customText
-          .split(',')
-          .map((s) => s.trim())
-          .filter((s) => s.length > 0)
+      ? customText.split(',').map((item) => item.trim()).filter(Boolean)
       : [];
     return [...selected, ...custom].slice(0, 5);
   }
 
-  const hasSelection =
-    selected.length > 0 ||
-    (customActive && customText.trim().length > 0);
+  const hasSelection = selected.length > 0 || (customActive && customText.trim().length > 0);
+  const selectedCount = buildIngredients().length;
 
   async function handleSuggest() {
     const ingredients = buildIngredients();
@@ -135,27 +139,26 @@ function BachaHuaPaid({
     setStage('loading');
 
     try {
-      const res = await fetch('/api/bacha-hua/suggest', {
+      const response = await fetch('/api/bacha-hua/suggest', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ingredients }),
       });
 
-      const data = (await res.json()) as {
+      const data = (await response.json()) as {
         recipes?: Recipe[];
         generated?: GeneratedResult;
         error?: string;
       };
 
-      if (res.status === 403) {
-        setError('Yeh feature premium mein hai 🌟');
+      if (response.status === 403) {
+        setError('Yeh feature premium access maang raha hai.');
         setUpgradeOpen(true);
         setStage('select');
         return;
       }
-
-      if (!res.ok) {
-        setError(data.error ?? 'Kuch gadbad ho gayi. Dobara try karein.');
+      if (!response.ok) {
+        setError(data.error ?? 'Suggestions abhi load nahi hui. Dobara try karein.');
         setStage('select');
         return;
       }
@@ -164,7 +167,7 @@ function BachaHuaPaid({
       setGenerated(data.generated ?? null);
       setStage('results');
     } catch {
-      setError('Network error. Dobara try karein.');
+      setError('Internet connection check karke dobara try karein.');
       setStage('select');
     }
   }
@@ -180,86 +183,92 @@ function BachaHuaPaid({
   }
 
   return (
-    <div style={{ background: 'var(--cream)', minHeight: '100%' }}>
+    <div className="app-screen safe-bottom">
       <BachaHeader />
 
-      {/* SELECT */}
       {stage === 'select' && (
-        <div style={{ padding: '18px 18px 96px' }}>
-          <SectionHead over="Kya bacha hai?" title="Chunein jo bacha hai" />
-          <p className="t-caption" style={{ margin: '4px 0 0' }}>Ek ya zyada select karo</p>
+        <div className="screen-content screen-content--tight">
+          <section className="home-hero r-card card-entry">
+            <div className="t-overline" style={{ color: 'var(--hero-dk)' }}>Step 1 · Select leftovers</div>
+            <h2 className="t-display mt-2" style={{ fontSize: 24, color: 'var(--text)' }}>Aaj kya bacha hai?</h2>
+            <p className="mt-2 text-[14px] leading-6" style={{ color: 'var(--muted)' }}>Maximum 5 items choose karein. Arti combinations ko practical cooking time ke saath match karegi.</p>
+          </section>
 
-          {error && <p style={{ marginTop: 12, fontSize: 13, fontWeight: 500, color: 'var(--hero-dk)' }}>{error}</p>}
-
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 16 }}>
-            {CHIPS.map((chip) => {
-              const isActive = chip.label === CUSTOM_LABEL ? customActive : selected.includes(chip.label);
-              return (
-                <button key={chip.label} type="button" onClick={() => toggleChip(chip.label)} className={`r-chip tap-spring ${isActive ? 'on' : ''}`}>
-                  <span>{chip.emoji}</span> {chip.label}
-                </button>
-              );
-            })}
-          </div>
-
-          {customActive && (
-            <input
-              type="text"
-              value={customText}
-              onChange={(e) => setCustomText(e.target.value)}
-              placeholder="Aur kya hai? (comma se alag karo)"
-              className="outline-none"
-              style={{ marginTop: 16, width: '100%', minHeight: 50, padding: '0 16px', borderRadius: 14, border: '1px solid var(--border)', background: 'var(--card)', fontSize: 14, color: 'var(--text)' }}
-            />
+          {error && (
+            <div role="alert" className="status-banner status-banner--error mt-4">
+              <span aria-hidden>!</span><p className="m-0 text-[13px] leading-5">{error}</p>
+            </div>
           )}
 
-          <button type="button" onClick={handleSuggest} disabled={!hasSelection} className="r-cta tap-spring disabled:opacity-50" style={{ marginTop: 24 }}>
-            <Icon name="sparkle" size={20} color="#fff" /> Suggest karo!
+          <section className="mt-6">
+            <SectionHead over="Quick selection" title="Jo available hai chunein" />
+            <div className="surface-card mt-4 p-4">
+              <div className="flex flex-wrap gap-2">
+                {CHIPS.map((chip) => {
+                  const active = chip.label === CUSTOM_LABEL ? customActive : selected.includes(chip.label);
+                  return (
+                    <button key={chip.label} type="button" onClick={() => toggleChip(chip.label)} className={`r-chip tap-spring ${active ? 'on' : ''}`} aria-pressed={active}>
+                      <span aria-hidden>{chip.emoji}</span> {chip.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {customActive && (
+                <label className="mt-4 block">
+                  <span className="mb-2 block text-[12px] font-semibold" style={{ color: 'var(--text)' }}>Baaki ingredients</span>
+                  <input type="text" value={customText} onChange={(event) => setCustomText(event.target.value)} placeholder="Jaise: paneer, hari chutney" className="input-surface w-full px-4 outline-none" />
+                  <span className="mt-1.5 block text-[11px]" style={{ color: 'var(--muted)' }}>Multiple items ko comma se alag karein.</span>
+                </label>
+              )}
+            </div>
+          </section>
+
+          <button type="button" onClick={() => void handleSuggest()} disabled={!hasSelection} className="r-cta tap-spring mt-5 disabled:opacity-50">
+            <Icon name="sparkle" size={20} color="#fff" /> {selectedCount > 0 ? `${selectedCount} items se ideas dekhein` : 'Leftovers select karein'}
           </button>
         </div>
       )}
 
-      {/* LOADING */}
       {stage === 'loading' && (
-        <div className="flex flex-col items-center text-center" style={{ padding: '80px 24px' }}>
-          <ArtiLoader message="Arti soch rahi hai" />
+        <div className="screen-content flex min-h-[58vh] flex-col items-center justify-center text-center" aria-live="polite" aria-busy="true">
+          <ArtiLoader message="Leftovers ka best combination soch rahi hoon" />
+          <p className="mt-4 max-w-[280px] text-[12.5px] leading-5" style={{ color: 'var(--muted)' }}>Exact match aur practical custom option dono check ho rahe hain.</p>
         </div>
       )}
 
-      {/* RESULTS */}
       {stage === 'results' && (
-        <div style={{ padding: '18px 18px 96px' }}>
-          <SectionHead over="In cheezon se" title="Yeh banayein" style={{ marginBottom: 14 }} />
+        <div className="screen-content screen-content--tight">
+          <section className="mb-5">
+            <div className="t-overline" style={{ color: 'var(--hero-dk)' }}>Step 2 · Choose a dish</div>
+            <h2 className="t-display mt-2" style={{ fontSize: 25, color: 'var(--text)' }}>Waste se next meal</h2>
+            <p className="mt-2 text-[13.5px] leading-5" style={{ color: 'var(--muted)' }}>Recipe khol kar ingredients aur cooking steps confirm karein.</p>
+          </section>
 
           {recipes.length > 0 && (
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-              {recipes.map((r, i) => (
-                <GridCard key={r.id} recipe={r} idx={i % 6} onOpen={(id) => router.push('/recipe/' + id)} />
-              ))}
+              {recipes.map((recipe, index) => <GridCard key={recipe.id} recipe={recipe} idx={index % 6} onOpen={(id) => router.push('/recipe/' + id)} />)}
             </div>
           )}
 
           {generated && (
-            <button
-              type="button"
-              onClick={() => router.push('/recipe/pending/' + generated.pendingId)}
-              className="r-card tap-spring"
-              style={{ marginTop: 14, width: '100%', padding: 16, textAlign: 'left', display: 'block' }}
-            >
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, borderRadius: 99, padding: '3px 10px', fontSize: 11, fontWeight: 700, color: '#fff', background: 'var(--hero)' }}>
-                <Icon name="sparkle" size={11} color="#fff" /> Naya recipe
+            <button type="button" onClick={() => router.push('/recipe/pending/' + generated.pendingId)} className="r-card tap-spring mt-4 block w-full p-4 text-left">
+              <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold text-white" style={{ background: 'var(--hero)' }}>
+                <Icon name="sparkle" size={11} color="#fff" /> Custom match
               </span>
-              <p className="t-display" style={{ marginTop: 8, fontSize: 17, color: 'var(--text)' }}>{generated.recipe.name_hinglish}</p>
-              <p className="t-caption" style={{ marginTop: 2 }}>Arti ka naya idea — kholne ke liye tap karein</p>
+              <p className="t-display mt-2" style={{ fontSize: 18, color: 'var(--text)' }}>{generated.recipe.name_hinglish}</p>
+              <p className="t-caption mt-1">Arti ne aapke selected leftovers ke liye banaya hai.</p>
             </button>
           )}
 
           {recipes.length === 0 && !generated && (
-            <p className="t-caption" style={{ marginTop: 24 }}>Kuch nahi mila. Dobara koshish karein.</p>
+            <div className="status-banner status-banner--warning">
+              <p className="m-0 text-[13.5px] leading-5">Is combination ke liye abhi workable recipe nahi mili. Ingredients badal kar dobara try karein.</p>
+            </div>
           )}
 
-          <button type="button" onClick={reset} className="r-cta ghost tap-spring" style={{ marginTop: 18, minHeight: 52 }}>
-            <Icon name="refresh" size={19} color="var(--hero-dk)" /> Aur kuch try karo
+          <button type="button" onClick={reset} className="r-cta ghost tap-spring mt-5">
+            <Icon name="refresh" size={19} color="var(--hero-dk)" /> Doosra combination try karein
           </button>
         </div>
       )}
