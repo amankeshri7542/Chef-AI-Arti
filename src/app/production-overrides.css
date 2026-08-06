@@ -14,3 +14,19 @@
     box-shadow: 0 0 0 1px rgba(83, 45, 23, .055), 0 30px 96px rgba(76, 35, 10, .13);
   }
 }
+
+/* Preserve clear boundaries for users requesting stronger contrast. */
+@media (prefers-contrast: more) {
+  .r-card,
+  .surface-card,
+  .status-banner,
+  .search-launch,
+  .input-surface {
+    border-color: currentColor;
+  }
+
+  .t-caption,
+  .screen-subtitle {
+    color: var(--text);
+  }
+}
