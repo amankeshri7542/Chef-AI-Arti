@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Recipe } from '@/types/index';
 import BackButton from '@/components/BackButton/BackButton';
@@ -15,15 +15,15 @@ interface ThaliData {
 }
 
 const MEAL_SLOTS = [
-  { key: 'nashta' as const, label: 'Nashta', time: 'Subah · 8:30 baje' },
-  { key: 'dopahar' as const, label: 'Dopahar', time: 'Lunch · 1:00 baje' },
-  { key: 'raat' as const, label: 'Raat', time: 'Dinner · 8:00 baje' },
+  { key: 'nashta' as const, index: '01', label: 'Nashta', time: 'Subah · 8:30', helper: 'Din ki easy shuruaat' },
+  { key: 'dopahar' as const, index: '02', label: 'Dopahar', time: 'Lunch · 1:00', helper: 'Balanced ghar ka khaana' },
+  { key: 'raat' as const, index: '03', label: 'Raat', time: 'Dinner · 8:00', helper: 'Halka aur satisfying' },
 ];
 
 function todayKey(userId: string): string {
-  const d = new Date();
-  const date = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-  return `aaj_ki_thali_${userId}_${date}`;
+  const date = new Date();
+  const value = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  return `aaj_ki_thali_${userId}_${value}`;
 }
 
 export default function ThaliClient({ userId }: { userId: string }) {
@@ -31,14 +31,40 @@ export default function ThaliClient({ userId }: { userId: string }) {
   const [thali, setThali] = useState<ThaliData | null>(null);
   const [loading, setLoading] = useState(true);
   const [planned, setPlanned] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (localStorage.getItem(todayKey(userId))) setPlanned(true);
+    setPlanned(Boolean(localStorage.getItem(todayKey(userId))));
   }, [userId]);
 
+  const fetchThali = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch('/api/thali/suggest');
+      if (!response.ok) {
+        setError('Aaj ka meal plan abhi load nahi hua. Dobara try karein.');
+        return;
+      }
+      const data: ThaliData = await response.json();
+      setThali(data);
+    } catch {
+      setError('Internet connection check karke dobara try karein.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void fetchThali();
+  }, [fetchThali]);
+
+  const mealIds = [thali?.nashta?.id, thali?.dopahar?.id, thali?.raat?.id].filter(Boolean);
+  const hasMeals = mealIds.length > 0;
+
   function confirmThali() {
-    const ids = [thali?.nashta?.id, thali?.dopahar?.id, thali?.raat?.id].filter(Boolean);
-    localStorage.setItem(todayKey(userId), JSON.stringify(ids));
+    if (!hasMeals) return;
+    localStorage.setItem(todayKey(userId), JSON.stringify(mealIds));
     setPlanned(true);
   }
 
@@ -47,95 +73,102 @@ export default function ThaliClient({ userId }: { userId: string }) {
     setPlanned(false);
   }
 
-  async function fetchThali() {
-    setLoading(true);
-    try {
-      const res = await fetch('/api/thali/suggest');
-      if (res.ok) {
-        const data = await res.json();
-        setThali(data);
-      }
-    } catch {
-      // silent
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    fetchThali();
-  }, []);
-
   return (
-    <div style={{ background: 'var(--cream)', minHeight: '100%', paddingBottom: 96 }}>
-      {/* Header */}
-      <header className="sticky top-0 z-10" style={{ background: 'var(--cream)', borderBottom: '1px solid var(--border)', padding: '12px 18px', display: 'flex', alignItems: 'center', gap: 10 }}>
+    <div className="app-screen safe-bottom">
+      <header className="screen-header sticky top-0 z-20 flex items-start gap-3" style={{ padding: '12px 18px', borderBottom: '1px solid var(--border)' }}>
         <BackButton fallback="/home" className="bg-[var(--hero-lt)] text-[var(--hero-dk)]" />
-        <div>
-          <div className="t-overline" style={{ color: 'var(--hero-dk)' }}>Teen waqt ka plan</div>
-          <h1 className="t-display" style={{ fontSize: 20, margin: 0, color: 'var(--text)' }}>Aaj ki Thali</h1>
+        <div className="screen-header__copy pt-0.5">
+          <div className="t-overline" style={{ color: 'var(--hero-dk)' }}>Daily meal planner</div>
+          <h1 className="screen-title">Aaj ki Thali</h1>
+          <p className="screen-subtitle">Teen meals, ek clear plan</p>
         </div>
       </header>
 
-      <div style={{ padding: '14px 18px 0' }}>
-        <p style={{ margin: 0, color: 'var(--muted)', fontSize: 14 }}>Arti ne aaj ke teeno waqt ka khaana chuna hai. Jo pasand na aaye, phir se suggest karwa lein!</p>
-      </div>
+      <div className="screen-content screen-content--tight">
+        <section className="home-hero r-card card-entry stg-1">
+          <div className="t-overline" style={{ color: 'var(--hero-dk)', marginBottom: 8 }}>Aaj ka plan</div>
+          <h2 className="t-display" style={{ margin: 0, fontSize: 25, color: 'var(--text)', maxWidth: 330 }}>Har meal ka decision ek baar mein</h2>
+          <p style={{ margin: '8px 0 0', color: 'var(--muted)', fontSize: 14, lineHeight: 1.6 }}>
+            Arti aapki preference ke hisaab se nashta, lunch aur dinner choose karti hai. Kisi bhi dish par tap karke details dekhein.
+          </p>
+        </section>
 
-      <div style={{ padding: '16px 18px 0' }}>
-        {loading ? (
-          <ArtiLoader className="py-16" message="Aaj ki thali soch rahi hai" />
-        ) : (
-          <div className="animate-content-fade flex flex-col" style={{ gap: 14 }}>
-            {MEAL_SLOTS.map((slot, i) => {
+        <div aria-live="polite" aria-busy={loading}>
+          {loading && <ArtiLoader className="py-16" message="Aaj ke meals balance kar rahi hoon" />}
+        </div>
+
+        {!loading && error && (
+          <div role="alert" className="status-banner status-banner--error mt-5">
+            <span aria-hidden>!</span>
+            <div className="flex-1">
+              <p className="m-0 text-[13.5px] leading-5">{error}</p>
+              <button type="button" onClick={() => void fetchThali()} className="mt-2 min-h-11 text-[13px] font-semibold underline" style={{ color: 'inherit' }}>Dobara try karein</button>
+            </div>
+          </div>
+        )}
+
+        {!loading && !error && (
+          <div className="animate-content-fade mt-5 flex flex-col gap-3.5">
+            {MEAL_SLOTS.map((slot, index) => {
               const recipe = thali?.[slot.key] ?? null;
               return (
-                <div key={slot.key} className={`r-card card-entry stg-${i + 1}`} style={{ padding: 14 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 10 }}>
-                    <span className="t-overline" style={{ color: 'var(--hero-dk)' }}>{slot.label}</span>
-                    <span className="t-caption">{slot.time}</span>
+                <article key={slot.key} className={`meal-card r-card card-entry stg-${index + 1}`}>
+                  <div className="mb-3 flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-2.5">
+                      <span className="meal-card__number">{slot.index}</span>
+                      <div>
+                        <div className="t-overline" style={{ color: 'var(--hero-dk)' }}>{slot.label}</div>
+                        <p className="m-0 text-[11.5px]" style={{ color: 'var(--muted)' }}>{slot.helper}</p>
+                      </div>
+                    </div>
+                    <span className="r-pill" style={{ height: 30, padding: '0 10px', fontSize: 11.5 }}>
+                      <Icon name="clock" size={12} color="var(--muted)" /> {slot.time}
+                    </span>
                   </div>
+
                   {recipe ? (
-                    <button type="button" onClick={() => router.push(`/recipe/${recipe.id}`)} className="tap-spring" style={{ display: 'flex', gap: 12, width: '100%', alignItems: 'center', textAlign: 'left' }}>
-                      <DishImage recipe={recipe} sizes="64px" style={{ width: 64, height: 64, borderRadius: 14, flexShrink: 0 }} />
-                      <span style={{ flex: 1, minWidth: 0 }}>
-                        <span className="t-display" style={{ display: 'block', fontSize: 17, color: 'var(--text)' }}>{recipe.name_hinglish}</span>
-                        <span className="t-caption" style={{ display: 'block', marginTop: 2 }}>{recipe.cook_time_minutes + recipe.prep_time_minutes} min · {recipe.spice_level}</span>
+                    <button type="button" onClick={() => router.push(`/recipe/${recipe.id}`)} className="tap-spring flex w-full items-center gap-3 text-left" aria-label={`${recipe.name_hinglish} recipe kholein`}>
+                      <DishImage recipe={recipe} sizes="76px" style={{ width: 76, height: 76, borderRadius: 18, flexShrink: 0 }} />
+                      <span className="min-w-0 flex-1">
+                        <span className="t-display block" style={{ fontSize: 18, color: 'var(--text)', lineHeight: 1.25 }}>{recipe.name_hinglish}</span>
+                        <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px]" style={{ color: 'var(--muted)' }}>
+                          <span>{recipe.cook_time_minutes + recipe.prep_time_minutes} min</span>
+                          <span aria-hidden>·</span>
+                          <span>{recipe.spice_level}</span>
+                        </span>
                       </span>
-                      <Icon name="chevR" size={18} color="var(--muted)" />
+                      <Icon name="chevR" size={19} color="var(--muted)" />
                     </button>
                   ) : (
-                    <div style={{ borderRadius: 14, border: '1.5px dashed var(--border)', background: 'var(--hero-lt)', padding: '16px', textAlign: 'center' }}>
-                      <p className="t-caption" style={{ margin: '0 0 8px' }}>Koi recipe nahi mili — khud choose karein</p>
-                      <button type="button" onClick={() => router.push('/search')} className="r-chip on tap-spring" style={{ minHeight: 44 }}>
-                        <Icon name="search" size={15} color="#fff" /> Browse karein
+                    <div className="rounded-[18px] border border-dashed p-4 text-center" style={{ borderColor: 'var(--border)', background: 'var(--hero-lt)' }}>
+                      <p className="t-caption m-0">Is meal ke liye match nahi mila.</p>
+                      <button type="button" onClick={() => router.push('/search')} className="r-chip on tap-spring mt-3" style={{ minHeight: 44 }}>
+                        <Icon name="search" size={15} color="#fff" /> Khud choose karein
                       </button>
                     </div>
                   )}
-                </div>
+                </article>
               );
             })}
 
-            {/* Action buttons */}
-            <div className="flex flex-col" style={{ gap: 12, marginTop: 4 }}>
-              {planned ? (
-                <div className="r-card" style={{ padding: '16px', textAlign: 'center', background: 'var(--green-lt)', borderColor: 'var(--green)' }}>
-                  <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--green)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                    <Icon name="check" size={18} color="var(--green)" sw={2.4} /> Aaj ki thali set hai!
-                  </p>
-                  <p style={{ marginTop: 4, fontSize: 13, color: 'var(--green)' }}>Aaj ka khaana plan ho gaya. Mazze se banao 💛</p>
-                  <button type="button" onClick={resetThali} className="tap-spring" style={{ marginTop: 10, minHeight: 44, fontSize: 13, fontWeight: 600, color: 'var(--green)', textDecoration: 'underline' }}>
-                    Badalna hai? Reset karo
-                  </button>
+            {planned ? (
+              <div className="status-banner status-banner--success mt-1 flex-col items-center text-center">
+                <span className="grid h-11 w-11 place-items-center rounded-[15px]" style={{ background: 'rgba(45,106,79,.12)' }}><Icon name="check" size={22} color="var(--green)" sw={2.4} /></span>
+                <div>
+                  <p className="m-0 text-[15px] font-bold">Aaj ki thali set hai</p>
+                  <p className="mt-1 text-[13px] leading-5">Ab cooking ke waqt sirf recipe follow karni hai.</p>
                 </div>
-              ) : (
-                <button type="button" onClick={confirmThali} className="r-cta tap-spring" style={{ background: 'var(--green)' }}>
-                  <Icon name="check" size={20} color="#fff" sw={2.4} /> Yeh theek hai
-                </button>
-              )}
-              <button type="button" onClick={fetchThali} className="r-cta ghost tap-spring" style={{ minHeight: 52 }}>
-                <Icon name="refresh" size={19} color="var(--hero-dk)" /> Phir se suggest karo
+                <button type="button" onClick={resetThali} className="min-h-11 text-[13px] font-semibold underline" style={{ color: 'var(--green)' }}>Plan unlock karke badlein</button>
+              </div>
+            ) : (
+              <button type="button" onClick={confirmThali} disabled={!hasMeals} className="r-cta tap-spring mt-1" style={{ background: 'var(--green)' }}>
+                <Icon name="check" size={20} color="#fff" sw={2.4} /> Aaj ka plan confirm karein
               </button>
-            </div>
+            )}
+
+            <button type="button" onClick={() => void fetchThali()} disabled={loading} className="r-cta ghost tap-spring">
+              <Icon name="refresh" size={19} color="var(--hero-dk)" /> Naya combination suggest karo
+            </button>
           </div>
         )}
       </div>
