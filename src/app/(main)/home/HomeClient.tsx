@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Recipe, DietType } from '@/types/index';
 import VratToggle from '@/components/VratToggle/VratToggle';
@@ -9,7 +9,7 @@ import PullToRefresh from '@/components/PullToRefresh/PullToRefresh';
 import { IOSInstallBanner } from '@/components/IOSInstallPrompt/IOSInstallPrompt';
 import Icon, { type IconName } from '@/components/editorial/Icon';
 import { Steam } from '@/components/editorial/DishArt';
-import { SectionHead, Divider } from '@/components/editorial/SectionHead';
+import { Divider, SectionHead } from '@/components/editorial/SectionHead';
 import { RecipeCardV } from '@/components/editorial/RecipeCards';
 
 interface HomeClientProps {
@@ -27,16 +27,16 @@ interface HomeClientProps {
 const WEEKDAYS_HI = ['Ravivar', 'Somvar', 'Mangalvar', 'Budhvar', 'Guruvar', 'Shukravar', 'Shanivar'];
 
 function timeSubtitle(): string {
-  const h = new Date().getHours();
-  const day = WEEKDAYS_HI[new Date().getDay()];
-  if (h >= 6 && h < 11) return `${day} ki subah — nashte mein kya banayein? ☀️`;
-  if (h >= 11 && h < 16) return `Dopahar ka khaana soch rahi hain? 🍽️`;
-  if (h >= 16 && h < 19) return `Chai ke saath kuch snack? 🍵`;
-  if (h >= 19 && h < 22) return `Dinner ka time ho gaya! 🌙`;
-  return `Raat ka khaana soch rahi hain? 🌛`;
+  const now = new Date();
+  const hour = now.getHours();
+  const day = WEEKDAYS_HI[now.getDay()];
+  if (hour >= 6 && hour < 11) return `${day} ki subah. Nashta aasaan rakhte hain.`;
+  if (hour >= 11 && hour < 16) return 'Dopahar ka khaana bina overthinking ke plan karein.';
+  if (hour >= 16 && hour < 19) return 'Chai ke saath kuch jaldi aur tasty banayein.';
+  if (hour >= 19 && hour < 22) return 'Dinner ka time hai. Aaj ka decision Arti par chhodiye.';
+  return 'Kal ki rasoi abhi se halka sa plan kar lein.';
 }
 
-// Local mirror of the API shape — do NOT add to types/index.ts
 interface RecommendationGroup {
   reason: string;
   based_on_recipe: string;
@@ -64,31 +64,31 @@ export default function HomeClient({
 }: HomeClientProps) {
   const router = useRouter();
   const [isVrat, setIsVrat] = useState(initialIsVrat);
-  const [vatLoading, setVatLoading] = useState(false);
+  const [vratLoading, setVratLoading] = useState(false);
   const [recipes] = useState<Recipe[]>(initialRecipes);
   const [surpriseLoading, setSurpriseLoading] = useState(false);
+  const [subtitle, setSubtitle] = useState('Aaj ki rasoi aasaan banate hain.');
+  const [recGroups, setRecGroups] = useState<RecommendationGroup[]>([]);
 
-  // Time-based subtitle — compute after mount to avoid hydration mismatch
-  const [subtitle, setSubtitle] = useState('Aaj kya banayein? 🍽️');
   useEffect(() => {
     setSubtitle(timeSubtitle());
   }, []);
 
-  // "Banaya tha, toh yeh try karein" — personalized rows (auth + 1+ cook only)
-  const [recGroups, setRecGroups] = useState<RecommendationGroup[]>([]);
   useEffect(() => {
     if (!isAuthenticated || cookedCount < 1) return;
     let cancelled = false;
+
     fetch('/api/recipes/recommendations')
       .then((res) => (res.ok ? res.json() : null))
       .then((data: { groups?: RecommendationGroup[] } | null) => {
         if (cancelled || !data?.groups) return;
-        const genuine = data.groups.filter((g) => g.based_on_recipe && g.recipes.length > 0);
+        const genuine = data.groups.filter((group) => group.based_on_recipe && group.recipes.length > 0);
         setRecGroups(genuine.slice(0, 2));
       })
       .catch(() => {
-        /* silent — section simply doesn't render */
+        // Recommendations are optional. Home remains useful without them.
       });
+
     return () => {
       cancelled = true;
     };
@@ -96,38 +96,43 @@ export default function HomeClient({
 
   const firstName = userName ? userName.split(' ')[0] : '';
 
-  // Top 4 for "Aaj ke liye": vrat + diet filtered, then spice-sorted.
-  const dietVratFilter = (r: Recipe) => {
-    if (isVrat && !r.is_vrat_friendly) return false;
-    if (dietType === 'veg' && r.diet_type !== 'veg') return false;
+  const dietVratFilter = (recipe: Recipe) => {
+    if (isVrat && !recipe.is_vrat_friendly) return false;
+    if (dietType === 'veg' && recipe.diet_type !== 'veg') return false;
     return true;
   };
-  const spiceScore = (r: Recipe) => {
+
+  const spiceScore = (recipe: Recipe) => {
     if (!spicePreference || spicePreference === 'medium') return 0;
-    return r.spice_level === spicePreference ? 0 : 1;
+    return recipe.spice_level === spicePreference ? 0 : 1;
   };
 
   const regionalFiltered = regionalRecipes.filter(dietVratFilter);
   const globalFiltered = recipes.filter(dietVratFilter).sort((a, b) => spiceScore(a) - spiceScore(b));
-  const seenFeaturedIds = new Set(regionalFiltered.map((r) => r.id));
-  const globalFill = globalFiltered.filter((r) => !seenFeaturedIds.has(r.id));
+  const seenFeaturedIds = new Set(regionalFiltered.map((recipe) => recipe.id));
+  const globalFill = globalFiltered.filter((recipe) => !seenFeaturedIds.has(recipe.id));
   const featured = [...regionalFiltered, ...globalFill].slice(0, 4);
 
   async function onVratToggle() {
-    setVatLoading(true);
-    const res = await fetch('/api/users/vrat-toggle', { method: 'POST' });
-    const data = await res.json();
-    setIsVrat(data.is_vrat_mode);
-    setVatLoading(false);
+    if (vratLoading) return;
+    setVratLoading(true);
+    try {
+      const response = await fetch('/api/users/vrat-toggle', { method: 'POST' });
+      if (!response.ok) return;
+      const data: { is_vrat_mode?: boolean } = await response.json();
+      setIsVrat(Boolean(data.is_vrat_mode));
+    } finally {
+      setVratLoading(false);
+    }
   }
 
   async function onSurprise() {
     if (surpriseLoading) return;
     setSurpriseLoading(true);
     try {
-      const res = await fetch('/api/recipes/surprise');
-      if (res.ok) {
-        const data = await res.json();
+      const response = await fetch('/api/recipes/surprise');
+      if (response.ok) {
+        const data = await response.json();
         if (data?.recipe?.id) {
           router.push('/recipe/' + data.recipe.id);
           return;
@@ -142,141 +147,99 @@ export default function HomeClient({
   const showExploreTeaser = !isAuthenticated || cookedCount < 5;
 
   const featureCards: FeatureCardDef[] = [
-    { icon: 'camera', title: 'Fridge Scan', subtitle: 'Photo lo → recipe pao', bg: 'var(--tile-1)', onClick: () => router.push('/fridge') },
-    { icon: 'chat', title: 'Chef Arti', subtitle: 'Koi bhi sawaal poochho', bg: 'var(--tile-2)', onClick: () => router.push('/chat') },
-    { icon: 'pot', title: 'Bacha Hua', subtitle: 'Leftovers → naya dish', bg: 'var(--tile-3)', onClick: () => router.push('/bacha-hua') },
-    { icon: 'thali', title: 'Aaj ki Thali', subtitle: 'Teen waqt ka plan', bg: 'var(--tile-4)', onClick: () => router.push('/aaj-ki-thali') },
+    { icon: 'camera', title: 'Fridge Scan', subtitle: 'Photo lo, ingredients pehchano', bg: 'var(--tile-1)', onClick: () => router.push('/fridge') },
+    { icon: 'chat', title: 'Chef Arti', subtitle: 'Normal Hinglish mein poochho', bg: 'var(--tile-2)', onClick: () => router.push('/chat') },
+    { icon: 'pot', title: 'Bacha Hua', subtitle: 'Leftovers ko nayi dish banao', bg: 'var(--tile-3)', onClick: () => router.push('/bacha-hua') },
+    { icon: 'thali', title: 'Aaj ki Thali', subtitle: 'Teen waqt ka simple plan', bg: 'var(--tile-4)', onClick: () => router.push('/aaj-ki-thali') },
   ];
 
   return (
     <PullToRefresh onRefresh={() => router.refresh()}>
-      <div data-vrat={isVrat ? 'on' : 'off'} style={{ background: 'var(--cream)', minHeight: '100%', paddingBottom: 88 }}>
-        {/* Sticky editorial header */}
-        <header
-          className="sticky top-0 z-10"
-          style={{ background: 'var(--cream)', padding: '10px 18px 12px', borderBottom: '1px solid var(--border)' }}
-        >
-          <div className="flex items-center justify-between gap-2" style={{ marginBottom: 10 }}>
-            <div>
-              <div className="t-overline" style={{ color: 'var(--hero-dk)' }}>Chief-AI-Arti</div>
-              <div className="t-ital" style={{ fontSize: 17, color: 'var(--text)' }}>Aaj kya banao?</div>
+      <div className="app-screen safe-bottom" data-vrat={isVrat ? 'on' : 'off'}>
+        <header className="screen-header sticky top-0 z-20" style={{ padding: '10px 18px 12px', borderBottom: '1px solid var(--border)' }}>
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <div className="t-overline" style={{ color: 'var(--hero-dk)' }}>Chef Arti</div>
+              <div className="t-ital truncate" style={{ fontSize: 17, color: 'var(--text)' }}>Aaj kya banao?</div>
             </div>
-            {isAuthenticated && <VratToggle isVrat={isVrat} onToggle={onVratToggle} loading={vatLoading} />}
+            {isAuthenticated && <VratToggle isVrat={isVrat} onToggle={onVratToggle} loading={vratLoading} />}
           </div>
-          <button
-            type="button"
-            onClick={() => router.push('/search')}
-            className="tap-spring"
-            style={{ width: '100%', minHeight: 50, display: 'flex', alignItems: 'center', gap: 10, padding: '0 16px', borderRadius: 16, background: 'var(--hero-lt)', border: '1px solid var(--border)', color: 'var(--muted)', fontSize: 14.5 }}
-          >
-            <Icon name="search" size={19} color="var(--hero-dk)" /> Kuch bhi dhundho…
+
+          <button type="button" onClick={() => router.push('/search')} className="search-launch tap-spring flex w-full items-center gap-3 px-4 text-left" aria-label="Recipe search kholein">
+            <Icon name="search" size={19} color="var(--hero-dk)" />
+            <span className="flex-1 text-[14.5px]" style={{ color: 'var(--muted)' }}>Dish, ingredient ya mood se dhundho</span>
+            <span className="r-pill" style={{ height: 30, padding: '0 10px', fontSize: 11, color: 'var(--hero-dk)' }}>Khoj</span>
           </button>
         </header>
 
-        {/* iOS Safari install banner — first visit only */}
         <IOSInstallBanner />
 
-        {/* Greeting card */}
-        <section style={{ padding: '16px 18px 0' }}>
-          <div className="r-card card-entry stg-1" style={{ padding: '18px 20px', position: 'relative', overflow: 'hidden', background: 'linear-gradient(135deg, var(--card) 60%, var(--hero-lt) 100%)' }}>
-            <div style={{ position: 'absolute', top: 12, right: 14, opacity: 0.9 }}><Steam size={30} color="var(--terracotta)" /></div>
-            <h1 className="t-display" style={{ fontSize: 26, margin: '0 0 4px', color: 'var(--text)' }}>
-              Namaskar{firstName ? `, ${firstName}` : ''}! 🙏
-            </h1>
-            <p style={{ margin: 0, color: 'var(--muted)', fontSize: 14 }}>{subtitle}</p>
+        <section style={{ padding: '18px 18px 0' }}>
+          <div className="home-hero r-card card-entry stg-1">
+            <div className="absolute right-4 top-4 opacity-80" aria-hidden><Steam size={34} color="var(--terracotta)" /></div>
+            <div className="t-overline" style={{ color: 'var(--hero-dk)', marginBottom: 8 }}>Aaj ki rasoi</div>
+            <h1 className="t-display" style={{ fontSize: 29, margin: '0 0 7px', color: 'var(--text)', maxWidth: 330 }}>Namaskar{firstName ? `, ${firstName}` : ''}</h1>
+            <p style={{ margin: 0, maxWidth: 360, color: 'var(--muted)', fontSize: 14.5, lineHeight: 1.6 }}>{subtitle}</p>
           </div>
         </section>
 
-        {/* Feature grid */}
-        <section style={{ padding: '20px 18px 0' }}>
-          <SectionHead over="Aaj ka kaam" title="Kya karna hai?" />
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 12 }}>
-            {featureCards.map((f, i) => (
-              <button
-                key={f.title}
-                type="button"
-                onClick={f.onClick}
-                className={`tap-spring card-entry stg-${i + 1}`}
-                style={{ minHeight: 116, borderRadius: 20, padding: '16px 16px 14px', background: f.bg, color: '#fff', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', textAlign: 'left', boxShadow: '0 2px 4px var(--shadow), 0 10px 22px -10px rgba(120,50,10,0.5)' }}
-              >
-                <span style={{ width: 42, height: 42, borderRadius: 13, background: 'rgba(255,255,255,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Icon name={f.icon} size={23} color="#fff" />
-                </span>
-                <span>
-                  <span style={{ display: 'block', fontSize: 16.5, fontWeight: 700 }}>{f.title}</span>
-                  <span style={{ display: 'block', fontSize: 12.5, opacity: 0.92, marginTop: 1 }}>{f.subtitle}</span>
+        <section style={{ padding: '24px 18px 0' }}>
+          <SectionHead over="Quick actions" title="Kaise madad chahiye?" />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 14 }}>
+            {featureCards.map((feature, index) => (
+              <button key={feature.title} type="button" onClick={feature.onClick} className={`feature-card tap-spring card-entry stg-${index + 1}`} style={{ background: feature.bg, color: '#fff', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', textAlign: 'left' }}>
+                <span className="feature-card__icon"><Icon name={feature.icon} size={23} color="#fff" /></span>
+                <span className="relative z-[1]">
+                  <span style={{ display: 'block', fontSize: 16.5, fontWeight: 700, letterSpacing: '-.01em' }}>{feature.title}</span>
+                  <span style={{ display: 'block', fontSize: 12, opacity: .9, marginTop: 3, lineHeight: 1.35 }}>{feature.subtitle}</span>
                 </span>
               </button>
             ))}
           </div>
-          <button
-            type="button"
-            onClick={onSurprise}
-            className="tap-spring card-entry stg-5"
-            style={{ marginTop: 12, width: '100%', minHeight: 56, borderRadius: 18, border: '1.5px dashed var(--terracotta)', background: 'var(--card)', display: 'flex', alignItems: 'center', gap: 12, padding: '0 16px', textAlign: 'left' }}
-          >
-            <Icon name="dice" size={22} color="var(--terracotta)" />
-            <span style={{ flex: 1 }}>
-              <span style={{ display: 'block', fontWeight: 600, fontSize: 15, color: 'var(--text)' }}>{surpriseLoading ? 'Dhundh rahe hain…' : 'Surprise karo!'}</span>
-              <span className="t-caption">Naya kuch try karein</span>
+
+          <button type="button" onClick={onSurprise} disabled={surpriseLoading} aria-busy={surpriseLoading} className="surprise-card tap-spring r-card card-entry stg-5 mt-3 flex min-h-16 w-full items-center gap-3 px-4 text-left disabled:opacity-60">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[15px]" style={{ background: 'var(--hero-lt)' }}><Icon name="dice" size={22} color="var(--terracotta)" /></span>
+            <span className="flex-1">
+              <span style={{ display: 'block', fontWeight: 650, fontSize: 15, color: 'var(--text)' }}>{surpriseLoading ? 'Aapke liye dhundh rahe hain…' : 'Decision Arti par chhodo'}</span>
+              <span className="t-caption">Ek achhi recipe surprise mein pao</span>
             </span>
             <Icon name="chevR" size={18} color="var(--muted)" />
           </button>
         </section>
 
-        <div style={{ padding: '20px 18px 0' }}><Divider /></div>
+        <div style={{ padding: '24px 18px 0' }}><Divider /></div>
 
-        {/* Aaj ke liye */}
-        <section style={{ paddingTop: 14 }}>
-          <SectionHead
-            over={isVrat ? 'Vrat special' : 'Aaj ke liye'}
-            title={isVrat ? 'Phalahari banayein' : 'Aaj yeh banayein'}
-            action="Sab dekhein"
-            onAction={() => router.push('/search')}
-            style={{ padding: '0 18px' }}
-          />
+        <section style={{ paddingTop: 17 }}>
+          <SectionHead over={isVrat ? 'Vrat special' : 'Aaj ke liye'} title={isVrat ? 'Phalahari options' : 'Arti ki pasand'} action="Sab dekhein" onAction={() => router.push('/search')} style={{ padding: '0 18px' }} />
           {featured.length === 0 ? (
-            <p className="px-4 py-6 text-center" style={{ color: 'var(--muted)', fontSize: 14 }}>Koi recipe nahi mili 😕</p>
+            <div className="mx-[18px] mt-4 rounded-[20px] border border-dashed p-6 text-center" style={{ borderColor: 'var(--border)', color: 'var(--muted)' }}>Is preference ke liye abhi recipe nahi mili.</div>
           ) : (
-            <div className="no-scrollbar" style={{ display: 'flex', gap: 12, overflowX: 'auto', padding: '14px 18px 6px' }}>
-              {featured.map((r, i) => (
-                <RecipeCardV key={r.id} recipe={r} idx={i} onOpen={(id) => router.push('/recipe/' + id)} />
-              ))}
+            <div className="no-scrollbar" style={{ display: 'flex', gap: 12, overflowX: 'auto', padding: '14px 18px 8px' }}>
+              {featured.map((recipe, index) => <RecipeCardV key={recipe.id} recipe={recipe} idx={index} onOpen={(id) => router.push('/recipe/' + id)} />)}
             </div>
           )}
         </section>
 
-        {/* "Banaya tha, toh yeh try karein" — personalized recommendation rows */}
         {recGroups.map((group) => (
-          <section key={group.based_on_recipe} style={{ paddingTop: 12 }}>
+          <section key={group.based_on_recipe} style={{ paddingTop: 18 }}>
             <div style={{ padding: '0 18px' }}>
-              <SectionHead over="Aapke swaad se" title="Yeh bhi achha lagega" />
-              <p className="t-caption" style={{ margin: '4px 0 0' }}>{group.reason}</p>
+              <SectionHead over="Aapke swaad se" title="Yeh bhi pasand aa sakta hai" />
+              <p className="t-caption" style={{ margin: '5px 0 0' }}>{group.reason}</p>
             </div>
-            <div className="no-scrollbar" style={{ display: 'flex', gap: 12, overflowX: 'auto', padding: '14px 18px 6px' }}>
-              {group.recipes.map((r, i) => (
-                <RecipeCardV key={r.id} recipe={r} idx={i} onOpen={(id) => router.push('/recipe/' + id)} />
-              ))}
+            <div className="no-scrollbar" style={{ display: 'flex', gap: 12, overflowX: 'auto', padding: '14px 18px 8px' }}>
+              {group.recipes.map((recipe, index) => <RecipeCardV key={recipe.id} recipe={recipe} idx={index} onOpen={(id) => router.push('/recipe/' + id)} />)}
             </div>
           </section>
         ))}
 
-        {/* Naye Recipes explore teaser */}
         {showExploreTeaser && (
-          <div style={{ padding: '18px 18px 0' }}>
-            <button
-              type="button"
-              onClick={() => router.push('/search')}
-              className="tap-spring r-card"
-              style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', textAlign: 'left', minHeight: 56 }}
-            >
-              <span style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <span style={{ width: 40, height: 40, borderRadius: 12, background: 'var(--hero-lt)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Icon name="search" size={20} color="var(--hero-dk)" />
-                </span>
+          <div style={{ padding: '20px 18px 8px' }}>
+            <button type="button" onClick={() => router.push('/search')} className="tap-spring r-card flex min-h-16 w-full items-center justify-between px-4 text-left">
+              <span className="flex items-center gap-3">
+                <span className="grid h-11 w-11 place-items-center rounded-[15px]" style={{ background: 'var(--hero-lt)' }}><Icon name="search" size={20} color="var(--hero-dk)" /></span>
                 <span>
-                  <span style={{ display: 'block', fontSize: 14.5, fontWeight: 600, color: 'var(--text)' }}>200+ recipes explore karein</span>
-                  <span className="t-caption">Poori library dekhein</span>
+                  <span style={{ display: 'block', fontSize: 14.5, fontWeight: 650, color: 'var(--text)' }}>200+ recipes ki library</span>
+                  <span className="t-caption">Cuisine, time aur ingredients se browse karein</span>
                 </span>
               </span>
               <Icon name="chevR" size={18} color="var(--muted)" />
@@ -284,7 +247,6 @@ export default function HomeClient({
           </div>
         )}
 
-        {/* Floating AI chat — auth-only, general context */}
         {isAuthenticated && <FloatingChatButton subscriptionStatus={subscriptionStatus} />}
       </div>
     </PullToRefresh>
