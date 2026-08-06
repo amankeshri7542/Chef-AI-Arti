@@ -1,0 +1,88 @@
+/* Premium UI layer: tactile, calm, food-first. Kept separate so the existing Warm Rasoi system stays easy to evolve. */
+:root {
+  --premium-radius: 22px;
+  --premium-shadow: 0 1px 2px rgba(77,39,17,.04), 0 12px 32px rgba(96,47,18,.08);
+  --premium-shadow-hover: 0 2px 4px rgba(77,39,17,.05), 0 18px 42px rgba(96,47,18,.12);
+  --premium-ease: cubic-bezier(.22,1,.36,1);
+}
+
+html { scroll-behavior: smooth; }
+body { text-rendering: optimizeLegibility; }
+button, a { -webkit-tap-highlight-color: transparent; }
+button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--hero) 28%, transparent);
+  outline-offset: 3px;
+}
+
+/* Make the app feel like one deliberate mobile surface on wide screens. */
+@media (min-width: 640px) {
+  body { background: #f3eee8; }
+  body > div, body > main { isolation: isolate; }
+}
+
+/* Better glass treatment for sticky app headers without sacrificing readability. */
+header.sticky {
+  background: color-mix(in srgb, var(--cream) 88%, transparent) !important;
+  backdrop-filter: blur(18px) saturate(1.25);
+  -webkit-backdrop-filter: blur(18px) saturate(1.25);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--border) 70%, transparent);
+}
+
+/* Shared surface polish. */
+.r-card {
+  border-radius: var(--premium-radius);
+  box-shadow: var(--premium-shadow);
+  transition: transform .28s var(--premium-ease), box-shadow .28s var(--premium-ease), border-color .2s ease;
+}
+@media (hover:hover) {
+  .r-card:hover { transform: translateY(-2px); box-shadow: var(--premium-shadow-hover); }
+}
+
+/* Press feedback should be quick, subtle and consistent. */
+.tap-spring {
+  will-change: transform;
+  transition: transform .22s var(--premium-ease), box-shadow .22s var(--premium-ease), filter .2s ease !important;
+}
+.tap-spring:active { transform: scale(.975) !important; }
+@media (hover:hover) { .tap-spring:hover { filter: saturate(1.04) brightness(1.01); } }
+
+/* Horizontal recipe rails: snap cleanly and leave a visual peek of the next card. */
+.no-scrollbar {
+  scroll-snap-type: x proximity;
+  overscroll-behavior-inline: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.no-scrollbar > * { scroll-snap-align: start; }
+
+/* Motion is intentionally restrained. */
+.card-entry { animation-duration: .46s !important; animation-timing-function: var(--premium-ease) !important; }
+.page-enter { animation-duration: .4s !important; animation-timing-function: var(--premium-ease) !important; }
+
+/* Stronger CTA hierarchy. */
+.r-cta {
+  border-radius: 18px;
+  box-shadow: 0 10px 28px color-mix(in srgb, var(--hero) 24%, transparent);
+  transition: transform .22s var(--premium-ease), box-shadow .22s ease, filter .2s ease;
+}
+.r-cta:active { transform: scale(.98); }
+@media (hover:hover) { .r-cta:hover { filter: brightness(1.035); box-shadow: 0 14px 34px color-mix(in srgb, var(--hero) 30%, transparent); } }
+
+/* Inputs should read as interactive surfaces, not plain boxes. */
+input, textarea, select {
+  transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+}
+input:focus, textarea:focus, select:focus {
+  border-color: color-mix(in srgb, var(--hero) 55%, var(--border)) !important;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--hero) 10%, transparent);
+}
+
+/* Accessible reduced-motion fallback. */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
