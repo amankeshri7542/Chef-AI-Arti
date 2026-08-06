@@ -1,12 +1,18 @@
 {
-  "name": "Chief-AI-Arti",
-  "short_name": "Chief Arti",
-  "description": "Aaj kya banao? — AI recipe sahayak",
+  "id": "/",
+  "name": "Chef Arti — AI Rasoi Assistant",
+  "short_name": "Chef Arti",
+  "description": "Aaj kya banao? Hinglish-first AI rasoi assistant for everyday Indian cooking.",
   "start_url": "/home",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#FFFDF9",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "background_color": "#FFF8F0",
   "theme_color": "#E8640C",
-  "orientation": "portrait",
+  "orientation": "portrait-primary",
+  "categories": ["food", "lifestyle", "utilities"],
+  "lang": "hi",
+  "dir": "ltr",
   "icons": [
     {
       "src": "/icon-192.png",
@@ -19,6 +25,29 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Fridge Scan",
+      "short_name": "Scan",
+      "description": "Fridge ki photo se recipes dhundho",
+      "url": "/fridge",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Recipe Dhundho",
+      "short_name": "Search",
+      "description": "Naam ya ingredient se recipe dhundho",
+      "url": "/search",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Aaj ki Thali",
+      "short_name": "Thali",
+      "description": "Aaj ke teen meals ka plan banao",
+      "url": "/aaj-ki-thali",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
     }
   ]
 }
