@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from "next";
 import { Poppins, Noto_Sans_Devanagari, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import "./premium-ui.css";
+import "./production-overrides.css";
 import SWUpdater from "@/components/SWUpdater/SWUpdater";
 import PHProvider from "@/components/PHProvider/PHProvider";
 
