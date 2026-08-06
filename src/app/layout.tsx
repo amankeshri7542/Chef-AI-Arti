@@ -1,5 +1,5 @@
 import { ClerkProvider } from "@clerk/nextjs";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Poppins, Noto_Sans_Devanagari, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import "./premium-ui.css";
@@ -28,9 +28,32 @@ const devanagari = Noto_Sans_Devanagari({
 });
 
 export const metadata: Metadata = {
-  title: "Chief-AI-Arti — Aaj kya banao?",
-  description: "Hinglish-first AI recipe assistant for North Indian homemakers",
+  applicationName: "Chef Arti",
+  title: {
+    default: "Chef Arti — Aaj kya banao?",
+    template: "%s · Chef Arti",
+  },
+  description: "Hinglish-first AI rasoi assistant for everyday Indian cooking.",
   manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Chef Arti",
+  },
+  formatDetection: {
+    telephone: false,
+    address: false,
+    email: false,
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  viewportFit: "cover",
+  themeColor: "#E8640C",
+  colorScheme: "light",
 };
 
 export default function RootLayout({
@@ -43,9 +66,6 @@ export default function RootLayout({
       lang="hi"
       className={`${poppins.variable} ${devanagari.variable} ${playfair.variable} h-full antialiased`}
     >
-      <head>
-        <meta name="theme-color" content="#E8640C" />
-      </head>
       <body className="min-h-full flex flex-col bg-[#FFFDF9] text-[#1A1A1A]">
         <ClerkProvider>
           <PHProvider>
